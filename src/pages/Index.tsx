@@ -15,6 +15,7 @@ import { ChevronRight, Menu, User, ShoppingBag, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { StatType, Gate } from '@/types/game';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 
@@ -206,7 +207,8 @@ const Index = () => {
   return (
     <div className="min-h-screen pb-24">
       {/* Header with Burger Menu */}
-      <header className="sticky top-0 z-40 flex justify-end items-center p-4">
+      <header className="sticky top-0 z-40 flex justify-between items-center p-4 gap-2">
+        <LanguageSwitcher />
         <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
           <SheetTrigger asChild>
             <button className="p-2 hover:bg-primary/10 rounded-lg transition-all">
