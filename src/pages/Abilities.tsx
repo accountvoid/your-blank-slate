@@ -43,7 +43,7 @@ const saveSkillLevels = (levels: SkillLevels) => {
 
 const Abilities = () => {
   const { t } = useTranslation();
-  const { gameState, consumeItem, purchaseItem } = useGameState();
+  const { gameState, consumeItem, spendGold } = useGameState();
   const [skillLevels, setSkillLevels] = useState<SkillLevels>(loadSkillLevels);
 
   const strengthLevel = gameState.levels.strength || 1;
@@ -124,16 +124,14 @@ const Abilities = () => {
       return;
     }
 
-    consumeItem('enhancement_stone', stoneCost);
-    // Spend gold via negative purchase trick: emit a custom item-less deduction by using an existing helper if available.
-    // Fallback: directly use a synthetic "gold_sink" purchase pattern is unsafe; instead we leverage purchaseItem's gold deduction
-    // by piggy-backing a zero-effect "skill_upgrade_fee" — but to keep it robust we deduct gold via a direct game state side-effect.
-    // Use a tiny inline dispatch:
     if (goldCost > 0) {
-      // best-effort: emit a custom event the hook can listen to in future. For now mutate via consumeItem on a virtual sink
-      // Since useGameState lacks public spendGold, we rely on the localStorage sync done by it; safe approach:
-      (window as Window & { __spendGold?: (n: number) => void }).__spendGold?.(goldCost);
+      const ok = spendGold(goldCost);
+      if (!ok) {
+        toast({ title: 'SYSTEM', description: t('abilities.errors.noGold', { count: goldCost }), variant: 'destructive' });
+        return;
+      }
     }
+    consumeItem('enhancement_stone', stoneCost);
     const newLevels: SkillLevels = { ...skillLevels, [skillId]: currentLevel + 1 };
     setSkillLevels(newLevels);
     saveSkillLevels(newLevels);
