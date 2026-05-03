@@ -1,0 +1,59 @@
+{
+  "nav": {
+    "home": "Home",
+    "quests": "Quests",
+    "gates": "Gates",
+    "stats": "Stats",
+    "grandQuest": "Goal",
+    "profile": "Profile",
+    "market": "Market",
+    "abilities": "Abilities",
+    "menu": "Menu"
+  },
+  "common": {
+    "level": "Level",
+    "totalLevel": "Total Level",
+    "gold": "Gold",
+    "hp": "HP",
+    "energy": "Energy",
+    "xp": "XP",
+    "close": "Close",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "loading": "Loading...",
+    "language": "Language",
+    "english": "English",
+    "arabic": "العربية"
+  },
+  "abilities": {
+    "title": "Ability Core Matrix",
+    "subtitle": "Ability Core Matrix v3.0",
+    "stats": {
+      "sLevel": "S. Level",
+      "baseDmg": "Base DMG",
+      "coreStones": "Core Stones",
+      "gold": "Gold"
+    },
+    "matrix": "Core Sync Matrix",
+    "manaOutput": "Mana Output",
+    "castTime": "Cast Time",
+    "manaCost": "Cost",
+    "upgrade": "Upgrade Matrix",
+    "maxed": "Core Level Maxed",
+    "locked": "LOCKED: Requires Dagger",
+    "errors": {
+      "max": "Core matrix at maximum",
+      "noStones": "Need {{count}} core stones",
+      "noGold": "Need {{count}} gold"
+    },
+    "success": "Skill matrix upgraded successfully",
+    "protocols": "SYSTEM CORE UPGRADE PROTOCOLS",
+    "warning": "Warning: upgrading skills slightly reduces cast time and greatly increases mana output."
+  },
+  "quests": {
+    "dailyQuest": "Daily Quest",
+    "newQuest": "Daily Quest has arrived!",
+    "completed": "Quest completed successfully!"
+  }
+}
