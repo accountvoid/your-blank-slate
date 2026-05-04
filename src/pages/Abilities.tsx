@@ -46,6 +46,7 @@ const Abilities = () => {
   const { t } = useTranslation();
   const { gameState, consumeItem, spendGold } = useGameState();
   const [skillLevels, setSkillLevels] = useState<SkillLevels>(loadSkillLevels);
+  const [pendingUpgrade, setPendingUpgrade] = useState<SkillId | null>(null);
 
   const strengthLevel = gameState.levels.strength || 1;
   const baseDmg = getBaseDamage(strengthLevel);
