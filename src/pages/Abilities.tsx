@@ -108,7 +108,7 @@ const Abilities = () => {
     },
   ];
 
-  const upgradeSkill = (skillId: SkillId) => {
+  const requestUpgrade = (skillId: SkillId) => {
     const currentLevel = skillLevels[skillId] || 1;
     if (currentLevel >= MAX_SKILL_LEVEL) {
       toast({ title: 'SYSTEM', description: t('abilities.errors.max') });
@@ -116,7 +116,6 @@ const Abilities = () => {
     }
     const stoneCost = STONE_COSTS[currentLevel];
     const goldCost = GOLD_COSTS[currentLevel];
-
     if (coreStones < stoneCost) {
       toast({ title: 'SYSTEM', description: t('abilities.errors.noStones', { count: stoneCost }), variant: 'destructive' });
       return;
@@ -125,19 +124,33 @@ const Abilities = () => {
       toast({ title: 'SYSTEM', description: t('abilities.errors.noGold', { count: goldCost }), variant: 'destructive' });
       return;
     }
+    setPendingUpgrade(skillId);
+  };
 
-    if (goldCost > 0) {
-      const ok = spendGold(goldCost);
-      if (!ok) {
-        toast({ title: 'SYSTEM', description: t('abilities.errors.noGold', { count: goldCost }), variant: 'destructive' });
-        return;
-      }
+  const confirmUpgrade = () => {
+    if (!pendingUpgrade) return;
+    const skillId = pendingUpgrade;
+    const currentLevel = skillLevels[skillId] || 1;
+    const stoneCost = STONE_COSTS[currentLevel];
+    const goldCost = GOLD_COSTS[currentLevel];
+
+    // Re-check at confirm time in case state changed
+    if (coreStones < stoneCost || gold < goldCost) {
+      toast({ title: 'SYSTEM', description: t('abilities.errors.noStones', { count: stoneCost }), variant: 'destructive' });
+      setPendingUpgrade(null);
+      return;
+    }
+    if (goldCost > 0 && !spendGold(goldCost)) {
+      toast({ title: 'SYSTEM', description: t('abilities.errors.noGold', { count: goldCost }), variant: 'destructive' });
+      setPendingUpgrade(null);
+      return;
     }
     consumeItem('enhancement_stone', stoneCost);
     const newLevels: SkillLevels = { ...skillLevels, [skillId]: currentLevel + 1 };
     setSkillLevels(newLevels);
     saveSkillLevels(newLevels);
     toast({ title: 'SYSTEM UPGRADE', description: t('abilities.success') });
+    setPendingUpgrade(null);
   };
 
   type AbilityColorTheme = { border: string; text: string; bg: string; glow: string; bar: string; btn: string };
