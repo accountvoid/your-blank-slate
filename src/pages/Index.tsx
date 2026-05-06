@@ -17,11 +17,13 @@ import { StatType, Gate } from '@/types/game';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useTranslation } from 'react-i18next';
 
 
 
 const Index = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const {
     gameState, 
     levelUpInfo,
@@ -47,9 +49,9 @@ const Index = () => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const menuItems = [
-    { key: 'profile', label: 'البروفايل', labelEn: 'Profile', icon: User, color: 'text-blue-400', borderColor: 'border-blue-500/40', bgColor: 'bg-blue-500/10', path: '/profile' },
-    { key: 'market', label: 'السوق', labelEn: 'Market', icon: ShoppingBag, color: 'text-yellow-400', borderColor: 'border-yellow-500/40', bgColor: 'bg-yellow-500/10', path: '/market' },
-    { key: 'abilities', label: 'القدرات', labelEn: 'Abilities', icon: Zap, color: 'text-purple-400', borderColor: 'border-purple-500/40', bgColor: 'bg-purple-500/10', path: '/abilities' },
+    { key: 'profile', label: t('nav.profile'), labelEn: 'Profile', icon: User, color: 'text-blue-400', borderColor: 'border-blue-500/40', bgColor: 'bg-blue-500/10', path: '/profile' },
+    { key: 'market', label: t('nav.market'), labelEn: 'Market', icon: ShoppingBag, color: 'text-yellow-400', borderColor: 'border-yellow-500/40', bgColor: 'bg-yellow-500/10', path: '/market' },
+    { key: 'abilities', label: t('nav.abilities'), labelEn: 'Abilities', icon: Zap, color: 'text-purple-400', borderColor: 'border-purple-500/40', bgColor: 'bg-purple-500/10', path: '/abilities' },
   ];
 
   // Check for max level - المستوى الأقصى هو 50
@@ -169,7 +171,7 @@ const Index = () => {
   const handleTaskComplete = (taskId: string) => {
     playQuestComplete();
     completeQuest(taskId);
-    setSystemMessage('تم إكمال المهمة بنجاح! الزعيم تلقى ضرراً.');
+    setSystemMessage(t('index.questCompleteMessage'));
     setTimeout(() => setSystemMessage(null), 3000);
   };
 
@@ -192,7 +194,7 @@ const Index = () => {
     
     const ability = gameState.abilities.find(a => a.id === abilityId);
     if (ability) {
-      setSystemMessage(`تم تفعيل ${ability.name}!`);
+      setSystemMessage(t('index.abilityActivated', { name: ability.name }));
       setTimeout(() => setSystemMessage(null), 3000);
     }
   };
@@ -217,7 +219,7 @@ const Index = () => {
           <SheetContent side="right" className="w-72 bg-card/95 border-l border-primary/30 p-0">
             <SheetHeader className="p-4 border-b border-primary/20">
               <SheetTitle className="text-sm font-bold tracking-[0.15em] uppercase text-primary text-right">
-                القائمة
+                {t('index.menuTitle')}
               </SheetTitle>
             </SheetHeader>
             
@@ -258,7 +260,7 @@ const Index = () => {
             {/* Player Info Mini */}
             <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-primary/20 bg-card/90">
               <div className="bg-primary/10 border border-primary/20 rounded-lg p-3 text-center">
-                <p className="text-xs text-muted-foreground">المستوى الكلي</p>
+                <p className="text-xs text-muted-foreground">{t('common.totalLevel')}</p>
                 <p className="text-2xl font-black text-primary">{gameState.totalLevel}</p>
               </div>
             </div>
@@ -269,8 +271,8 @@ const Index = () => {
       {showNewQuestNotification && (
         <SystemNotification 
           show={showNewQuestNotification}
-          title="مهمة يومية جديدة"
-          message="Daily Quest has arrived!"
+          title={t('index.newQuestTitle')}
+          message={t('index.newQuestMessage')}
           type="info"
           onClose={() => setShowNewQuestNotification(false)}
         />
@@ -279,7 +281,7 @@ const Index = () => {
       {systemMessage && (
         <SystemNotification 
           show={!!systemMessage}
-          title="تم بنجاح"
+          title={t('common.successTitle')}
           message={systemMessage}
           type="success"
           onClose={() => setSystemMessage(null)}

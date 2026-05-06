@@ -5,13 +5,7 @@ import { StatType } from '@/types/game';
 import { Flag, Check, Calendar, Target, ChevronRight, Zap } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-
-const categoryLabels: Record<StatType, string> = {
-  strength: 'PHYSICAL BODY',
-  mind: 'MENTAL GROWTH',
-  spirit: 'SPIRITUALITY',
-  agility: 'AGILITY & FITNESS',
-};
+import { useTranslation } from 'react-i18next';
 
 const suggestedTasks: Record<StatType, string[]> = {
   strength: ['30 Min Workout', '8 Cups of Water', '7 Hours Sleep', '5000 Steps'],
@@ -22,22 +16,30 @@ const suggestedTasks: Record<StatType, string[]> = {
 
 const GrandQuest = () => {
   const { gameState, startGrandQuest, completeGrandQuestDay, consumeItem } = useGameState();
+  const { t } = useTranslation();
   const [selectedCategory, setSelectedCategory] = useState<StatType>('strength');
   const [questTitle, setQuestTitle] = useState('');
+
+  const categoryLabels: Record<StatType, string> = {
+    strength: t('grandQuest.categories.strength'),
+    mind: t('grandQuest.categories.mind'),
+    spirit: t('grandQuest.categories.spirit'),
+    agility: t('grandQuest.categories.agility'),
+  };
 
   // Use grand quest stones from inventory
   const grandQuestStones = gameState.inventory?.find(i => i.id === 'grand_quest_stone')?.quantity || 0;
 
   const handleStart = () => {
     if (!questTitle.trim()) {
-      toast({ title: 'SYSTEM: ERROR', description: 'Enter Quest Title', variant: 'destructive' });
+      toast({ title: t('common.errorTitle'), description: t('grandQuest.errors.enterTitle'), variant: 'destructive' });
       return;
     }
 
     if (grandQuestStones < 1) {
       toast({ 
-        title: '⚠️ STONE REQUIRED', 
-        description: 'تحتاج حجر المهمة الكبرى لتفعيل Grand Quest!', 
+        title: t('common.warningTitle'), 
+        description: t('grandQuest.errors.stoneRequired'), 
         variant: 'destructive' 
       });
       return;
@@ -45,12 +47,12 @@ const GrandQuest = () => {
 
     consumeItem('grand_quest_stone', 1);
     startGrandQuest(selectedCategory, questTitle, suggestedTasks[selectedCategory]);
-    toast({ title: '🎯 QUEST STARTED', description: '30-Day Challenge Initialized' });
+    toast({ title: t('grandQuest.started'), description: t('grandQuest.startedDesc') });
   };
 
   const handleCompleteDay = () => {
     completeGrandQuestDay();
-    toast({ title: '✓ PROGRESS SAVED', description: `Day ${gameState.grandQuest?.completedDays || 0 + 1} Complete` });
+    toast({ title: t('grandQuest.progressSaved'), description: t('grandQuest.dayComplete', { day: (gameState.grandQuest?.completedDays || 0) + 1 }) });
   };
 
   return (
@@ -63,11 +65,11 @@ const GrandQuest = () => {
 
       <header className="relative z-10 flex flex-col justify-center items-center mb-8 border-b border-blue-500/30 pb-3">
         <h1 className="text-xl font-bold tracking-[0.2em] uppercase italic text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]">
-          Grand Quest
+          {t('grandQuest.title')}
         </h1>
         <div className="mt-2 flex items-center gap-2 bg-blue-500/10 border border-blue-500/40 px-3 py-0.5 rounded-full animate-pulse shadow-[0_0_10px_rgba(34,211,238,0.2)]">
            <Zap className="w-3 h-3 text-cyan-400 fill-cyan-400" />
-           <span className="text-[10px] font-black tracking-widest text-cyan-300">QUEST STONES: {grandQuestStones}</span>
+           <span className="text-[10px] font-black tracking-widest text-cyan-300">{t('grandQuest.questStones')}: {grandQuestStones}</span>
         </div>
       </header>
 
@@ -78,7 +80,7 @@ const GrandQuest = () => {
               <div className="flex justify-center mb-6 mt-[-2.5rem]">
                 <div className="border border-slate-400/50 px-4 py-1 bg-slate-900/90 shadow-[0_0_15px_rgba(255,255,255,0.3)]">
                   <h2 className="text-[10px] font-bold tracking-widest text-white drop-shadow-[0_0_12px_rgba(255,255,255,0.9)] uppercase">
-                    ACTIVE MISSION
+                    {t('grandQuest.activeMission')}
                   </h2>
                 </div>
               </div>
@@ -89,15 +91,15 @@ const GrandQuest = () => {
                     {gameState.grandQuest.title}
                   </h3>
                   <p className="text-[10px] text-blue-400 font-bold tracking-[0.3em] mt-1 uppercase">
-                    Category: {categoryLabels[gameState.grandQuest.category]}
+                    {t('grandQuest.category')}: {categoryLabels[gameState.grandQuest.category]}
                   </p>
                 </div>
 
                 <div className="space-y-2">
                   <div className="flex justify-between text-[10px] font-bold tracking-widest text-white/70">
-                    <span>PROGRESS</span>
+                    <span>{t('grandQuest.progress').toUpperCase()}</span>
                     <span className="text-white drop-shadow-[0_0_5px_rgba(255,255,255,0.8)]">
-                      {gameState.grandQuest.completedDays} / 30 DAYS
+                      {t('grandQuest.days', { done: gameState.grandQuest.completedDays })}
                     </span>
                   </div>
                   <div className="h-3 bg-slate-900 border border-white/20 rounded-none overflow-hidden p-[1px] shadow-inner">
@@ -109,7 +111,7 @@ const GrandQuest = () => {
                 </div>
 
                 <div className="bg-blue-950/20 border border-white/10 p-4 space-y-3 backdrop-blur-sm">
-                  <p className="text-[9px] font-bold text-blue-400 tracking-widest uppercase mb-2">Daily Requirements:</p>
+                  <p className="text-[9px] font-bold text-blue-400 tracking-widest uppercase mb-2">{t('grandQuest.dailyRequirements')}:</p>
                   {gameState.grandQuest.dailyTasks.map((task, index) => (
                     <div key={index} className="flex items-center gap-3 text-xs text-slate-300 italic group">
                       <div className="w-1.5 h-1.5 bg-white shadow-[0_0_8px_white] group-hover:scale-125 transition-transform" />
@@ -122,7 +124,7 @@ const GrandQuest = () => {
                   onClick={handleCompleteDay} 
                   className="w-full py-4 bg-gradient-to-b from-blue-500/20 to-blue-900/30 hover:from-blue-500/30 hover:to-blue-900/40 border border-white/40 text-white text-xs font-black tracking-[0.3em] uppercase transition-all shadow-[0_0_20px_rgba(30,58,138,0.4)] active:scale-95 group"
                 >
-                  <span className="group-hover:drop-shadow-[0_0_5px_white]">Complete Today's Tasks</span>
+                  <span className="group-hover:drop-shadow-[0_0_5px_white]">{t('grandQuest.completeToday')}</span>
                 </button>
               </div>
             </div>
@@ -133,7 +135,7 @@ const GrandQuest = () => {
               <div className="flex justify-center mb-6 mt-[-2.5rem]">
                 <div className="border border-slate-400/50 px-4 py-1 bg-slate-900/90 shadow-[0_0_10px_rgba(255,255,255,0.2)]">
                   <h2 className="text-[10px] font-bold tracking-widest text-white drop-shadow-[0_0_12px_rgba(255,255,255,0.9)] uppercase">
-                    Initialize New Quest
+                    {t('grandQuest.initializeNew')}
                   </h2>
                 </div>
               </div>
@@ -142,15 +144,15 @@ const GrandQuest = () => {
                 <div className="flex items-center justify-between p-3 bg-red-500/5 border border-red-500/20 rounded-sm">
                    <div className="flex items-center gap-2">
                      <Zap className="w-4 h-4 text-red-500" />
-                     <span className="text-[10px] font-bold text-red-200 tracking-tighter">INITIALIZATION COST:</span>
+                     <span className="text-[10px] font-bold text-red-200 tracking-tighter">{t('grandQuest.initCost').toUpperCase()}:</span>
                    </div>
-                   <span className="text-xs font-black text-white drop-shadow-[0_0_5px_red]">1 QUEST STONE</span>
+                   <span className="text-xs font-black text-white drop-shadow-[0_0_5px_red]">{t('grandQuest.oneStone')}</span>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[9px] font-bold text-blue-400 tracking-widest uppercase ml-1">Mission Title</label>
+                  <label className="text-[9px] font-bold text-blue-400 tracking-widest uppercase ml-1">{t('grandQuest.missionTitle')}</label>
                   <input
-                    placeholder="Enter mission name..."
+                    placeholder={t('grandQuest.missionTitlePlaceholder')}
                     value={questTitle}
                     onChange={(e) => setQuestTitle(e.target.value)}
                     className="w-full bg-black/50 border border-slate-700 p-3 text-sm focus:border-white focus:bg-blue-950/20 outline-none transition-all italic text-white"
@@ -158,7 +160,7 @@ const GrandQuest = () => {
                 </div>
 
                 <div className="space-y-3">
-                  <label className="text-[9px] font-bold text-blue-400 tracking-widest uppercase ml-1">Select Type</label>
+                  <label className="text-[9px] font-bold text-blue-400 tracking-widest uppercase ml-1">{t('grandQuest.selectType')}</label>
                   <div className="grid grid-cols-1 gap-2">
                     {(Object.entries(categoryLabels) as [StatType, string][]).map(([key, label]) => (
                       <button
@@ -180,7 +182,7 @@ const GrandQuest = () => {
                 </div>
 
                 <div className="p-4 bg-blue-950/30 border border-blue-500/20 backdrop-blur-md">
-                   <p className="text-[9px] font-bold text-blue-400 tracking-widest uppercase mb-2 italic underline decoration-blue-500/50">System Suggestions:</p>
+                   <p className="text-[9px] font-bold text-blue-400 tracking-widest uppercase mb-2 italic underline decoration-blue-500/50">{t('grandQuest.systemSuggestions')}:</p>
                    <ul className="grid grid-cols-2 gap-2">
                     {suggestedTasks[selectedCategory].map((task, index) => (
                       <li key={index} className="text-[9px] text-slate-300 uppercase italic flex items-center gap-1.5">
@@ -201,7 +203,7 @@ const GrandQuest = () => {
                       : "bg-slate-900 text-slate-600 border-slate-800 cursor-not-allowed opacity-50"
                   )}
                 >
-                  {grandQuestStones >= 1 ? 'Accept Mission' : 'Insufficient Stones'}
+                  {grandQuestStones >= 1 ? t('grandQuest.accept') : t('grandQuest.insufficient')}
                 </button>
               </div>
             </div>

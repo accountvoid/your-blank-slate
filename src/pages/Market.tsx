@@ -5,10 +5,12 @@ import { BottomNav } from '@/components/BottomNav';
 import { Coins, Loader2, AlertTriangle, ShieldAlert, X, Zap, CreditCard, Wallet, Image as ImageIcon, CheckCircle2, QrCode, ArrowRight } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 const Market = () => {
   const { gameState, purchaseItem } = useGameState();
   const { playPurchase } = useSoundEffects();
+  const { t } = useTranslation();
   
   const [isScanning, setIsScanning] = useState(false);
   const [isExiting, setIsExiting] = useState(false); 
@@ -115,9 +117,9 @@ const Market = () => {
     if (gameState.gold >= item.price) {
       purchaseItem(item.id);
       playPurchase();
-      toast({ title: 'System: SUCCESS', description: `Acquired ${item.name}` });
+      toast({ title: t('common.successTitle'), description: t('market.successAcquired', { name: item.name }) });
     } else {
-      toast({ title: 'System: WARNING', description: 'Insufficient Gold', variant: 'destructive' });
+      toast({ title: t('common.warningTitle'), description: t('market.insufficientGold'), variant: 'destructive' });
     }
   };
 
@@ -127,9 +129,9 @@ const Market = () => {
     if (maxAffordable > 0) {
       for (let i = 0; i < maxAffordable; i++) purchaseItem(item.id);
       playPurchase();
-      toast({ title: 'System: MAX ACQUIRED', description: `Acquired x${maxAffordable} ${item.name}` });
+      toast({ title: t('common.successTitle'), description: t('market.maxAcquired', { count: maxAffordable, name: item.name }) });
     } else {
-      toast({ title: 'System: WARNING', description: 'Insufficient Gold', variant: 'destructive' });
+      toast({ title: t('common.warningTitle'), description: t('market.insufficientGold'), variant: 'destructive' });
     }
   };
 
@@ -327,7 +329,7 @@ const Market = () => {
             
             <div className={cn("p-6 text-center space-y-4 transition-all duration-1000 delay-700", isVisible && !isExiting ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4")}>
               <h2 className="text-blue-400 text-lg font-bold tracking-[0.2em] uppercase italic drop-shadow-[0_0_10px_rgba(96,165,250,0.5)]">
-                {scanResult === 'searching' ? 'Analyzing Data...' : '[Access Denied]'}
+                {scanResult === 'searching' ? t('market.scan.analyzing') : t('market.scan.denied')}
               </h2>
               {scanResult === 'searching' ? (
                 <div className="py-10 flex flex-col items-center gap-4">
@@ -335,14 +337,14 @@ const Market = () => {
                     <Loader2 className="w-16 h-16 text-blue-500 animate-spin" />
                     <div className="absolute inset-0 flex items-center justify-center"><span className="text-[8px] animate-pulse text-blue-300">SCN</span></div>
                   </div>
-                  <p className="text-[10px] text-blue-200 animate-pulse tracking-[0.3em] uppercase">Bypassing Encryption...</p>
+                  <p className="text-[10px] text-blue-200 animate-pulse tracking-[0.3em] uppercase">{t('market.scan.bypassing')}</p>
                 </div>
               ) : (
                 <div className="py-2 flex flex-col items-start gap-4 w-full text-left">
                   {/* ... (Original Scan Content) */}
                    <div className="w-full border border-blue-500/30 p-4 bg-blue-950/20">
-                      <p className="text-xs text-red-500 font-bold mb-2 uppercase tracking-tighter italic">Warning: Level insufficient to decrypt {activeItem?.name}</p>
-                      <button onClick={closeScanModal} className="w-full py-4 bg-white text-black font-black text-[11px] tracking-[0.5em] uppercase">Confirm & Terminate</button>
+                      <p className="text-xs text-red-500 font-bold mb-2 uppercase tracking-tighter italic">{t('market.scan.warning', { name: activeItem?.name })}</p>
+                      <button onClick={closeScanModal} className="w-full py-4 bg-white text-black font-black text-[11px] tracking-[0.5em] uppercase">{t('market.scan.terminate')}</button>
                    </div>
                 </div>
               )}
@@ -354,7 +356,7 @@ const Market = () => {
       {/* --- Main UI Header --- */}
       <header className="relative z-10 flex justify-between items-center mb-6 border-b border-blue-500/30 pb-3">
         <h1 className="text-xl font-bold tracking-[0.1em] uppercase italic text-blue-400 drop-shadow-[0_0_8px_rgba(96,165,250,0.5)]">
-          System Store
+          {t('market.systemStore')}
         </h1>
         {/* Clickable Gold Display */}
         <div 
@@ -383,7 +385,7 @@ const Market = () => {
                 <div className="flex justify-center mb-4 mt-[-1.5rem]">
                   <div className="border border-slate-400/50 px-4 py-0.5 bg-slate-900/90 shadow-[0_0_10px_rgba(255,255,255,0.2)]">
                     <h2 className="text-xs font-bold tracking-widest text-white uppercase italic">
-                      ITEM: <span className="text-blue-100">{isRevealed ? (item.arabicName || item.name) : 'NOT FOUND'}</span>
+                      ITEM: <span className="text-blue-100">{isRevealed ? (item.arabicName || item.name) : t('market.notFound')}</span>
                     </h2>
                   </div>
                 </div>
@@ -401,11 +403,11 @@ const Market = () => {
                     </div>
                     <div className="flex-1 space-y-2 font-mono uppercase text-[10px]">
                       <div className="flex justify-between border-b border-white/10 pb-1">
-                        <span className="text-slate-400">Rank:</span>
+                        <span className="text-slate-400">{t('market.rank')}:</span>
                         <span className={cn("font-bold", rarity.text)}>{isRevealed ? item.difficulty : '??'}</span>
                       </div>
                       <div className="flex justify-between border-b border-white/10 pb-1">
-                        <span className="text-slate-400">Type:</span>
+                        <span className="text-slate-400">{t('market.type')}:</span>
                         <span className="text-white">{isRevealed ? item.category : '??'}</span>
                       </div>
                     </div>
@@ -419,7 +421,7 @@ const Market = () => {
 
                   <div className="text-center px-1">
                     <p className="text-[10px] text-slate-300 italic leading-tight">
-                      {isRevealed ? item.description : 'System analysis failed: Unauthorized access.'}
+                      {isRevealed ? item.description : t('market.analysisFailed')}
                     </p>
                   </div>
 
@@ -434,11 +436,11 @@ const Market = () => {
                         gameState.gold >= item.price ? "bg-blue-500/10 border-blue-400/40 text-blue-300" : "bg-red-900/20 border-red-500/30 text-red-400"
                       )}
                     >
-                      {!isRevealed ? 'Analyze' : isAlphaLocked ? 'Locked' : 'Purchase'}
+                      {!isRevealed ? t('market.analyze') : isAlphaLocked ? t('market.lockedShort') : t('market.purchase')}
                     </button>
                     {isRevealed && !isAlphaLocked && (
                       <button onClick={() => handleMaxPurchase(item)} className="mt-2 px-4 bg-yellow-600/10 border border-yellow-500/30 text-yellow-500 text-[10px] font-black uppercase transition-all active:scale-90">
-                        MAX
+                        {t('market.max')}
                       </button>
                     )}
                   </div>

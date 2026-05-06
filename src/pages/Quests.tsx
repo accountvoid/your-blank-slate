@@ -40,8 +40,8 @@ const Quests = () => {
     if (selectedQuest) {
       startSideQuest(selectedQuest.id);
       toast({
-        title: 'SYSTEM: QUEST INITIALIZED',
-        description: 'تم تفعيل بروتوكول المهمة بنجاح.',
+        title: t('quests.questInitialized'),
+        description: t('quests.initialized'),
       });
       handleCloseModal();
     }
@@ -55,8 +55,8 @@ const Quests = () => {
     setTimeout(() => {
       claimSideQuest(questId);
       toast({
-        title: 'SYSTEM: REWARDS CLAIMED',
-        description: 'تم استلام المكافآت بنجاح!',
+        title: t('quests.rewardsClaimed'),
+        description: t('quests.rewardsClaimedDesc'),
       });
     }, 800);
   };
@@ -111,22 +111,22 @@ const Quests = () => {
               isVisible && !isExiting ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
             )}>
               <div className="text-center">
-                <span className="text-[10px] font-black tracking-[0.4em] text-blue-500/60 uppercase">Mission Briefing</span>
+                <span className="text-[10px] font-black tracking-[0.4em] text-blue-500/60 uppercase">{t('quests.missionBriefing')}</span>
               </div>
 
               <div className="w-full border border-blue-500/30 p-4 bg-blue-950/20 relative">
                 <div className="absolute top-0 right-0 p-1"><ShieldAlert className="w-4 h-4 text-blue-500/40" /></div>
                 <div className="mb-3 border-b border-blue-500/20 pb-2">
-                  <span className="text-[9px] text-blue-400 block mb-1 uppercase font-bold">Designation:</span>
+                  <span className="text-[9px] text-blue-400 block mb-1 uppercase font-bold">{t('quests.designation')}:</span>
                   <span className="text-sm font-bold text-white tracking-widest uppercase italic">{selectedQuest.title}</span>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <span className="text-[9px] text-blue-400 block mb-1">TYPE:</span>
+                    <span className="text-[9px] text-blue-400 block mb-1">{t('quests.type')}:</span>
                     <span className="text-xs font-bold text-white">{selectedQuest.category.toUpperCase()}</span>
                   </div>
                   <div>
-                    <span className="text-[9px] text-blue-400 block mb-1">LIMIT:</span>
+                    <span className="text-[9px] text-blue-400 block mb-1">{t('quests.limit')}:</span>
                     <span className="text-xs font-bold text-blue-300">{selectedQuest.requiredTime || 10}M</span>
                   </div>
                 </div>
@@ -138,21 +138,21 @@ const Quests = () => {
 
               <div className="border-l-2 border-yellow-500 bg-yellow-500/5 p-3 space-y-2">
                 <div className="flex justify-between items-center">
-                  <span className="text-[10px] font-bold text-yellow-500 uppercase">Gold:</span>
+                  <span className="text-[10px] font-bold text-yellow-500 uppercase">{t('quests.rewardGold')}:</span>
                   <span className="text-xs font-bold text-yellow-400 tracking-widest">{selectedQuest.goldReward || 25} G</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-[10px] font-bold text-blue-400 uppercase">XP:</span>
+                  <span className="text-[10px] font-bold text-blue-400 uppercase">{t('quests.rewardXp')}:</span>
                   <span className="text-xs font-bold text-blue-300 tracking-widest">+{selectedQuest.xpReward} XP</span>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3 pt-2">
                 <button onClick={handleCloseModal} className="py-3 border border-slate-700 text-slate-500 text-[10px] font-bold uppercase tracking-widest hover:text-red-400 hover:border-red-400/50 transition-all">
-                  Abort
+                  {t('quests.abort')}
                 </button>
                 <button onClick={handleConfirmStart} className="py-3 bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest shadow-[0_0_20px_rgba(37,99,235,0.4)] active:scale-95 transition-all">
-                  Initialize
+                  {t('quests.initialize')}
                 </button>
               </div>
             </div>
@@ -162,10 +162,10 @@ const Quests = () => {
 
       {/* --- Main UI Content --- */}
       <header className="relative z-10 flex flex-col items-center mb-6 border-b border-blue-500/30 pb-4">
-        <h1 className="text-xl font-bold tracking-[0.2em] uppercase italic text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]">Side Quests</h1>
+        <h1 className="text-xl font-bold tracking-[0.2em] uppercase italic text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]">{t('quests.sideQuests')}</h1>
         <div className="flex items-center gap-2 text-[10px] font-bold tracking-widest text-blue-400 uppercase mt-2">
           <CheckCircle2 className="w-3 h-3" />
-          <span>Available: {sideQuests.filter(q => !q.completed).length} / {sideQuests.length}</span>
+          <span>{t('quests.available')}: {sideQuests.filter(q => !q.completed).length} / {sideQuests.length}</span>
         </div>
       </header>
 
@@ -204,7 +204,7 @@ const Quests = () => {
                   <div className="relative bg-black/60 border-2 border-slate-200/90 p-4 shadow-[0_0_20px_rgba(30,58,138,0.3)]">
                     <div className="flex justify-center mb-4 mt-[-1.5rem]">
                       <div className="border border-slate-400/50 px-4 py-0.5 bg-slate-900/90">
-                        <h2 className="text-[10px] font-bold tracking-widest text-white uppercase italic">QUEST: {quest.title}</h2>
+                        <h2 className="text-[10px] font-bold tracking-widest text-white uppercase italic">{t('quests.title').toUpperCase()}: {quest.title}</h2>
                       </div>
                     </div>
                     <div className="flex flex-col gap-4">
@@ -216,22 +216,22 @@ const Quests = () => {
                         </div>
                         <div className="flex-1 space-y-2">
                           <div className="flex justify-between items-center border-b border-white/10 pb-1">
-                            <span className="text-[9px] text-slate-400 uppercase font-bold">Reward:</span>
+                            <span className="text-[9px] text-slate-400 uppercase font-bold">{t('quests.reward')}:</span>
                             <div className="flex gap-2">
                               <span className="text-xs font-bold text-yellow-400">+{quest.goldReward || 25} G</span>
                               <span className="text-xs font-bold text-blue-300">+{quest.xpReward} XP</span>
                             </div>
                           </div>
                           <div className="flex justify-between items-center border-b border-white/10 pb-1">
-                            <span className="text-[9px] text-slate-400 uppercase font-bold">Status:</span>
+                            <span className="text-[9px] text-slate-400 uppercase font-bold">{t('quests.status')}:</span>
                             <span className={cn("text-[9px] font-bold uppercase", quest.active ? "text-blue-400 animate-pulse" : quest.completed && !quest.claimed ? "text-green-400" : "text-slate-500")}>
-                              {quest.active ? 'In Progress' : quest.completed && !quest.claimed ? 'Ready to Claim' : 'Available'}
+                              {quest.active ? t('quests.inProgress') : quest.completed && !quest.claimed ? t('quests.readyToClaim') : t('quests.statusAvailable')}
                             </span>
                           </div>
                           {(quest.active || quest.completed) && quest.requiredTime && (
                             <div className="space-y-1">
                               <div className="flex justify-between items-center">
-                                <span className="text-[9px] text-slate-400 uppercase font-bold">Progress:</span>
+                                <span className="text-[9px] text-slate-400 uppercase font-bold">{t('quests.progress')}:</span>
                                 <span className="text-[9px] font-bold text-blue-300">
                                   {Math.floor((quest.timeProgress || 0) / 60)}m / {quest.requiredTime}m
                                 </span>
@@ -259,7 +259,7 @@ const Quests = () => {
                           "bg-blue-500/10 border-blue-500/40 text-blue-300 hover:bg-blue-500/20"
                         )}
                       >
-                        {quest.active ? 'Processing...' : quest.completed && !quest.claimed ? '✓ Claim Reward' : 'Initialize Quest'}
+                        {quest.active ? t('quests.processing') : quest.completed && !quest.claimed ? `✓ ${t('quests.claimReward')}` : t('quests.initializeQuest')}
                       </button>
                     </div>
                   </div>

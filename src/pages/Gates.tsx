@@ -153,19 +153,19 @@ const Gates = () => {
 
       <header className="relative z-20 pt-16 pb-12 px-6 text-center border-b border-white/5">
         <h1 className="relative text-3xl font-black italic tracking-[0.3em] uppercase">
-          <span className="text-white drop-shadow-[0_0_100px_rgba(255,255,255,0.5)]">Dungeon</span>
-          <span className="block text-xs text-blue-400 mt-2 tracking-[0.5em] font-bold uppercase opacity-70">Gate Recognition System</span>
+          <span className="text-white drop-shadow-[0_0_100px_rgba(255,255,255,0.5)]">{t('gates.dungeon')}</span>
+          <span className="block text-xs text-blue-400 mt-2 tracking-[0.5em] font-bold uppercase opacity-70">{t('gates.subtitle')}</span>
         </h1>
         <div className="mt-4 text-sm text-slate-400">
-          {t('gates.availableToday', 'Available gates today')}: <span className="text-white font-bold">{gates.length}</span>
+          {t('gates.availableToday')}: <span className="text-white font-bold">{gates.length}</span>
         </div>
       </header>
 
       {gates.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 px-6 text-center">
           <Target className="w-16 h-16 text-slate-600 mb-4" />
-          <h2 className="text-xl font-bold text-slate-400 mb-2">{t('gates.empty.title', 'No gates')}</h2>
-          <p className="text-sm text-slate-500">{t('gates.empty.subtitle', 'No gates discovered today. Come back tomorrow!')}</p>
+          <h2 className="text-xl font-bold text-slate-400 mb-2">{t('gates.empty.title')}</h2>
+          <p className="text-sm text-slate-500">{t('gates.empty.subtitle')}</p>
         </div>
       ) : (
         <main className="relative z-10 px-6 space-y-40 mt-16">
@@ -179,6 +179,7 @@ const Gates = () => {
               getGateBorderColor={getGateBorderColor}
               getGateColor={getGateColor}
               isGateLocked={isGateLocked}
+              t={t}
             />
           ))}
         </main>
@@ -200,6 +201,7 @@ const Gates = () => {
           getGateColor={getGateColor}
           isGateLocked={isGateLocked}
           canSeeGateDetails={canSeeGateDetails}
+          t={t}
         />
       )}
 
@@ -232,9 +234,10 @@ interface GateCardProps {
   getGateBorderColor: (rank: string) => string;
   getGateColor: (rank: string) => string;
   isGateLocked: (gate: Gate) => boolean;
+  t: (key: string, opts?: any) => string;
 }
 
-const GateCard = ({ gate, index, onGateClick, getGateGlow, getGateBorderColor, getGateColor, isGateLocked }: GateCardProps) => {
+const GateCard = ({ gate, index, onGateClick, getGateGlow, getGateBorderColor, getGateColor, isGateLocked, t }: GateCardProps) => {
   const { isBroken, formatted } = useGateTimer(gate.closingTime);
   const locked = isGateLocked(gate);
   const gateNum = gate.gateNumber || (index + 1);
@@ -280,7 +283,7 @@ const GateCard = ({ gate, index, onGateClick, getGateGlow, getGateBorderColor, g
           )}>
             <h2 className={cn("text-[10px] font-black tracking-[0.3em] uppercase flex items-center gap-2", isBroken ? "text-red-400" : "text-white")}>
               {isBroken && <Skull className="w-3 h-3 text-red-500 animate-pulse" />}
-              RANK: <span className={cn(
+              {t('common.rank').toUpperCase()}: <span className={cn(
                 isBroken ? "text-red-500" :
                 gate.rank === 'S' ? "text-red-500" : gate.rank === 'A' ? "text-purple-400" : "text-blue-400"
               )}>{gate.rank}</span>
@@ -294,10 +297,10 @@ const GateCard = ({ gate, index, onGateClick, getGateGlow, getGateBorderColor, g
           <div className={cn("flex items-center justify-between p-3 border-b", isBroken ? "border-red-800/40" : "border-white/10")}>
             <div className="flex items-center gap-2">
               <Target className={cn("w-3.5 h-3.5", isBroken ? "text-red-500" : "text-slate-400")} />
-              <p className={cn("text-[10px] uppercase font-black tracking-tighter", isBroken ? "text-red-400" : "text-slate-400")}>اسم البوابة</p>
+              <p className={cn("text-[10px] uppercase font-black tracking-tighter", isBroken ? "text-red-400" : "text-slate-400")}>{t('gates.gateName')}</p>
             </div>
             <span className={cn("text-sm font-black italic", isBroken ? "text-red-400" : "text-white")}>
-              البوابة {gateNum}
+              {t('gates.gateNumber', { num: gateNum })}
             </span>
           </div>
 
@@ -312,14 +315,14 @@ const GateCard = ({ gate, index, onGateClick, getGateGlow, getGateBorderColor, g
               <div className="flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0 animate-pulse" />
                 <p className="text-[9px] text-red-400 font-bold italic leading-relaxed uppercase tracking-tighter">
-                  ⚠ تحذير: البوابة قد انهارت. تشققات بُعدية تم اكتشافها. لا يمكن الدخول.
+                  {t('gates.brokenWarning')}
                 </p>
               </div>
             ) : (
               <div className="flex items-center gap-2">
                 <Activity className="w-4 h-4 text-cyan-400 flex-shrink-0" />
                 <p className="text-[9px] text-cyan-300/80 font-bold italic leading-relaxed uppercase tracking-tighter">
-                  ✦ النظام قد منح الدخول... شقّ بُعدي مستقر. اضغط على البوابة للبدء.
+                  {t('gates.stableMessage')}
                 </p>
               </div>
             )}
@@ -329,7 +332,7 @@ const GateCard = ({ gate, index, onGateClick, getGateGlow, getGateBorderColor, g
           <div className={cn("flex justify-between items-center border-b pb-2", isBroken ? "border-red-800/40" : "border-white/10")}>
             <div className="flex items-center gap-2">
               <Zap className={cn("w-3.5 h-3.5", isBroken ? "text-red-400" : "text-yellow-400")} />
-              <p className={cn("text-[10px] uppercase font-black tracking-tighter", isBroken ? "text-red-400/60" : "text-slate-400")}>Energy Density</p>
+              <p className={cn("text-[10px] uppercase font-black tracking-tighter", isBroken ? "text-red-400/60" : "text-slate-400")}>{t('gates.energyDensity')}</p>
             </div>
             <p className={cn("text-base font-mono font-bold italic", isBroken ? "text-red-500/50 line-through" : "text-white")}>
               {gate.energyDensity} <span className="text-[9px] opacity-40">MP</span>
@@ -343,7 +346,7 @@ const GateCard = ({ gate, index, onGateClick, getGateGlow, getGateBorderColor, g
                 isBroken ? "text-red-500" :
                 gate.rank === 'S' ? "text-red-500" : gate.rank === 'A' ? "text-purple-400" : "text-blue-400"
               )} />
-              <p className={cn("text-[10px] uppercase font-black tracking-tighter", isBroken ? "text-red-400/60" : "text-slate-400")}>Danger Level</p>
+              <p className={cn("text-[10px] uppercase font-black tracking-tighter", isBroken ? "text-red-400/60" : "text-slate-400")}>{t('gates.dangerLevel')}</p>
             </div>
             <p className={cn("text-xs font-black uppercase italic tracking-widest",
               isBroken ? "text-red-500/50 line-through" :
@@ -358,14 +361,14 @@ const GateCard = ({ gate, index, onGateClick, getGateGlow, getGateBorderColor, g
             <div className="flex items-center gap-2">
               <Clock className={cn("w-3.5 h-3.5", isBroken ? "text-red-500" : "text-cyan-400")} />
               <p className={cn("text-[10px] uppercase font-black tracking-tighter", isBroken ? "text-red-400" : "text-slate-400")}>
-                {isBroken ? "حالة البوابة" : "وقت الإغلاق"}
+                {isBroken ? t('gates.gateStatus') : t('gates.closingIn')}
               </p>
             </div>
             {isBroken ? (
               <div className="flex items-center gap-2">
                 <AlertTriangle className="w-3.5 h-3.5 text-red-500 animate-pulse" />
                 <span className="text-xs font-black text-red-500 uppercase tracking-wider animate-[crack-pulse_1.5s_ease-in-out_infinite]">
-                  كُسرت البوابة
+                  {t('gates.broken')}
                 </span>
               </div>
             ) : (
@@ -395,11 +398,12 @@ interface GateDetailModalProps {
   getGateColor: (rank: string) => string;
   isGateLocked: (gate: Gate) => boolean;
   canSeeGateDetails: (gate: Gate) => boolean;
+  t: (key: string, opts?: any) => string;
 }
 
 const GateDetailModal = ({
   gate, isVisible, isExiting, isScanning, showManaDetails, hasManaGauge,
-  onClose, onScanMana, onEnter, getGateGlow, getGateColor, isGateLocked, canSeeGateDetails
+  onClose, onScanMana, onEnter, getGateGlow, getGateColor, isGateLocked, canSeeGateDetails, t
 }: GateDetailModalProps) => {
   const { isBroken, formatted } = useGateTimer(gate.closingTime);
   const gateNum = gate.gateNumber || 1;
@@ -443,7 +447,7 @@ const GateDetailModal = ({
                 <img src="/AnimationManaAnalysis.gif" alt="Scanning..." className="w-64 h-64 object-contain mb-4 relative z-10" />
                 <div className="absolute inset-0 bg-blue-500/20 blur-[60px] animate-pulse rounded-full" />
               </div>
-              <p className="text-blue-400 font-black tracking-[0.4em] text-sm animate-pulse">DECODING MANA FREQUENCY...</p>
+              <p className="text-blue-400 font-black tracking-[0.4em] text-sm animate-pulse">{t('gates.decoding')}</p>
               <div className="mt-4 w-48 h-1 bg-white/10 rounded-full overflow-hidden">
                 <div className="h-full bg-blue-500 animate-[loading_8s_linear]" />
               </div>
@@ -458,10 +462,10 @@ const GateDetailModal = ({
                   {isBroken ? <Skull className="w-10 h-10 text-red-500" /> : (!canSeeGateDetails(gate) ? "?" : gate.rank)}
                 </div>
                 <h2 className={cn("text-2xl font-bold uppercase", isBroken ? "text-red-500" : "text-white drop-shadow-[0_0_100px_rgba(255,255,255,0.8)]")}>
-                  البوابة {gateNum} {!isBroken && (!canSeeGateDetails(gate) ? "" : `— ${gate.name}`)}
+                  {t('gates.gateNumber', { num: gateNum })} {!isBroken && (!canSeeGateDetails(gate) ? "" : `— ${gate.name}`)}
                 </h2>
                 <p className={cn("text-sm uppercase tracking-widest mt-1", isBroken ? "text-red-400/60" : "text-slate-400")}>
-                  {isBroken ? "GATE COLLAPSED" : (!canSeeGateDetails(gate) ? "???,???" : gate.danger)}
+                  {isBroken ? t('gates.collapsed') : (!canSeeGateDetails(gate) ? "???,???" : gate.danger)}
                 </p>
               </div>
 
@@ -473,13 +477,13 @@ const GateDetailModal = ({
                 {isBroken ? (
                   <>
                     <AlertTriangle className="w-5 h-5 text-red-500 animate-pulse" />
-                    <span className="text-sm font-black text-red-500 uppercase tracking-wider">كُسرت البوابة — لا يمكن الدخول</span>
+                    <span className="text-sm font-black text-red-500 uppercase tracking-wider">{t('gates.brokenLong')}</span>
                   </>
                 ) : (
                   <>
                     <Clock className="w-5 h-5 text-cyan-400" />
                     <span className="text-lg font-mono font-bold text-cyan-400 tracking-widest">{formatted}</span>
-                    <span className="text-[9px] text-cyan-400/60 uppercase font-bold">حتى الإغلاق</span>
+                    <span className="text-[9px] text-cyan-400/60 uppercase font-bold">{t('gates.untilClose')}</span>
                   </>
                 )}
               </div>
@@ -539,7 +543,7 @@ const GateDetailModal = ({
                   <div className={cn("flex justify-between items-center p-3 rounded-lg border text-white",
                     isBroken ? "bg-red-950/20 border-red-800/30" : "bg-white/5 border-white/10"
                   )}>
-                    <span className="flex items-center gap-2 text-sm text-slate-300">كثافة الطاقة</span>
+                    <span className="flex items-center gap-2 text-sm text-slate-300">{t('gates.energyDensity')}</span>
                     <span className="font-bold">{!canSeeGateDetails(gate) ? '???' : gate.energyDensity} MP</span>
                   </div>
                 )}
@@ -548,7 +552,7 @@ const GateDetailModal = ({
               {/* Rewards */}
               {!isBroken && (
                 <div className="p-3 rounded-lg bg-purple-500/10 border border-purple-500/30 mb-6">
-                  <h3 className="text-sm font-bold mb-2 text-purple-400 text-center uppercase tracking-widest">المكافآت المتوقعة</h3>
+                  <h3 className="text-sm font-bold mb-2 text-purple-400 text-center uppercase tracking-widest">{t('gates.expectedRewards')}</h3>
                   <div className="flex justify-around text-sm font-bold text-slate-200">
                     <span className="flex items-center gap-1"><Zap className="w-3 h-3 text-yellow-400" /> +{!canSeeGateDetails(gate) ? "?" : gate.rewards.xp} XP</span>
                     <span className="flex items-center gap-1"><Shield className="w-3 h-3 text-blue-400" /> +{!canSeeGateDetails(gate) ? "?" : gate.rewards.gold} Gold</span>
@@ -568,7 +572,7 @@ const GateDetailModal = ({
                 >
                   <span className="flex items-center justify-center gap-2">
                     <Scan className="w-4 h-4" />
-                    إطلاق موجات السونار السحرية
+                    {t('gates.scanMana')}
                   </span>
                 </button>
               )}
@@ -587,11 +591,11 @@ const GateDetailModal = ({
               >
                 <span className="flex items-center justify-center gap-2">
                   {isBroken ? (
-                    <><Skull className="w-5 h-5" /> البوابة منهارة</>
+                    <><Skull className="w-5 h-5" /> {t('gates.collapsed')}</>
                   ) : isGateLocked(gate) ? (
-                    <><Skull className="w-5 h-5" /> LOCKED (RANK TOO HIGH)</>
+                    <><Skull className="w-5 h-5" /> {t('gates.lockedHigh')}</>
                   ) : (
-                    <><Activity className="w-5 h-5" /> ENTER DUNGEON</>
+                    <><Activity className="w-5 h-5" /> {t('gates.enterDungeon')}</>
                   )}
                 </span>
               </button>
