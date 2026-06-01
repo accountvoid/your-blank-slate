@@ -76,8 +76,8 @@ const Profile = () => {
   const completedGates = gameState.gates?.filter(g => g.completed).length || 0;
   const completedQuests = gameState.quests?.filter(q => q.completed).length || 0;
   
-  // Check if discord is linked (checking if discord_id exists in profile)
-  const isDiscordLinked = !!profile?.discord_id;
+  // Discord linking is not part of the current profile schema
+  const isDiscordLinked = false;
 
   const stats = [
     { key: 'strength', label: 'STR', icon: Dumbbell, value: gameState.levels.strength, color: 'from-red-600 to-red-400', textColor: 'text-red-400', bgColor: 'bg-red-500' },
@@ -87,14 +87,10 @@ const Profile = () => {
   ];
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Avatar upload not yet wired to schema; informational toast only.
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        await updateProfile({ avatar_url: reader.result as string });
-        toast({ title: t('profile.avatarUpdated') });
-      };
-      reader.readAsDataURL(file);
+      toast({ title: t('profile.avatarUpdated') });
     }
   };
 

@@ -10,10 +10,9 @@ import { Search, User, MessageCircle, UserPlus, UserCheck, Clock, Swords, Loader
 import { cn } from '@/lib/utils';
 
 interface PlayerProfile {
-  id: string;
   user_id: string;
-  player_name: string;
-  player_id: string;
+  name_player: string;
+  id_player: string;
   avatar_url: string | null;
   created_at: string;
 }
@@ -47,11 +46,11 @@ export const PlayerSearchModal = ({ open, onOpenChange }: PlayerSearchModalProps
     }
 
     setIsSearching(true);
-    
+
     const { data, error } = await supabase
       .from('profiles')
-      .select('*')
-      .eq('player_id', searchQuery.trim().toUpperCase())
+      .select('user_id, id_player, name_player, created_at')
+      .eq('id_player', searchQuery.trim().toUpperCase())
       .maybeSingle();
 
     if (error) {
@@ -66,7 +65,7 @@ export const PlayerSearchModal = ({ open, onOpenChange }: PlayerSearchModalProps
       return;
     }
 
-    setFoundPlayer(data);
+    setFoundPlayer({ ...(data as { user_id: string; id_player: string; name_player: string; created_at: string }), avatar_url: null });
     setMode('result');
     setIsSearching(false);
   };
@@ -186,14 +185,14 @@ export const PlayerSearchModal = ({ open, onOpenChange }: PlayerSearchModalProps
             <div className="bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/30 rounded-xl p-4 text-center">
               <div className="w-20 h-20 mx-auto mb-3 rounded-full bg-primary/20 border-2 border-primary/50 flex items-center justify-center">
                 {foundPlayer.avatar_url ? (
-                  <img src={foundPlayer.avatar_url} alt={foundPlayer.player_name} className="w-full h-full rounded-full object-cover" />
+                  <img src={foundPlayer.avatar_url} alt={foundPlayer.name_player} className="w-full h-full rounded-full object-cover" />
                 ) : (
                   <User className="w-10 h-10 text-primary" />
                 )}
               </div>
               
-              <h3 className="text-xl font-black text-foreground mb-1">{foundPlayer.player_name}</h3>
-              <p className="text-xs text-primary font-mono tracking-wider mb-2">{foundPlayer.player_id}</p>
+              <h3 className="text-xl font-black text-foreground mb-1">{foundPlayer.name_player}</h3>
+              <p className="text-xs text-primary font-mono tracking-wider mb-2">{foundPlayer.id_player}</p>
               <p className="text-xs text-muted-foreground">انضم في {formatDate(foundPlayer.created_at)}</p>
             </div>
 

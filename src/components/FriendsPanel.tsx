@@ -12,7 +12,7 @@ export const FriendsPanel = () => {
 
   const handleAccept = async (friendshipId: string) => {
     setActionLoading(friendshipId);
-    const { error } = await acceptRequest(friendshipId);
+    const { error } = await acceptRequest();
     if (error) toast({ title: 'خطأ', description: 'فشل قبول الطلب', variant: 'destructive' });
     else toast({ title: 'تم القبول', description: 'تمت إضافة الصديق بنجاح' });
     setActionLoading(null);
@@ -20,7 +20,7 @@ export const FriendsPanel = () => {
 
   const handleReject = async (friendshipId: string) => {
     setActionLoading(friendshipId);
-    const { error } = await rejectRequest(friendshipId);
+    const { error } = await rejectRequest();
     if (error) toast({ title: 'خطأ', description: 'فشل رفض الطلب', variant: 'destructive' });
     else toast({ title: 'تم الرفض', description: 'تم رفض طلب الصداقة' });
     setActionLoading(null);
@@ -28,7 +28,7 @@ export const FriendsPanel = () => {
 
   const handleRemove = async (friendshipId: string) => {
     setActionLoading(friendshipId);
-    const { error } = await removeFriend(friendshipId);
+    const { error } = await removeFriend();
     if (error) toast({ title: 'خطأ', description: 'فشل إزالة الصديق', variant: 'destructive' });
     else toast({ title: 'تمت الإزالة', description: 'تم إزالة الصديق' });
     setActionLoading(null);
