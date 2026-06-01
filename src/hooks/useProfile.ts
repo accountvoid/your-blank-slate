@@ -2,13 +2,24 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
+export interface PlayerStats {
+  STR: number;
+  AGI: number;
+  SPI: number;
+  MIN: number;
+}
+
 export interface Profile {
-  id: string;
   user_id: string;
-  player_name: string;
-  player_id: string;
-  avatar_url: string | null;
-  discord_id: string | null;
+  id_player: string;
+  name_player: string;
+  rank_player: string;
+  level_player: number;
+  hp_player: number;
+  mb_player: number;
+  gold_player: number;
+  void_player: number;
+  stats_player: PlayerStats;
   created_at: string;
   updated_at: string;
 }
@@ -39,36 +50,21 @@ export const useProfile = () => {
         return;
       }
 
-      // For legacy users without a profile row, create one
-      if (!data) {
-        const playerName =
-          (user.user_metadata?.player_name as string | undefined) ?? 'Hunter';
-
-        const { data: newProfile, error: insertError } = await supabase
-          .from('profiles')
-          .insert({ user_id: user.id, player_name: playerName })
-          .select()
-          .single();
-
-        if (!insertError && newProfile) {
-          setProfile(newProfile as unknown as Profile);
-        }
-      } else {
+      if (data) {
         setProfile(data as unknown as Profile);
       }
-
       setLoading(false);
     };
 
     fetchProfile();
   }, [user]);
 
-  const updateProfile = async (updates: Partial<Profile>) => {
+  const updateProfile = async (updates: Partial<Omit<Profile, 'user_id' | 'created_at' | 'updated_at' | 'id_player'>>) => {
     if (!user) return { error: new Error('Not authenticated') };
 
     const { data, error } = await supabase
       .from('profiles')
-      .update(updates)
+      .update(updates as never)
       .eq('user_id', user.id)
       .select()
       .single();
