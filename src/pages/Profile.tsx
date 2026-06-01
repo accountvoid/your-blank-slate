@@ -209,7 +209,7 @@ const Profile = () => {
             <div className="flex justify-between items-start mb-6">
               <div className="p-1.5 bg-card/80 rounded-xl border border-border/50 relative overflow-hidden group">
                 <div className="absolute inset-0 bg-primary/10 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500" />
-                {profile && <PlayerQRCode playerId={profile.player_id} playerName={profile.player_name} size={36} />}
+                {profile && <PlayerQRCode playerId={profile.id_player} playerName={profile.name_player} size={36} />}
               </div>
               
               {/* Rank Badge - Dramatic */}
@@ -242,7 +242,7 @@ const Profile = () => {
                   rankData.gradient
                 )} />
                 <div className="relative w-28 h-28 rounded-full overflow-hidden border-2 border-card bg-card shadow-2xl">
-                  <img src={profile?.avatar_url || "/setvoid.png"} className="w-full h-full object-cover" alt="avatar" />
+                  <img src={null || "/setvoid.png"} className="w-full h-full object-cover" alt="avatar" />
                 </div>
                 <button 
                   onClick={() => fileInputRef.current?.click()} 
@@ -289,11 +289,11 @@ const Profile = () => {
               {/* System ID */}
               <div 
                 className="flex flex-col items-end gap-1.5"
-                onClick={() => { navigator.clipboard.writeText(profile?.player_id || ''); toast({ title: t('profile.copied') }); }}
+                onClick={() => { navigator.clipboard.writeText(profile?.id_player || ''); toast({ title: t('profile.copied') }); }}
               >
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-card/60 rounded-xl border border-border/50 cursor-pointer hover:border-primary/30 transition-all group">
                   <Fingerprint className="w-3.5 h-3.5 text-primary/50" />
-                  <span className="text-[10px] font-mono font-bold text-muted-foreground">{profile?.player_id}</span>
+                  <span className="text-[10px] font-mono font-bold text-muted-foreground">{profile?.id_player}</span>
                   <Copy className="w-3 h-3 text-muted-foreground/50 group-hover:text-primary transition-colors" />
                 </div>
               </div>
