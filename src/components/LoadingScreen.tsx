@@ -20,11 +20,18 @@ export const LoadingScreen = ({ fullScreen = false, message, className }: Loadin
       )}
     >
       <img
+        src="/SETVOIDUI.png"
+        alt="SETVOID"
+        className="h-10 w-auto object-contain opacity-90 mb-2"
+        onError={(e) => {
+          (e.currentTarget as HTMLImageElement).src = '/setvoid.png';
+        }}
+      />
+      <img
         src="/Loadingsetvoid.gif"
         alt="Loading"
-        className="w-24 h-24 object-contain"
+        className="w-20 h-20 object-contain"
         onError={(e) => {
-          // Graceful fallback if the gif isn't uploaded yet
           (e.currentTarget as HTMLImageElement).style.display = 'none';
         }}
       />
