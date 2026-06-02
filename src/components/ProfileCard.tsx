@@ -28,6 +28,7 @@ const stats = [
 ] as const;
 
 export const ProfileCard = ({ gameState, getXpProgress, onUpdateProfile }: ProfileCardProps) => {
+  const { t } = useTranslation();
   const [showEditModal, setShowEditModal] = useState(false);
   const [showTestGateNotif, setShowTestGateNotif] = useState(false);
   const [testGate, setTestGate] = useState<Gate | null>(null);
