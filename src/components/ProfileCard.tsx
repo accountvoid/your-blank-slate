@@ -100,7 +100,7 @@ export const ProfileCard = ({ gameState, getXpProgress, onUpdateProfile }: Profi
               <div className="flex items-center justify-between mb-1">
                 <div className="flex items-center gap-1">
                   <Shield className="w-4 h-4 text-destructive" />
-                  <span className="text-xs">HP</span>
+                  <span className="text-xs">{t('common.hp')}</span>
                 </div>
                 <span className="text-xs font-bold">{Math.round(gameState.hp)}/{gameState.maxHp}</span>
               </div>
@@ -112,7 +112,7 @@ export const ProfileCard = ({ gameState, getXpProgress, onUpdateProfile }: Profi
               <div className="flex items-center justify-between mb-1">
                 <div className="flex items-center gap-1">
                   <Zap className="w-4 h-4 text-secondary" />
-                  <span className="text-xs">ENERGY</span>
+                  <span className="text-xs">{t('common.energy')}</span>
                 </div>
                 <span className="text-xs font-bold">{Math.round(gameState.energy)}/{gameState.maxEnergy}</span>
               </div>
@@ -128,17 +128,17 @@ export const ProfileCard = ({ gameState, getXpProgress, onUpdateProfile }: Profi
             <div className="text-center">
               <Flame className="w-5 h-5 mx-auto mb-1 text-orange-500" />
               <div className="text-lg font-bold">{gameState.streakDays}</div>
-              <div className="text-[10px] text-muted-foreground">Streak Day</div>
+              <div className="text-[10px] text-muted-foreground">{t('common.streakDay')}</div>
             </div>
             <div className="w-px h-10 bg-primary/30" />
             <div className="text-center">
               <div className="text-lg font-bold">{todayQuests}/{totalQuests}</div>
-              <div className="text-[10px] text-muted-foreground">Quest day</div>
+              <div className="text-[10px] text-muted-foreground">{t('common.questDay')}</div>
             </div>
             <div className="w-px h-10 bg-primary/30" />
             <div className="text-center">
               <div className="text-lg font-bold text-secondary">{gameState.gold || 0}</div>
-              <div className="text-[10px] text-muted-foreground">gold</div>
+              <div className="text-[10px] text-muted-foreground">{t('common.gold')}</div>
             </div>
           </div>
 
