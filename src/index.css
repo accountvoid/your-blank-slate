@@ -99,6 +99,27 @@
     @apply bg-background text-foreground font-arabic antialiased;
     background: var(--gradient-dark);
     min-height: 100vh;
+    position: relative;
+  }
+
+  /* Global SETVOID logo watermark */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url('/SETVOIDUI.png');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: min(70vw, 520px);
+    opacity: 0.04;
+    pointer-events: none;
+    z-index: 0;
+    filter: drop-shadow(0 0 40px hsl(270 100% 60% / 0.4));
+  }
+
+  #root {
+    position: relative;
+    z-index: 1;
   }
 }
 
