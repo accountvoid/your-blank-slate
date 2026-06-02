@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Dumbbell, Brain, Heart, Flame, Shield, Zap, Bell, Target, Scroll, Crown, Trophy, Smartphone } from 'lucide-react';
 import { GameState, Gate } from '@/types/game';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 import { NewGateNotification } from './NewGateNotification';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
