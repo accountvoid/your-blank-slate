@@ -644,22 +644,17 @@ export const useGameState = () => {
     });
   }, []);
 
+  // SETVOID canonical market catalog. i18n names/descriptions resolved in UI.
   const MARKET_ITEMS: InventoryItem[] = [
-    { id: 'xp_book', name: 'كتاب الخبرة', description: 'يزيد خبرة اللاعب 500 XP موزعة على جميع الإحصائيات', type: 'xp', category: 'Element', effect: 500, price: 250, quantity: 0, icon: '📚' },
-    { id: 'hp_potion', name: 'Blood Elixir', description: 'يستعيد 50% من الصحة القصوى', type: 'health', category: 'Elixir', effect: 50, price: 500, quantity: 0, icon: '🧪' },
-    { id: 'mp_potion', name: 'Energy Elixir', description: 'يستعيد 50% من الطاقة القصوى', type: 'energy', category: 'Elixir', effect: 50, price: 500, quantity: 0, icon: '⚡' },
-    { id: 'mana_meter', name: 'Mana Gauge', description: 'جهاز قياس طاقة البوابات والعناصر', type: 'tool', category: 'Tool', effect: 0, price: 2000, quantity: 0, icon: '📊' },
-    { id: 'dagger', name: 'خنجر الظلام', description: 'سلاح قوي يفتح مهارة ضربة الخنجر في المعركة', type: 'tool', category: 'Weapon', effect: 0, price: 3000, quantity: 0, icon: '🗡️' },
-    { id: 'enhancement_stone', name: 'حجر التطوير', description: 'حجر طاقة لتطوير مهارات المعركة - اجمع الأحجار لرفع مستوى المهارات', type: 'tool', category: 'Enhancement', effect: 0, price: 1000, quantity: 0, icon: '💎' },
-    { id: 'awakened_title', name: 'المستيقظ الواعي', description: 'لقب يُظهر أنك من المستيقظين - يزيد XP بنسبة 5%', type: 'title', category: 'Title', effect: 5, price: 3000, quantity: 0, icon: '👑' },
-    { id: 'power_eye_title', name: 'عين القوة', description: 'لقب نادر يكشف قوة الأعداء ويظهر إحصائياتهم', type: 'title', category: 'Title', effect: 10, price: 10000, quantity: 0, icon: '👁️' },
-    { id: 'storm_hand_title', name: 'يد العاصفة', description: 'لقب نادر يزيد ضرر الهجمات بنسبة 10%', type: 'title', category: 'Title', effect: 10, price: 15000, quantity: 0, icon: '🌩️' },
-    { id: 'return_key', name: 'مفتاح العودة', description: 'يتيح الخروج من البوابة دون إكمالها بشكل آمن', type: 'key', category: 'Key', effect: 0, price: 8000, quantity: 0, icon: '🔑' },
-    { id: 'xp_reset', name: 'حجر إعادة التوزيع', description: 'يعيد جميع نقاط XP ويسمح لك بإعادة توزيعها', type: 'reset', category: 'Special', effect: 0, price: 5000, quantity: 0, icon: '🔄' },
-    { id: 'rename_stone', name: 'حجر إعادة التسمية', description: 'يسمح لك بتغيير اسم شخصيتك', type: 'tool', category: 'Special', effect: 0, price: 2000, quantity: 0, icon: '✏️' },
-    { id: 'gate_exit_stone', name: 'حجر الخروج من البوابة', description: 'يسمح بالخروج الآمن من البوابة دون عقوبة', type: 'key', category: 'Special', effect: 0, price: 3000, quantity: 0, icon: '🚪' },
-    { id: 'grand_quest_stone', name: 'حجر المهمة الكبرى', description: 'مطلوب لتفعيل مهمة Grand Quest جديدة', type: 'tool', category: 'Special', effect: 0, price: 5000, quantity: 0, icon: '🔮' },
-    { id: 'central_activation_stone', name: 'حجر التفعيل المركزي', description: 'يفعّل شات النظام للتواصل مع ذكاء النظام', type: 'tool', category: 'Special', effect: 0, price: 10000, quantity: 0, icon: '💬' },
+    { id: 'hp_elixir',      name: 'HP Elixir',         description: 'Restores 50% HP',  type: 'health', category: 'consumable',       effect: 50, price: 300,  quantity: 0, icon: '🧪' },
+    { id: 'mp_elixir',      name: 'MP Elixir',         description: 'Restores 50% MP',  type: 'energy', category: 'consumable',       effect: 50, price: 300,  quantity: 0, icon: '⚡' },
+    { id: 'xp_book',        name: 'XP Book',           description: 'Grants 75 XP',     type: 'xp',     category: 'consumable',       effect: 75, price: 250,  quantity: 0, icon: '📚' },
+    { id: 'stone_dagger',   name: 'Stone Dagger',      description: 'Weapon (+16 HP, +23 DMG)', type: 'tool', category: 'weapon',     effect: 0,  price: 600,  quantity: 0, icon: '🗡️' },
+    { id: 'shadow_dagger',  name: 'Dagger of Shadows', description: 'Weapon (+92 HP, +231 DMG)', type: 'tool', category: 'weapon',    effect: 0,  price: 11000,quantity: 0, icon: '🗡️' },
+    { id: 'cutting_stones', name: 'Cutting Stones',    description: 'Merge 5 to forge a Mana Stone', type: 'tool', category: 'special_material', effect: 0, price: 7000, quantity: 0, icon: '💎' },
+    { id: 'mana_analyst',   name: 'Mana Analyst',      description: '2 uses utility',   type: 'tool',   category: 'utility',          effect: 0,  price: 1000, quantity: 0, icon: '📊' },
+    // Mana Stone — not purchasable, only forged from 5 Cutting Stones
+    { id: 'mana_stone',     name: 'Mana Stone',        description: 'Forged from 5 Cutting Stones', type: 'tool', category: 'stone',  effect: 0,  price: 0,    quantity: 0, icon: '🔮' },
   ];
 
   const purchaseItem = useCallback((itemId: string) => {
