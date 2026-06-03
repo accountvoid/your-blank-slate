@@ -31,9 +31,9 @@ const Penalty = () => {
   return (
     <div style={{ position: 'relative', width: '100%', height: '100vh', overflow: 'hidden' }}>
       {/* عرض الصورة 3 مرات في أماكن مختلفة حول اللاعب */}
-      <img src="/MonsterPenalty.png" style={{ position: 'absolute', top: '10%', left: '5%', zIndex: 10, width: '150px' }} alt="penalty-1" />
-      <img src="/MonsterPenalty.png" style={{ position: 'absolute', bottom: '15%', right: '10%', zIndex: 10, width: '150px' }} alt="penalty-2" />
-      <img src="/MonsterPenalty.png" style={{ position: 'absolute', top: '50%', left: '80%', zIndex: 10, width: '150px' }} alt="penalty-3" />
+      <img src="/GrottoMonsters.png" style={{ position: 'absolute', top: '10%', left: '5%', zIndex: 10, width: '150px' }} alt="penalty-1" />
+      <img src="/GrottoMonsters.png" style={{ position: 'absolute', bottom: '15%', right: '10%', zIndex: 10, width: '150px' }} alt="penalty-2" />
+      <img src="/GrottoMonsters.png" style={{ position: 'absolute', top: '50%', left: '80%', zIndex: 10, width: '150px' }} alt="penalty-3" />
 
       <PenaltyZoneScreen 
         endTime={endTime} 
