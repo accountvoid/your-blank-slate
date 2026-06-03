@@ -41,25 +41,21 @@ const Market = () => {
     E: { border: 'border-gray-600', text: 'text-gray-400', locked: false },
   };
 
+  // SETVOID catalog — names/descriptions are resolved via i18n at render time.
   const SOLO_ITEMS = [
-    { id: 'xp_book', name: 'Experience Book', arabicName: 'كتاب الخبرة', category: 'Element', difficulty: 'E', price: 250, icon: '📚', description: 'يزيد خبرة اللاعب 500 XP موزعة على جميع الإحصائيات', rankLevel: 0 },
-    { id: 'hp_potion', name: 'Blood Elixir', arabicName: 'إكسير الدم', category: 'Elixir', difficulty: 'E', price: 500, icon: '🧪', description: 'يستعيد 50% من الصحة القصوى', rankLevel: 0 },
-    { id: 'mp_potion', name: 'Energy Elixir', arabicName: 'إكسير الطاقة', category: 'Elixir', difficulty: 'E', price: 500, icon: '⚡', description: 'يستعيد 50% من الطاقة القصوى', rankLevel: 0 },
-    { id: 'enhancement_stone', name: 'Enhancement Stone', arabicName: 'حجر التطوير', category: 'Enhancement', difficulty: 'E', price: 1000, icon: '💎', description: 'حجر طاقة لتطوير مهارات المعركة', rankLevel: 0 },
-    { id: 'rename_stone', name: 'Rename Stone', arabicName: 'حجر إعادة التسمية', category: 'Special', difficulty: 'E', price: 2000, icon: '✏️', description: 'يسمح لك بتغيير اسم شخصيتك', rankLevel: 0 },
-    { id: 'dagger', name: 'Shadow Dagger', arabicName: 'خنجر الظلام', category: 'Weapon', difficulty: 'D', price: 3000, icon: '🗡️', description: 'سلاح قوي يفتح مهارة ضربة الخنجر في المعركة', rankLevel: 1 },
-    { id: 'gate_exit_stone', name: 'Gate Exit Stone', arabicName: 'حجر الخروج من البوابة', category: 'Special', difficulty: 'D', price: 3000, icon: '🚪', description: 'يسمح بالخروج الآمن من البوابة دون عقوبة', rankLevel: 1 },
-    { id: 'grand_quest_stone', name: 'Grand Quest Stone', arabicName: 'حجر المهمة الكبرى', category: 'Special', difficulty: 'D', price: 5000, icon: '🔮', description: 'مطلوب لتفعيل مهمة Grand Quest جديدة', rankLevel: 1 },
-    { id: 'xp_reset', name: 'Redistribution Stone', arabicName: 'حجر إعادة التوزيع', category: 'Special', difficulty: 'C', price: 5000, icon: '🔄', description: 'يعيد جميع نقاط XP ويسمح لك بإعادة توزيعها', rankLevel: 2 },
-    { id: 'mana_meter', name: 'Mana Gauge', arabicName: 'مقياس المانا', category: 'Tool', difficulty: 'D', price: 2000, icon: '/ManaDeviceIcon.png', description: 'جهاز قياس طاقة البوابات والعناصر', rankLevel: 1 },
-    { id: 'awakened_title', name: 'Awakened One', arabicName: 'المستيقظ الواعي', category: 'Title', difficulty: 'C', price: 3000, icon: '👑', description: 'لقب يُظهر أنك من المستيقظين - يزيد XP بنسبة 5%', rankLevel: 2 },
-    { id: 'central_activation_stone', name: 'Central Activation Stone', arabicName: 'حجر التفعيل المركزي', category: 'Special', difficulty: 'C', price: 10000, icon: '💬', description: 'يفعّل شات النظام للتواصل مع ذكاء النظام', rankLevel: 2 },
-    { id: 'power_eye_title', name: 'Eye of Power', arabicName: 'عين القوة', category: 'Title', difficulty: 'B', price: 10000, icon: '👁️', description: 'لقب نادر يكشف قوة الأعداء ويظهر إحصائياتهم', rankLevel: 3 },
-    { id: 'storm_hand_title', name: 'Hand of Storm', arabicName: 'يد العاصفة', category: 'Title', difficulty: 'B', price: 15000, icon: '🌩️', description: 'لقب نادر يزيد ضرر الهجمات بنسبة 10%', rankLevel: 3 },
-    { id: 'return_key', name: 'Return Key', arabicName: 'مفتاح العودة', category: 'Key', difficulty: 'B', price: 8000, icon: '🔑', description: 'يتيح الخروج من البوابة دون إكمالها بشكل آمن', rankLevel: 3 },
-    { id: 'shadow_elixir', name: 'Shadow Monarch Elixir', arabicName: 'إكسير ملك الظلال', category: 'Ancient Grade', difficulty: 'A', price: 150000, icon: '🧪', description: 'إكسير أسطوري مخفي في أرشيف النظام', rankLevel: 4 },
-    { id: 'demon_blood', name: 'Demon King Blood', arabicName: 'دم ملك الشياطين', category: 'Divine Item', difficulty: 'S', price: 5000000, icon: '💀', description: 'جوهر ملك شيطاني رفيع المستوى', rankLevel: 5 },
-  ];
+    { id: 'hp_elixir',      i18nKey: 'items.hp_elixir',      category: 'consumable',       difficulty: 'E', price: 300,   icon: '🧪', rankLevel: 0, extra: t('items.stats.useOnly') },
+    { id: 'mp_elixir',      i18nKey: 'items.mp_elixir',      category: 'consumable',       difficulty: 'E', price: 300,   icon: '⚡', rankLevel: 0, extra: t('items.stats.useOnly') },
+    { id: 'xp_book',        i18nKey: 'items.xp_book',        category: 'consumable',       difficulty: 'E', price: 250,   icon: '📚', rankLevel: 0, extra: t('items.stats.useOnly') },
+    { id: 'stone_dagger',   i18nKey: 'items.stone_dagger',   category: 'weapon',           difficulty: 'D', price: 600,   icon: '🗡️', rankLevel: 0, extra: `+16 ${t('items.stats.health')} · +23 ${t('items.stats.damage')} · 150 ${t('items.stats.blows')}` },
+    { id: 'shadow_dagger',  i18nKey: 'items.shadow_dagger',  category: 'weapon',           difficulty: 'B', price: 11000, icon: '🗡️', rankLevel: 0, extra: `+92 ${t('items.stats.health')} · +231 ${t('items.stats.damage')} · 600 ${t('items.stats.blows')}` },
+    { id: 'cutting_stones', i18nKey: 'items.cutting_stones', category: 'special_material', difficulty: 'C', price: 7000,  icon: '💎', rankLevel: 0, extra: '' },
+    { id: 'mana_analyst',   i18nKey: 'items.mana_analyst',   category: 'utility',          difficulty: 'D', price: 1000,  icon: '📊', rankLevel: 0, extra: t('items.stats.usesCount', { count: 2 }) },
+  ].map(i => ({
+    ...i,
+    name: t(`${i.i18nKey}.name`),
+    arabicName: t(`${i.i18nKey}.name`),
+    description: t(`${i.i18nKey}.description`),
+  }));
 
   const getPlayerRank = () => {
     const level = gameState.totalLevel || 1;
