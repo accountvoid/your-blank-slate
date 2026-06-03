@@ -214,7 +214,7 @@ const Gates = () => {
 
       <GateLootModal
         show={showLootModal}
-        gate={completedGate}
+        rank={completedGate?.rank ?? 'E'}
         loot={currentLoot}
         onClose={() => setShowLootModal(false)}
         onCollect={handleCollectLoot}
