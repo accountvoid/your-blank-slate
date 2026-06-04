@@ -8,9 +8,11 @@ import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 
 const Market = () => {
-  const { gameState, purchaseItem } = useGameState();
+  const { gameState, purchaseItem, mergeCuttingStones } = useGameState();
   const { playPurchase } = useSoundEffects();
   const { t } = useTranslation();
+  const cuttingStonesOwned = (gameState.inventory || []).find(i => i.id === 'cutting_stones')?.quantity || 0;
+  const CUTTING_NEED = 5;
   
   const [isScanning, setIsScanning] = useState(false);
   const [isExiting, setIsExiting] = useState(false); 
@@ -440,6 +442,35 @@ const Market = () => {
                       </button>
                     )}
                   </div>
+
+                  {/* Cutting Stones merge action */}
+                  {isRevealed && item.id === 'cutting_stones' && (
+                    <div className="mt-2 p-3 border border-cyan-500/30 bg-cyan-950/20">
+                      <div className="flex items-center justify-between text-[10px] text-cyan-300 font-mono mb-2">
+                        <span className="uppercase tracking-widest">🔮 {t('marketExt.merge')}</span>
+                        <span>{t('marketExt.mergeProgress', { have: cuttingStonesOwned, need: CUTTING_NEED })}</span>
+                      </div>
+                      <button
+                        onClick={() => {
+                          const ok = mergeCuttingStones();
+                          toast({
+                            title: ok ? t('common.successTitle') : t('common.warningTitle'),
+                            description: ok ? t('marketExt.mergedSuccess') : t('marketExt.mergedFailed', { need: CUTTING_NEED }),
+                            variant: ok ? undefined : 'destructive',
+                          });
+                        }}
+                        disabled={cuttingStonesOwned < CUTTING_NEED}
+                        className={cn(
+                          "w-full py-2 text-[10px] font-black uppercase tracking-widest border",
+                          cuttingStonesOwned >= CUTTING_NEED
+                            ? "bg-cyan-500/20 border-cyan-400/50 text-cyan-200 active:scale-95"
+                            : "bg-slate-900/50 border-slate-800 text-slate-600 cursor-not-allowed"
+                        )}
+                      >
+                        {cuttingStonesOwned >= CUTTING_NEED ? t('marketExt.mergeReady') : t('marketExt.merge')}
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
