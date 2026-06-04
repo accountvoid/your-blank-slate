@@ -237,6 +237,9 @@ const Dungeon = () => {
     } else {
       setCleared(true);
       setPhase('cleared');
+      // Generate gate loot once on clear
+      const loot = generateGateLoot(rank);
+      setGateLoot(loot);
     }
   };
 
@@ -521,10 +524,24 @@ const Dungeon = () => {
         {showStaminaModal && (
           <StaminaModal open={showStaminaModal} tasks={staminaTasks} onComplete={handleStaminaTask} onClose={() => setShowStaminaModal(false)} themeColor={theme.primary} />
         )}
-        {cleared && (
+        {cleared && lootClaimed && (
           <DungeonClearedScreen rank={rank} gold={gold} xp={xp} monstersDefeated={monstersDefeated} treasuresFound={treasuresFound} roomsExplored={roomsExplored} themeColor={theme.primary} onExit={() => navigate(-1)} />
         )}
       </AnimatePresence>
+
+      {/* Gate Loot Modal — shown before the cleared screen */}
+      {cleared && gateLoot && !lootClaimed && (
+        <GateLootModal
+          show
+          rank={rank}
+          loot={gateLoot}
+          onClose={() => setLootClaimed(true)}
+          onCollect={() => {
+            claimGateLoot(gateLoot.map(l => ({ id: l.id, quantity: l.quantity, type: l.type })));
+            setLootClaimed(true);
+          }}
+        />
+      )}
     </div>
   );
 };
