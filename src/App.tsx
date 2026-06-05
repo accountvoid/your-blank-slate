@@ -1,3 +1,4 @@
+import { lazy, Suspense, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,36 +10,63 @@ import { LevelUpModal } from "@/components/LevelUpModal";
 import { GameOverModal } from "@/components/GameOverModal";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { AppHeader } from "@/components/AppHeader";
+import { preloadAssets, preloadRoutes } from "@/lib/assetPreload";
 
 import Index from "./pages/Index";
-import Quests from "./pages/Quests";
-import Gates from "./pages/Gates";
-import Battle from "./pages/Battle";
-import MonsterBattle from "./pages/MonsterBattle";
-import Dungeon from "./pages/Dungeon";
-import Abilities from "./pages/Abilities";
-import Stats from "./pages/Stats";
-import Achievements from "./pages/Achievements";
-import GrandQuest from "./pages/GrandQuest";
-import Market from "./pages/Market";
-import Profile from "./pages/Profile";
 import Onboarding from "./pages/Onboarding";
 import AuthCallback from "./pages/AuthCallback";
-import Penalty from "./pages/Penalty";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+// Lazy chunks — preloaded on idle after auth.
+const Quests = lazy(() => import("./pages/Quests"));
+const Gates = lazy(() => import("./pages/Gates"));
+const Battle = lazy(() => import("./pages/Battle"));
+const MonsterBattle = lazy(() => import("./pages/MonsterBattle"));
+const Dungeon = lazy(() => import("./pages/Dungeon"));
+const Abilities = lazy(() => import("./pages/Abilities"));
+const Stats = lazy(() => import("./pages/Stats"));
+const Achievements = lazy(() => import("./pages/Achievements"));
+const GrandQuest = lazy(() => import("./pages/GrandQuest"));
+const Market = lazy(() => import("./pages/Market"));
+const Profile = lazy(() => import("./pages/Profile"));
+const Penalty = lazy(() => import("./pages/Penalty"));
+
+const LAZY_LOADERS = [
+  () => import("./pages/Quests"),
+  () => import("./pages/Gates"),
+  () => import("./pages/Battle"),
+  () => import("./pages/Dungeon"),
+  () => import("./pages/Stats"),
+  () => import("./pages/Market"),
+  () => import("./pages/Profile"),
+  () => import("./pages/Penalty"),
+];
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60_000,
+      gcTime: 5 * 60_000,
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
 const AppContent = () => {
   const { gameState, levelUpInfo, dismissLevelUp, resetGame } = useGameState();
   const { user, loading: authLoading } = useAuth();
 
-  // Show loading splash while checking auth
+  // Warm assets + lazy chunks once authed.
+  useEffect(() => {
+    preloadAssets();
+    if (user) preloadRoutes(LAZY_LOADERS);
+  }, [user]);
+
   if (authLoading) {
-    return <LoadingScreen fullScreen message="SETVOID" className="scale-150" />;
+    return <LoadingScreen fullScreen message="SETVOID" />;
   }
 
-  // If not authenticated, not onboarded, or needs password setup - show onboarding
   const needsPassword = typeof window !== 'undefined' && localStorage.getItem('needsPassword') === 'true';
   if (!user || !gameState.isOnboarded || needsPassword) {
     return <Onboarding />;
@@ -47,26 +75,27 @@ const AppContent = () => {
   return (
     <>
       <AppHeader />
-      <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/quests" element={<Quests />} />
-        <Route path="/gates" element={<Gates />} />
-        <Route path="/battle" element={<Battle />} />
-        <Route path="/battle/monster" element={<MonsterBattle />} />
-        <Route path="/dungeon" element={<Dungeon />} />
-        <Route path="/abilities" element={<Abilities />} />
-        <Route path="/stats" element={<Stats />} />
-        <Route path="/achievements" element={<Achievements />} />
-        <Route path="/grand-quest" element={<GrandQuest />} />
-        <Route path="/market" element={<Market />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/onboarding" element={<Navigate to="/" replace />} />
-        <Route path="/auth/callback" element={<AuthCallback />} />
-        <Route path="/penalty" element={<Penalty />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-      
-      
+      <Suspense fallback={<LoadingScreen fullScreen message="LOADING" />}>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/quests" element={<Quests />} />
+          <Route path="/gates" element={<Gates />} />
+          <Route path="/battle" element={<Battle />} />
+          <Route path="/battle/monster" element={<MonsterBattle />} />
+          <Route path="/dungeon" element={<Dungeon />} />
+          <Route path="/abilities" element={<Abilities />} />
+          <Route path="/stats" element={<Stats />} />
+          <Route path="/achievements" element={<Achievements />} />
+          <Route path="/grand-quest" element={<GrandQuest />} />
+          <Route path="/market" element={<Market />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/onboarding" element={<Navigate to="/" replace />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/penalty" element={<Penalty />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
+
       {levelUpInfo && (
         <LevelUpModal
           show={levelUpInfo.show}
@@ -75,12 +104,9 @@ const AppContent = () => {
           onDismiss={dismissLevelUp}
         />
       )}
-      
+
       {gameState.hp <= 0 && (
-        <GameOverModal
-          show={true}
-          onRestart={resetGame}
-        />
+        <GameOverModal show={true} onRestart={resetGame} />
       )}
     </>
   );
