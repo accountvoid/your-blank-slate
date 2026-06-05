@@ -178,8 +178,14 @@ const getScheduledGates = (playerLevel: number): Gate[] => {
   
   const isHigherLevel = playerLevel >= gateTemplate.requiredPower;
   
+  // Permanent immutable identifier: per-rank, per-day, deterministic.
+  // Format: GATE-{rankIdx}{dateSeed padded}
+  const rankIdx = ['E','D','C','B','A','S'].indexOf(gateTemplate.rank);
+  const permanentId = `GATE-${String(rankIdx * 100000 + (dateSeed % 100000)).padStart(4, '0')}`;
+
   return [{
     ...gateTemplate,
+    idGate: permanentId,
     id: `${gateTemplate.id}_${dateSeed}`,
     discovered: true,
     gateNumber: 1,
