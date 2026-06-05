@@ -47,7 +47,7 @@ export const ProfileCard = ({ gameState, getXpProgress, onUpdateProfile }: Profi
   return (
     <>
       <div 
-        className={cn("profile-card relative flex flex-col isolation-isolate", rankColor.border, totalLevel >= 50 && "shadow-2xl")}
+        className={cn("profile-card relative flex flex-col isolation-isolate rounded-none border", rankColor.border, totalLevel >= 50 && "shadow-2xl")}
         style={{ willChange: 'transform' }}
       >
         {/* الشعار في الخلفية */}
@@ -100,7 +100,7 @@ export const ProfileCard = ({ gameState, getXpProgress, onUpdateProfile }: Profi
                 </div>
                 <span className="text-xs font-bold">{Math.round(gameState.hp)}/{gameState.maxHp}</span>
               </div>
-              <div className="stats-bar h-3">
+              <div className="stats-bar h-3 rounded-none">
                 <div className="stats-bar-fill bg-destructive" style={{ width: `${hpPercentage}%` }} />
               </div>
             </div>
@@ -112,7 +112,7 @@ export const ProfileCard = ({ gameState, getXpProgress, onUpdateProfile }: Profi
                 </div>
                 <span className="text-xs font-bold">{Math.round(gameState.energy)}/{gameState.maxEnergy}</span>
               </div>
-              <div className="stats-bar h-3">
+              <div className="stats-bar h-3 rounded-none">
                 <div className="stats-bar-fill bg-secondary" style={{ width: `${energyPercentage}%` }} />
               </div>
             </div>
@@ -120,7 +120,7 @@ export const ProfileCard = ({ gameState, getXpProgress, onUpdateProfile }: Profi
 
           <div className="h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent mb-4" />
 
-          <div className="flex items-center justify-around mb-4 py-3 rounded-lg bg-card/50 border border-primary/20">
+          <div className="flex items-center justify-around mb-4 py-3 rounded-none bg-card/50 border border-primary/20">
             <div className="text-center">
               <Flame className="w-5 h-5 mx-auto mb-1 text-orange-500" />
               <div className="text-lg font-bold">{gameState.streakDays}</div>
@@ -146,14 +146,14 @@ export const ProfileCard = ({ gameState, getXpProgress, onUpdateProfile }: Profi
               const progress = getXpProgress(xp);
 
               return (
-                <div key={stat.key} className="flex items-center gap-3 p-3 rounded-lg bg-card/30 border border-primary/10 overflow-hidden">
+                <div key={stat.key} className="flex items-center gap-3 p-3 rounded-none bg-card/30 border border-primary/10 overflow-hidden">
                   <Icon className={cn('w-5 h-5 shrink-0', stat.color)} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
                       <span className={cn('text-sm font-bold', stat.color)}>{stat.label}</span>
                       <span className="stat-value text-sm">{level}</span>
                     </div>
-                    <div className="stats-bar h-2">
+                    <div className="stats-bar h-2 rounded-none">
                       <div className={cn('stats-bar-fill', stat.color.replace('text-', 'bg-'))} style={{ width: `${progress}%` }} />
                     </div>
                   </div>
@@ -163,14 +163,14 @@ export const ProfileCard = ({ gameState, getXpProgress, onUpdateProfile }: Profi
           </div>
 
           {isSupported && (
-            <div className="mt-4 p-3 bg-card/50 border border-primary/20 rounded-lg">
+            <div className="mt-4 p-3 bg-card/50 border border-primary/20 rounded-none">
               <div className="flex items-center justify-between mb-2">
                 <h4 className="text-xs font-bold text-muted-foreground flex items-center gap-2">
                   <Smartphone className="w-4 h-4" />
                   إشعارات النظام
                 </h4>
                 <span className={cn(
-                  "text-[10px] font-bold px-2 py-0.5 rounded-full",
+                  "text-[10px] font-bold px-2 py-0.5 rounded-none",
                   permission === 'granted' ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'
                 )}>
                   {permission === 'granted' ? 'مفعلة' : 'غير مفعّلة'}
@@ -180,7 +180,7 @@ export const ProfileCard = ({ gameState, getXpProgress, onUpdateProfile }: Profi
               {permission !== 'granted' && (
                 <button
                   onClick={requestPermission}
-                  className="w-full p-2 text-xs bg-primary/10 border border-primary/30 text-primary rounded hover:bg-primary/20 font-bold flex items-center justify-center gap-2 transition-colors"
+                  className="w-full p-2 text-xs bg-primary/10 border border-primary/30 text-primary rounded-none hover:bg-primary/20 font-bold flex items-center justify-center gap-2 transition-colors"
                 >
                   <Bell className="w-4 h-4" />
                   {permission === 'denied' ? 'فعّل من إعدادات المتصفح' : 'تفعيل إشعارات الهاتف'}
