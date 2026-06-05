@@ -16,32 +16,41 @@ export type Database = {
     Tables: {
       gates: {
         Row: {
+          battle_sessions: Json
           created_at: string
           id: string
           id_gate: string
           name_gate: string
           power_gate: number
           rank_gate: string
+          rewards_log: Json
+          stats: Json
           updated_at: string
           user_id: string
         }
         Insert: {
+          battle_sessions?: Json
           created_at?: string
           id?: string
           id_gate: string
           name_gate: string
           power_gate?: number
           rank_gate?: string
+          rewards_log?: Json
+          stats?: Json
           updated_at?: string
           user_id: string
         }
         Update: {
+          battle_sessions?: Json
           created_at?: string
           id?: string
           id_gate?: string
           name_gate?: string
           power_gate?: number
           rank_gate?: string
+          rewards_log?: Json
+          stats?: Json
           updated_at?: string
           user_id?: string
         }
@@ -51,11 +60,16 @@ export type Database = {
         Row: {
           created_at: string
           gold_player: number
+          hp_last_tick_at: string
+          hp_max: number
           hp_player: number
           id_player: string
           level_player: number
           mb_player: number
           name_player: string
+          punishment_active: boolean
+          punishment_end_at: string | null
+          punishment_started_at: string | null
           rank_player: string
           stats_player: Json
           updated_at: string
@@ -65,11 +79,16 @@ export type Database = {
         Insert: {
           created_at?: string
           gold_player?: number
+          hp_last_tick_at?: string
+          hp_max?: number
           hp_player?: number
           id_player: string
           level_player?: number
           mb_player?: number
           name_player?: string
+          punishment_active?: boolean
+          punishment_end_at?: string | null
+          punishment_started_at?: string | null
           rank_player?: string
           stats_player?: Json
           updated_at?: string
@@ -79,11 +98,16 @@ export type Database = {
         Update: {
           created_at?: string
           gold_player?: number
+          hp_last_tick_at?: string
+          hp_max?: number
           hp_player?: number
           id_player?: string
           level_player?: number
           mb_player?: number
           name_player?: string
+          punishment_active?: boolean
+          punishment_end_at?: string | null
+          punishment_started_at?: string | null
           rank_player?: string
           stats_player?: Json
           updated_at?: string
@@ -97,7 +121,62 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      apply_punishment_drain: {
+        Args: { uid: string }
+        Returns: {
+          created_at: string
+          gold_player: number
+          hp_last_tick_at: string
+          hp_max: number
+          hp_player: number
+          id_player: string
+          level_player: number
+          mb_player: number
+          name_player: string
+          punishment_active: boolean
+          punishment_end_at: string | null
+          punishment_started_at: string | null
+          rank_player: string
+          stats_player: Json
+          updated_at: string
+          user_id: string
+          void_player: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "profiles"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      start_punishment: {
+        Args: { hours?: number; uid: string }
+        Returns: {
+          created_at: string
+          gold_player: number
+          hp_last_tick_at: string
+          hp_max: number
+          hp_player: number
+          id_player: string
+          level_player: number
+          mb_player: number
+          name_player: string
+          punishment_active: boolean
+          punishment_end_at: string | null
+          punishment_started_at: string | null
+          rank_player: string
+          stats_player: Json
+          updated_at: string
+          user_id: string
+          void_player: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "profiles"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
       [_ in never]: never
