@@ -106,7 +106,20 @@ const getSideQuests = (): Quest[] => {
   ];
 
   const startIndex = day % sideQuests.length;
-  return [sideQuests[startIndex], sideQuests[(startIndex + 1) % sideQuests.length], sideQuests[(startIndex + 2) % sideQuests.length]];
+  const selected = [sideQuests[startIndex], sideQuests[(startIndex + 1) % sideQuests.length], sideQuests[(startIndex + 2) % sideQuests.length]];
+
+  // Enforce global caps: total side-quest gold <= 150, total XP <= 200
+  const GOLD_CAP = 150;
+  const XP_CAP = 200;
+  const totalGold = selected.reduce((s, q) => s + (q.goldReward || 0), 0);
+  const totalXp = selected.reduce((s, q) => s + (q.xpReward || 0), 0);
+  const goldScale = totalGold > GOLD_CAP ? GOLD_CAP / totalGold : 1;
+  const xpScale = totalXp > XP_CAP ? XP_CAP / totalXp : 1;
+  return selected.map(q => ({
+    ...q,
+    goldReward: Math.floor((q.goldReward || 0) * goldScale),
+    xpReward: Math.floor((q.xpReward || 0) * xpScale),
+  }));
 };
 
 const getInitialAbilities = (): Ability[] => [
