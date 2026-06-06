@@ -70,6 +70,7 @@ export type Database = {
           punishment_active: boolean
           punishment_end_at: string | null
           punishment_started_at: string | null
+          Quests: string | null
           rank_player: string
           stats_player: Json
           updated_at: string
@@ -89,6 +90,7 @@ export type Database = {
           punishment_active?: boolean
           punishment_end_at?: string | null
           punishment_started_at?: string | null
+          Quests?: string | null
           rank_player?: string
           stats_player?: Json
           updated_at?: string
@@ -108,6 +110,7 @@ export type Database = {
           punishment_active?: boolean
           punishment_end_at?: string | null
           punishment_started_at?: string | null
+          Quests?: string | null
           rank_player?: string
           stats_player?: Json
           updated_at?: string
@@ -136,6 +139,7 @@ export type Database = {
           punishment_active: boolean
           punishment_end_at: string | null
           punishment_started_at: string | null
+          Quests: string | null
           rank_player: string
           stats_player: Json
           updated_at: string
@@ -164,6 +168,7 @@ export type Database = {
           punishment_active: boolean
           punishment_end_at: string | null
           punishment_started_at: string | null
+          Quests: string | null
           rank_player: string
           stats_player: Json
           updated_at: string
