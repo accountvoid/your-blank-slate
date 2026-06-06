@@ -64,6 +64,18 @@ const AppContent = () => {
     if (user) preloadRoutes(LAZY_LOADERS);
   }, [user]);
 
+  // Global MP < 10 toast for quest/portal entry attempts
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<{ current?: number; required?: number }>).detail || {};
+      toast.error('Mana منخفضة', {
+        description: `تحتاج ${detail.required ?? 10} MP على الأقل لبدء أي مهمة أو دخول بوابة. (الحالي: ${Math.floor(detail.current ?? 0)})`,
+      });
+    };
+    window.addEventListener('mp-too-low', handler);
+    return () => window.removeEventListener('mp-too-low', handler);
+  }, []);
+
   if (authLoading) {
     return <LoadingScreen fullScreen message="SETVOID" />;
   }
