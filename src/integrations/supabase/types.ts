@@ -56,6 +56,54 @@ export type Database = {
         }
         Relationships: []
       }
+      portals: {
+        Row: {
+          active: boolean
+          color: string
+          created_at: string
+          danger: string
+          energy_density: string
+          id: string
+          id_portal: string
+          name: string
+          rank: string
+          required_level: number
+          required_power: number
+          rewards: Json
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          color?: string
+          created_at?: string
+          danger?: string
+          energy_density?: string
+          id?: string
+          id_portal: string
+          name: string
+          rank?: string
+          required_level?: number
+          required_power?: number
+          rewards?: Json
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          color?: string
+          created_at?: string
+          danger?: string
+          energy_density?: string
+          id?: string
+          id_portal?: string
+          name?: string
+          rank?: string
+          required_level?: number
+          required_power?: number
+          rewards?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -66,11 +114,12 @@ export type Database = {
           id_player: string
           level_player: number
           mb_player: number
+          mp_max: number
           name_player: string
           punishment_active: boolean
           punishment_end_at: string | null
           punishment_started_at: string | null
-          Quests: string | null
+          Quests: Json
           rank_player: string
           stats_player: Json
           updated_at: string
@@ -86,11 +135,12 @@ export type Database = {
           id_player: string
           level_player?: number
           mb_player?: number
+          mp_max?: number
           name_player?: string
           punishment_active?: boolean
           punishment_end_at?: string | null
           punishment_started_at?: string | null
-          Quests?: string | null
+          Quests?: Json
           rank_player?: string
           stats_player?: Json
           updated_at?: string
@@ -106,11 +156,12 @@ export type Database = {
           id_player?: string
           level_player?: number
           mb_player?: number
+          mp_max?: number
           name_player?: string
           punishment_active?: boolean
           punishment_end_at?: string | null
           punishment_started_at?: string | null
-          Quests?: string | null
+          Quests?: Json
           rank_player?: string
           stats_player?: Json
           updated_at?: string
@@ -124,6 +175,36 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      apply_damage: {
+        Args: { hp_delta: number; mp_delta: number; uid: string }
+        Returns: {
+          created_at: string
+          gold_player: number
+          hp_last_tick_at: string
+          hp_max: number
+          hp_player: number
+          id_player: string
+          level_player: number
+          mb_player: number
+          mp_max: number
+          name_player: string
+          punishment_active: boolean
+          punishment_end_at: string | null
+          punishment_started_at: string | null
+          Quests: Json
+          rank_player: string
+          stats_player: Json
+          updated_at: string
+          user_id: string
+          void_player: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "profiles"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       apply_punishment_drain: {
         Args: { uid: string }
         Returns: {
@@ -135,11 +216,12 @@ export type Database = {
           id_player: string
           level_player: number
           mb_player: number
+          mp_max: number
           name_player: string
           punishment_active: boolean
           punishment_end_at: string | null
           punishment_started_at: string | null
-          Quests: string | null
+          Quests: Json
           rank_player: string
           stats_player: Json
           updated_at: string
@@ -164,11 +246,42 @@ export type Database = {
           id_player: string
           level_player: number
           mb_player: number
+          mp_max: number
           name_player: string
           punishment_active: boolean
           punishment_end_at: string | null
           punishment_started_at: string | null
-          Quests: string | null
+          Quests: Json
+          rank_player: string
+          stats_player: Json
+          updated_at: string
+          user_id: string
+          void_player: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "profiles"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      update_quests: {
+        Args: { quests_json: Json; uid: string }
+        Returns: {
+          created_at: string
+          gold_player: number
+          hp_last_tick_at: string
+          hp_max: number
+          hp_player: number
+          id_player: string
+          level_player: number
+          mb_player: number
+          mp_max: number
+          name_player: string
+          punishment_active: boolean
+          punishment_end_at: string | null
+          punishment_started_at: string | null
+          Quests: Json
           rank_player: string
           stats_player: Json
           updated_at: string
