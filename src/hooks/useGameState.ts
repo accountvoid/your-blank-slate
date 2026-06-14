@@ -362,6 +362,28 @@ export const useGameState = () => {
           
           const today = new Date().toISOString().split('T')[0];
           const isNewDay = mergedState.lastActiveDate !== today;
+          
+          // ---- نظام التحقق التلقائي من العقاب عند تغيير اليوم ----
+          if (isNewDay && mergedState.quests && mergedState.quests.length > 0) {
+            const hasUncompletedMainQuests = mergedState.quests.some(
+              (q: any) => q.isMainQuest && !q.completed
+            );
+
+            if (hasUncompletedMainQuests) {
+              mergedState.punishment = {
+                active: true,
+                endTime: new Date(Date.now() + 4 * 60 * 60 * 1000).toISOString(),
+                monstersDefeated: 0,
+                currentWave: 1,
+                playerHpInPenalty: mergedState.hp,
+                maxHpInPenalty: mergedState.maxHp
+              };
+              mergedState.hp = Math.max(0, mergedState.hp - 30);
+              mergedState.missedQuestsCount = (mergedState.missedQuestsCount || 0) + 1;
+            }
+          }
+          // --------------------------------------------------------
+
           const needsQuestSeed = isNewDay || !mergedState.quests || mergedState.quests.length === 0;
           if (needsQuestSeed) {
             mergedState.quests = [...getRotatingQuests(), ...getSideQuests()];
