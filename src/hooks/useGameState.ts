@@ -931,19 +931,35 @@ export const useGameState = () => {
         try { window.dispatchEvent(new CustomEvent('mp-too-low', { detail: { current: prev.energy, required: 10 } })); } catch {}
         return prev;
       }
-      return { ...prev, quests: prev.quests.map(q => (q.id === questId && !q.active && !q.completed) ? { ...q, startedAt: new Date().toISOString(), timeProgress: q.timeProgress || 0, active: true, claimed: false } : q) };
+      const updatedQuests = prev.quests.map(q => (q.id === questId && !q.active && !q.completed) ? { ...q, startedAt: new Date().toISOString(), timeProgress: q.timeProgress || 0, active: true, claimed: false } : q);
+      
+      // مزامنة فورية ومباشرة لتقدم المهمة الجديد إلى Supabase لمنع الضياع عند خروج اللاعب
+      if (user?.id) {
+        profilesTable().update({ quests: updatedQuests }).eq('user_id', user.id).then();
+      }
+      
+      return { ...prev, quests: updatedQuests };
     });
-  }, []);
+  }, [user]);
 
   const updateSideQuestProgress = useCallback((questId: string, progress: number) => {
-    setGameState(prev => ({ ...prev, quests: prev.quests.map(q => {
+    setGameState(prev => {
+      const updatedQuests = prev.quests.map(q => {
         if (q.id === questId) {
           const isComplete = progress >= (q.requiredTime || 0) * 60;
           return { ...q, timeProgress: progress, completed: isComplete ? true : q.completed, active: isComplete ? false : q.active };
         }
         return q;
-      }) }));
-  }, []);
+      });
+
+      // مزامنة فورية ومباشرة للتقدم المستمر العداد إلى Supabase
+      if (user?.id) {
+        profilesTable().update({ quests: updatedQuests }).eq('user_id', user.id).then();
+      }
+
+      return { ...prev, quests: updatedQuests };
+    });
+  }, [user]);
 
   const claimSideQuest = useCallback((questId: string) => {
     setGameState(prev => {
