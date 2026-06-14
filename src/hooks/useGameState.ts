@@ -370,15 +370,16 @@ export const useGameState = () => {
             );
 
             if (hasUncompletedMainQuests) {
+              const nextHp = Math.max(0, mergedState.hp - 30);
               mergedState.punishment = {
                 active: true,
                 endTime: new Date(Date.now() + 4 * 60 * 60 * 1000).toISOString(),
                 monstersDefeated: 0,
                 currentWave: 1,
-                playerHpInPenalty: mergedState.hp,
+                playerHpInPenalty: nextHp,
                 maxHpInPenalty: mergedState.maxHp
               };
-              mergedState.hp = Math.max(0, mergedState.hp - 30);
+              mergedState.hp = nextHp;
               mergedState.missedQuestsCount = (mergedState.missedQuestsCount || 0) + 1;
             }
           }
@@ -437,6 +438,7 @@ export const useGameState = () => {
               name_player?: string; hp_player?: number; hp_max?: number;
               mb_player?: number; mp_max?: number; gold_player?: number;
               level_player?: number; stats_player?: Record<string, number>;
+              punishment?: any;
             };
             setGameState(prev => ({
               ...prev,
@@ -449,6 +451,7 @@ export const useGameState = () => {
               maxEnergy: n.mp_max ?? n.max_energy ?? prev.maxEnergy,
               shadowPoints: n.shadow_points ?? prev.shadowPoints,
               totalLevel: n.level_player ?? prev.totalLevel,
+              punishment: n.punishment || prev.punishment,
             }));
           }
         }).subscribe();
@@ -510,6 +513,7 @@ export const useGameState = () => {
           streak_days: gameState.streakDays,
           last_active_date: gameState.lastActiveDate,
           punishment: gameState.punishment,
+          punishment_end_time: gameState.punishmentEndTime,
           missed_quests_count: gameState.missedQuestsCount,
           selected_reciter: gameState.selectedReciter,
           sound_enabled: gameState.soundEnabled,
@@ -723,6 +727,12 @@ export const useGameState = () => {
 
       if (item.type === 'health') {
         updates.hp = Math.min(prev.maxHp, prev.hp + (prev.maxHp * item.effect / 100) * quantity);
+        if (prev.punishment?.active) {
+          updates.punishment = {
+            ...prev.punishment,
+            playerHpInPenalty: updates.hp
+          };
+        }
       } else if (item.type === 'energy') {
         updates.energy = Math.min(prev.maxEnergy, prev.energy + (prev.maxEnergy * item.effect / 100) * quantity);
       } else if (item.type === 'xp') {
@@ -799,7 +809,20 @@ export const useGameState = () => {
   }, [calculateLevel, getTotalLevel]);
 
   const takeDamage = useCallback((damage: number) => {
-    setGameState(prev => ({ ...prev, hp: Math.max(0, prev.hp - damage) }));
+    setGameState(prev => {
+      const nextHp = Math.max(0, prev.hp - damage);
+      if (prev.punishment?.active) {
+        return {
+          ...prev,
+          hp: nextHp,
+          punishment: {
+            ...prev.punishment,
+            playerHpInPenalty: nextHp
+          }
+        };
+      }
+      return { ...prev, hp: nextHp };
+    });
   }, []);
 
   // Mission Failure penalty (HP deduction by difficulty)
@@ -819,11 +842,13 @@ export const useGameState = () => {
       const newQuests = prev.quests.map(q =>
         q.id === questId ? { ...q, startedAt: undefined, timerDuration: undefined, active: false } : q
       );
+      const nextHp = Math.max(0, prev.hp - dmg);
       return {
         ...prev,
         quests: newQuests,
-        hp: Math.max(0, prev.hp - dmg),
+        hp: nextHp,
         missedQuestsCount: (prev.missedQuestsCount ?? 0) + 1,
+        punishment: prev.punishment?.active ? { ...prev.punishment, playerHpInPenalty: nextHp } : prev.punishment
       };
     });
   }, []);
@@ -831,11 +856,31 @@ export const useGameState = () => {
   const applyPunishment = useCallback(() => {
     const endTime = new Date();
     endTime.setHours(endTime.getHours() + 4);
-    setGameState(prev => ({ ...prev, punishmentEndTime: endTime.toISOString(), hp: Math.max(0, prev.hp - 30) }));
+    setGameState(prev => {
+      const nextHp = Math.max(0, prev.hp - 30);
+      return { 
+        ...prev, 
+        punishmentEndTime: endTime.toISOString(), 
+        hp: nextHp,
+        punishment: {
+          active: true,
+          endTime: endTime.toISOString(),
+          monstersDefeated: 0,
+          currentWave: 1,
+          playerHpInPenalty: nextHp,
+          maxHpInPenalty: prev.maxHp
+        }
+      };
+    });
   }, []);
 
   const clearPunishment = useCallback(() => {
-    setGameState(prev => ({ ...prev, punishmentEndTime: null, missedQuestsCount: 0 }));
+    setGameState(prev => ({ 
+      ...prev, 
+      punishmentEndTime: null, 
+      missedQuestsCount: 0,
+      punishment: { active: false, endTime: null, monstersDefeated: 0, currentWave: 1, playerHpInPenalty: prev.hp, maxHpInPenalty: prev.maxHp }
+    }));
   }, []);
 
   const toggleSound = useCallback(() => {
@@ -847,15 +892,26 @@ export const useGameState = () => {
     setGameState(getDefaultState());
   }, []);
 
-  const updatePlayerData = useCallback((data: { playerName?: string; title?: string; gold?: number; hp?: number; maxHp?: number; stats?: { strength: number; mind: number; spirit: number; agility: number; }; streakDays?: number; }) => {
+  const updatePlayerData = useCallback((data: { playerName?: string; title?: string; gold?: number; hp?: number; maxHp?: number; stats?: { strength: number; mind: number; spirit: number; agility: number; }; streakDays?: number; punishment?: any; }) => {
     setGameState(prev => {
       const newState = { ...prev };
       if (data.playerName !== undefined) newState.playerName = data.playerName;
       if (data.title !== undefined) newState.equippedTitle = data.title === '-' ? undefined : data.title;
       if (data.gold !== undefined) newState.gold = data.gold;
-      if (data.hp !== undefined) newState.hp = data.hp;
+      if (data.hp !== undefined) {
+        newState.hp = data.hp;
+        if (newState.punishment?.active) {
+          newState.punishment.playerHpInPenalty = data.hp;
+        }
+      }
       if (data.maxHp !== undefined) newState.maxHp = data.maxHp;
       if (data.streakDays !== undefined) newState.streakDays = data.streakDays;
+      if (data.punishment !== undefined) {
+        newState.punishment = data.punishment;
+        if (data.punishment && data.punishment.playerHpInPenalty !== undefined) {
+          newState.hp = data.punishment.playerHpInPenalty;
+        }
+      }
       if (data.stats) {
         newState.stats = data.stats;
         newState.levels = { strength: calculateLevel(data.stats.strength), mind: calculateLevel(data.stats.mind), spirit: calculateLevel(data.stats.spirit), agility: calculateLevel(data.stats.agility) };
@@ -1056,9 +1112,6 @@ export const useGameState = () => {
     },
     []
   );
-
-
-
 
   return {
     gameState,
