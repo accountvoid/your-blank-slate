@@ -554,7 +554,7 @@ export const useGameState = () => {
       try {
         const { data: existing } = await profilesTable().select('id').eq('user_id', user.id).maybeSingle();
         
-        // هيكلة تخزين المهام ديناميكياً داخل كائن الـ JSONB الموحد
+        // هيكلة تخزين المهام ديناميكياً داخل كائن الـ JSONB الموحد والمطابق للـ Schema لضمان عدم حدوث أي تضارب
         const structuredQuestsPayload = {
           mainQuests: gameState.quests.filter(q => q.isMainQuest),
           sideQuests: gameState.quests.filter(q => !q.isMainQuest),
@@ -1231,3 +1231,4 @@ export const useGameState = () => {
     claimGateLoot,
   };
 };
+ 
