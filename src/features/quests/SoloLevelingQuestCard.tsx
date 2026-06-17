@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { StatType, Quest } from '@/types/game';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/supabase'; // تأكد من صحة مسار استيراد عميل Supabase في مشروعك
+import { supabase } from '@/supabase'; 
 
 interface QuestCardProps {
   quests: Quest[];
@@ -118,7 +118,7 @@ const QuestModal = ({ quest, allQuests, onClose, onStart, onComplete, onUpdatePr
           await supabase
             .from('profiles')
             .update({ 
-              quests: { activeQuests: updatedQuestsArray } 
+              Quests: { activeQuests: updatedQuestsArray } // تم التعديل إلى الحرف الكبير Quests
             })
             .eq('id', userId);
         } catch (error) {
@@ -155,7 +155,7 @@ const QuestModal = ({ quest, allQuests, onClose, onStart, onComplete, onUpdatePr
         await supabase
           .from('profiles')
           .update({ 
-            quests: { activeQuests: updatedQuestsArray } 
+            Quests: { activeQuests: updatedQuestsArray } // تم التعديل إلى الحرف الكبير Quests
           })
           .eq('id', userId);
       }
@@ -181,7 +181,7 @@ const QuestModal = ({ quest, allQuests, onClose, onStart, onComplete, onUpdatePr
         await supabase
           .from('profiles')
           .update({ 
-            quests: { activeQuests: updatedQuestsArray } 
+            Quests: { activeQuests: updatedQuestsArray } // تم التعديل إلى الحرف الكبير Quests
           })
           .eq('id', userId);
       }
@@ -700,4 +700,46 @@ export const SoloLevelingQuestCard = ({
               <div className="mt-4 flex items-center justify-center gap-2 px-4 py-2">
                 <div className="flex items-center gap-2 px-4 py-1.5 border border-cyan-500/20 bg-cyan-500/5">
                   <Target className="w-4 h-4 text-cyan-400" />
-                  <span className="text-xs font-black text-cyan-300 tracking-wider
+                  <span className="text-xs font-black text-cyan-300 tracking-wider">
+                    {completedTasks}/{displayQuests.length} COMPLETED
+                  </span>
+                </div>
+              </div>
+
+              <div className="mx-0 my-4 h-[1px] bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent" />
+
+              <div className="px-2 pb-1">
+                <p className="text-xs text-slate-500 text-center leading-relaxed">
+                  <span className="text-red-400 font-bold">WARNING:</span> Failure to complete
+                  the daily quest will result in an appropriate <span className="text-red-400 font-bold">penalty</span>.
+                </p>
+              </div>
+
+              <div className="mt-4 flex items-center justify-center">
+                {dailyTimeLeft && (
+                  <div className="flex items-center gap-2 px-4 py-2 border border-cyan-500/20 bg-cyan-500/5">
+                    <Clock className="w-4 h-4 text-cyan-400" />
+                    <span className="text-xs font-black text-cyan-300 tracking-[0.15em] font-mono">
+                      TIME REMAINING: {dailyTimeLeft}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {selectedQuest && (
+        <QuestModal
+          quest={selectedQuest}
+          allQuests={quests} 
+          onClose={() => setSelectedQuest(null)}
+          onStart={handleStartQuest}
+          onComplete={handleCompleteQuest}
+          onUpdateProgress={handleUpdateProgress}
+        />
+      )}
+    </>
+  );
+};
