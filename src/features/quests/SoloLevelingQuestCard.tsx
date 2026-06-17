@@ -61,7 +61,7 @@ const difficultyConfig = {
 
 interface QuestModalProps {
   quest: Quest;
-  allQuests: Quest[]; // ممرر لتحديث مصفوفة المهام الكاملة في Supabase
+  allQuests: Quest[]; 
   onClose: () => void;
   onStart: () => void;
   onComplete: () => void;
@@ -96,18 +96,17 @@ const QuestModal = ({ quest, allQuests, onClose, onStart, onComplete, onUpdatePr
     return () => clearInterval(timer);
   }, [isRunning]);
 
-  // مزامنة وحفظ التقدم الزمني في Supabase كلما تغير الـ timeProgress لمنع ضياع العداد
   const lastSavedProgress = useRef<number>(-1);
   useEffect(() => {
     if (onUpdateProgress && quest.startedAt && timeProgress !== lastSavedProgress.current) {
       lastSavedProgress.current = timeProgress;
       onUpdateProgress(timeProgress);
 
-      // دالة مزامنة التقدم الفوري لـ Supabase لمنع أي تعليق أو فقدان للبيانات
       const syncProgressToSupabase = async () => {
         try {
-          const { data: { user } } = await supabase.auth.getUser();
-          if (!user) return;
+          const { data: sessionData } = await supabase.auth.getSession();
+          const userId = sessionData?.session?.user?.id;
+          if (!userId) return;
 
           const updatedQuestsArray = allQuests.map(q => {
             if (q.id === quest.id) {
@@ -118,14 +117,15 @@ const QuestModal = ({ quest, allQuests, onClose, onStart, onComplete, onUpdatePr
 
           await supabase
             .from('profiles')
-            .update({ quests: updatedQuestsArray })
-            .eq('id', user.id);
+            .update({ 
+              quests: { activeQuests: updatedQuestsArray } 
+            })
+            .eq('id', userId);
         } catch (error) {
           console.error("Error syncing quest progress to Supabase:", error);
         }
       };
 
-      // الحفظ الفوري عند الاكتمال أو كل 5 ثوانٍ دورياً أثناء الركض لتقليل استهلاك الشبكة
       if (timeProgress >= requiredTimeInSeconds || timeProgress % 5 === 0) {
         syncProgressToSupabase();
       }
@@ -140,8 +140,10 @@ const QuestModal = ({ quest, allQuests, onClose, onStart, onComplete, onUpdatePr
 
   const handleStart = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const userId = sessionData?.session?.user?.id;
+      
+      if (userId) {
         const nowIso = new Date().toISOString();
         const updatedQuestsArray = allQuests.map(q => {
           if (q.id === quest.id) {
@@ -152,8 +154,10 @@ const QuestModal = ({ quest, allQuests, onClose, onStart, onComplete, onUpdatePr
 
         await supabase
           .from('profiles')
-          .update({ quests: updatedQuestsArray })
-          .eq('id', user.id);
+          .update({ 
+            quests: { activeQuests: updatedQuestsArray } 
+          })
+          .eq('id', userId);
       }
     } catch (e) {
       console.error("Error starting quest in Supabase:", e);
@@ -163,8 +167,10 @@ const QuestModal = ({ quest, allQuests, onClose, onStart, onComplete, onUpdatePr
 
   const handleComplete = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const userId = sessionData?.session?.user?.id;
+      
+      if (userId) {
         const updatedQuestsArray = allQuests.map(q => {
           if (q.id === quest.id) {
             return { ...q, completed: true, active: false, timeProgress: requiredTimeInSeconds };
@@ -174,8 +180,10 @@ const QuestModal = ({ quest, allQuests, onClose, onStart, onComplete, onUpdatePr
 
         await supabase
           .from('profiles')
-          .update({ quests: updatedQuestsArray })
-          .eq('id', user.id);
+          .update({ 
+            quests: { activeQuests: updatedQuestsArray } 
+          })
+          .eq('id', userId);
       }
     } catch (e) {
       console.error("Error completing quest in Supabase:", e);
@@ -692,46 +700,4 @@ export const SoloLevelingQuestCard = ({
               <div className="mt-4 flex items-center justify-center gap-2 px-4 py-2">
                 <div className="flex items-center gap-2 px-4 py-1.5 border border-cyan-500/20 bg-cyan-500/5">
                   <Target className="w-4 h-4 text-cyan-400" />
-                  <span className="text-xs font-black text-cyan-300 tracking-wider">
-                    {completedTasks}/{displayQuests.length} COMPLETED
-                  </span>
-                </div>
-              </div>
-
-              <div className="mx-0 my-4 h-[1px] bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent" />
-
-              <div className="px-2 pb-1">
-                <p className="text-xs text-slate-500 text-center leading-relaxed">
-                  <span className="text-red-400 font-bold">WARNING:</span> Failure to complete
-                  the daily quest will result in an appropriate <span className="text-red-400 font-bold">penalty</span>.
-                </p>
-              </div>
-
-              <div className="mt-4 flex items-center justify-center">
-                {dailyTimeLeft && (
-                  <div className="flex items-center gap-2 px-4 py-2 border border-cyan-500/20 bg-cyan-500/5">
-                    <Clock className="w-4 h-4 text-cyan-400" />
-                    <span className="text-xs font-black text-cyan-300 tracking-[0.15em] font-mono">
-                      TIME REMAINING: {dailyTimeLeft}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {selectedQuest && (
-        <QuestModal
-          quest={selectedQuest}
-          allQuests={quests} // تمرير المصفوفة كاملة للمودال لضمان التحديث الصحيح للهيكل في Supabase
-          onClose={() => setSelectedQuest(null)}
-          onStart={handleStartQuest}
-          onComplete={handleCompleteQuest}
-          onUpdateProgress={handleUpdateProgress}
-        />
-      )}
-    </>
-  );
-};
+                  <span className="text-xs font-black text-cyan-300 tracking-wider
