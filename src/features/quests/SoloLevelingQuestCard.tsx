@@ -68,11 +68,14 @@ const QuestModal = ({ quest, allQuests, onClose, onStart, onComplete, onUpdatePr
 
   const requiredTimeInSeconds = (quest.requiredTime || 0) * 60;
 
+  // الحسبة الدقيقة والمعدلة: قراءة التقدم المخزن مسبقاً مضافاً إليه الوقت الفعلي المنقضي منذ بدء التشغيل الحالي
   const timeProgress = (() => {
     if (!quest.startedAt) return quest.timeProgress || 0;
     const started = new Date(quest.startedAt).getTime();
     const elapsedSinceStart = Math.floor((now - started) / 1000);
-    return Math.min(elapsedSinceStart, requiredTimeInSeconds);
+    // دمج التراكم القديم والجديد لضمان عدم ضياع أي ثانية عند غلق الصفحة
+    const initialProgress = quest.timeProgress || 0;
+    return Math.min(initialProgress + elapsedSinceStart, requiredTimeInSeconds);
   })();
 
   const isRunning = !!quest.startedAt && !quest.completed && timeProgress < requiredTimeInSeconds;
@@ -103,6 +106,7 @@ const QuestModal = ({ quest, allQuests, onClose, onStart, onComplete, onUpdatePr
           return q;
         });
         localStorage.setItem('local_active_quests', JSON.stringify(updatedQuestsArray));
+        localStorage.setItem('local_quests_progress', JSON.stringify(updatedQuestsArray));
       };
 
       if (timeProgress >= requiredTimeInSeconds || timeProgress % 5 === 0) {
@@ -121,13 +125,14 @@ const QuestModal = ({ quest, allQuests, onClose, onStart, onComplete, onUpdatePr
     const nowIso = new Date().toISOString();
     const updatedQuestsArray = allQuests.map(q => {
       if (q.id === quest.id) {
-        return { ...q, startedAt: nowIso, active: true };
+        return { ...q, startedAt: nowIso, active: true, timeProgress: quest.timeProgress || 0 };
       }
       return q;
     });
 
     // حفظ حالة بدء المهمة محلياً
     localStorage.setItem('local_active_quests', JSON.stringify(updatedQuestsArray));
+    localStorage.setItem('local_quests_progress', JSON.stringify(updatedQuestsArray));
     onStart();
   };
 
@@ -141,6 +146,7 @@ const QuestModal = ({ quest, allQuests, onClose, onStart, onComplete, onUpdatePr
 
     // حفظ حالة اكتمال المهمة محلياً
     localStorage.setItem('local_active_quests', JSON.stringify(updatedQuestsArray));
+    localStorage.setItem('local_quests_progress', JSON.stringify(updatedQuestsArray));
     onComplete();
   };
 
@@ -452,7 +458,7 @@ export const SoloLevelingQuestCard = ({
     }
   }, [allCompleted, showCompletion]);
 
-  const handleQuestClick = (quest: Quest) => {
+  const handleQuestClick = (quest) => {
     setSelectedQuest(quest);
   };
 
@@ -696,4 +702,3 @@ export const SoloLevelingQuestCard = ({
     </>
   );
 };
- 
