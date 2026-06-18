@@ -18,7 +18,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useTranslation } from 'react-i18next';
-import { supabase } from '@/supabase';
+import { supabase } from '@/integrations/supabase/client';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -57,20 +57,11 @@ const Index = () => {
     { key: 'abilities', label: t('nav.abilities'), labelEn: 'Abilities', icon: Zap, color: 'text-purple-400', borderColor: 'border-purple-500/40', bgColor: 'bg-purple-500/10', path: '/abilities' },
   ];
 
-  // دالة مزامنة مصفوفة المهمات الكاملة مع الـ Supabase
-  const syncQuestsToSupabase = async (updatedQuests: Quest[]) => {
-    try {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const userId = sessionData?.session?.user?.id;
-      if (!userId) return;
-
-      await supabase
-        .from('profiles')
-        .update({ Quests: updatedQuests })
-        .eq('id', userId);
-    } catch (error) {
-      console.error("Error syncing status to Supabase:", error);
-    }
+  // ملاحظة: المزامنة مع Supabase تتم مركزياً عبر useGameState الذي يكتب على
+  // الأعمدة الصحيحة (Quests JSONB + name_player/hp_player/...). كانت هذه الدالة
+  // السابقة تكتب على عمود غير موجود (`id`) وتمسح كامل Quests JSONB، فأزلناها.
+  const syncQuestsToSupabase = async (_updatedQuests: Quest[]) => {
+    /* no-op: handled by useGameState central save effect */
   };
 
   // معالجة دمج البيانات وحمايتها من التصفير عند تحميل الصفحة أو تحديث الـ gameState
