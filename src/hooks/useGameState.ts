@@ -452,29 +452,52 @@ export const useGameState = () => {
           }
           if (payload.new && !isSyncingRef.current) {
             const n = payload.new as any;
-            let parsedQuests: Quest[] = [];
-            if (n.quests) {
-              if (typeof n.quests === 'object' && !Array.isArray(n.quests)) {
-                parsedQuests = [...(n.quests.mainQuests || []), ...(n.quests.sideQuests || [])];
-              } else if (Array.isArray(n.quests)) {
-                parsedQuests = n.quests;
-              }
-            }
+            const Q = (n.Quests && typeof n.Quests === 'object' && !Array.isArray(n.Quests)) ? n.Quests : {};
+            const parsedQuests: Quest[] = [
+              ...((Q.mainQuests as Quest[]) || []),
+              ...((Q.sideQuests as Quest[]) || []),
+            ];
+            const sp = n.stats_player || {};
+            const mappedStats = {
+              strength: typeof sp.STR === 'number' ? sp.STR : undefined,
+              agility:  typeof sp.AGI === 'number' ? sp.AGI : undefined,
+              spirit:   typeof sp.SPI === 'number' ? sp.SPI : undefined,
+              mind:     typeof sp.MIN === 'number' ? sp.MIN : undefined,
+            };
 
             setGameState(prev => {
-              const updated = {
+              const nextStats = {
+                strength: mappedStats.strength ?? prev.stats.strength,
+                agility:  mappedStats.agility  ?? prev.stats.agility,
+                spirit:   mappedStats.spirit   ?? prev.stats.spirit,
+                mind:     mappedStats.mind     ?? prev.stats.mind,
+              };
+              const nextLevels = {
+                strength: Math.min(calcLevelFromXp(nextStats.strength), MAX_LEVEL),
+                mind:     Math.min(calcLevelFromXp(nextStats.mind),     MAX_LEVEL),
+                spirit:   Math.min(calcLevelFromXp(nextStats.spirit),   MAX_LEVEL),
+                agility:  Math.min(calcLevelFromXp(nextStats.agility),  MAX_LEVEL),
+              };
+              const updated: GameState = {
                 ...prev,
-                playerName: n.player_name || prev.playerName,
-                gold: n.gold ?? prev.gold,
-                hp: n.hp ?? prev.hp,
-                maxHp: n.max_hp ?? prev.maxHp,
-                energy: n.energy ?? prev.energy,
-                maxEnergy: n.max_energy ?? prev.maxEnergy,
-                shadowPoints: n.shadow_points ?? prev.shadowPoints,
-                totalLevel: n.total_level ?? prev.totalLevel,
-                punishment: n.punishment || prev.punishment,
+                playerName: n.name_player || prev.playerName,
+                gold: n.gold_player ?? prev.gold,
+                hp: n.hp_player ?? prev.hp,
+                maxHp: n.hp_max ?? prev.maxHp,
+                energy: n.mb_player ?? prev.energy,
+                maxEnergy: n.mp_max ?? prev.maxEnergy,
+                shadowPoints: n.void_player ?? prev.shadowPoints,
+                totalLevel: n.level_player ?? prev.totalLevel,
+                stats: nextStats,
+                levels: nextLevels,
+                punishment: {
+                  ...prev.punishment,
+                  active: typeof n.punishment_active === 'boolean' ? n.punishment_active : prev.punishment.active,
+                  endTime: n.punishment_end_at ?? prev.punishment.endTime,
+                },
                 quests: parsedQuests.length > 0 ? parsedQuests : prev.quests,
-                prayerQuests: n.prayer_quests || prev.prayerQuests
+                grandQuest: Q.grandQuest ?? prev.grandQuest,
+                prayerQuests: (Q._extras && Q._extras.prayerQuests) || prev.prayerQuests,
               };
               saveToLocalBackup(updated, user.id);
               return updated;
