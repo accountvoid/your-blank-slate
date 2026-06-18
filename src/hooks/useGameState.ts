@@ -295,64 +295,85 @@ export const useGameState = () => {
         if (data) {
           const savedState = data as any;
           const defaultState = getDefaultState();
-          
-          let parsedQuests: Quest[] = [];
-          let parsedGrandQuest: GrandQuest | null = null;
-          
-          if (savedState.quests) {
-            if (typeof savedState.quests === 'object' && !Array.isArray(savedState.quests)) {
-              const mainQ = savedState.quests.mainQuests || [];
-              const sideQ = savedState.quests.sideQuests || [];
-              parsedQuests = [...mainQ, ...sideQ];
-              parsedGrandQuest = savedState.quests.grandQuest || null;
-            } else if (Array.isArray(savedState.quests)) {
-              parsedQuests = savedState.quests;
-            }
-          }
 
-          const fetchedPrayerQuests = savedState.prayer_quests || savedState.prayerQuests || defaultState.prayerQuests;
+          // Parse Quests JSONB: { mainQuests, sideQuests, grandQuest, _extras: {...} }
+          const Q = (savedState.Quests && typeof savedState.Quests === 'object' && !Array.isArray(savedState.Quests))
+            ? savedState.Quests
+            : {};
+          const parsedQuests: Quest[] = [
+            ...((Q.mainQuests as Quest[]) || []),
+            ...((Q.sideQuests as Quest[]) || []),
+          ];
+          const parsedGrandQuest: GrandQuest | null = Q.grandQuest || null;
+          const extras = Q._extras || {};
 
-          const mergedState = { 
-            ...defaultState, 
-            isOnboarded: true,
-            playerName: savedState.name_player || savedState.player_name || defaultState.playerName,
-            gold: savedState.gold_player ?? savedState.gold ?? defaultState.gold,
-            hp: savedState.hp_player ?? savedState.hp ?? defaultState.hp,
-            maxHp: savedState.hp_max ?? savedState.max_hp ?? defaultState.maxHp,
-            energy: savedState.mb_player ?? savedState.energy ?? defaultState.energy,
-            maxEnergy: savedState.mp_max ?? savedState.max_energy ?? defaultState.maxEnergy,
-            shadowPoints: savedState.shadow_points ?? defaultState.shadowPoints,
-            equippedTitle: savedState.equipped_title || defaultState.equippedTitle,
-            stats: savedState.stats_player || savedState.stats || defaultState.stats,
-            levels: savedState.levels || defaultState.levels,
-            totalLevel: savedState.level_player ?? savedState.total_level ?? defaultState.totalLevel,
-            playerTitle: savedState.player_title || defaultState.playerTitle,
-            playerJob: savedState.player_job || defaultState.playerJob,
-            quests: parsedQuests.length > 0 ? parsedQuests : defaultState.quests,
-            grandQuest: parsedGrandQuest || savedState.grand_quest || defaultState.grandQuest,
-            currentBoss: savedState.current_boss || defaultState.currentBoss,
-            abilities: savedState.abilities || defaultState.abilities,
-            achievements: savedState.achievements || defaultState.achievements,
-            inventory: savedState.inventory || defaultState.inventory,
-            equipment: savedState.equipment || defaultState.equipment,
-            prayerQuests: Array.isArray(fetchedPrayerQuests) && fetchedPrayerQuests.length > 0 ? fetchedPrayerQuests : defaultState.prayerQuests,
-            shadowSoldiers: savedState.shadow_soldiers || defaultState.shadowSoldiers,
-            gates: savedState.gates || defaultState.gates,
-            daily_stats: savedState.daily_stats || defaultState.dailyStats,
-            totalQuestsCompleted: savedState.total_quests_completed ?? defaultState.totalQuestsCompleted,
-            streakDays: savedState.streak_days ?? defaultState.streakDays,
-            lastActiveDate: savedState.last_active_date || defaultState.lastActiveDate,
-            punishment: savedState.punishment || defaultState.punishment,
-            punishmentEndTime: savedState.punishment_end_time || defaultState.punishmentEndTime,
-            missedQuestsCount: savedState.missed_quests_count ?? defaultState.missedQuestsCount,
-            selectedReciter: savedState.selected_reciter || defaultState.selectedReciter,
-            soundEnabled: savedState.sound_enabled ?? defaultState.soundEnabled,
-            lastBossAttackTime: savedState.last_boss_attack_time || defaultState.lastBossAttackTime,
+          // Map stats_player {STR,AGI,SPI,MIN} -> {strength,agility,spirit,mind}
+          const sp = savedState.stats_player || {};
+          const loadedStats = {
+            strength: typeof sp.STR === 'number' ? sp.STR : (sp.strength ?? defaultState.stats.strength),
+            agility:  typeof sp.AGI === 'number' ? sp.AGI : (sp.agility  ?? defaultState.stats.agility),
+            spirit:   typeof sp.SPI === 'number' ? sp.SPI : (sp.spirit   ?? defaultState.stats.spirit),
+            mind:     typeof sp.MIN === 'number' ? sp.MIN : (sp.mind     ?? defaultState.stats.mind),
           };
-          
+          // Levels are derived from stats; always recompute to avoid drift.
+          const derivedLevels = {
+            strength: Math.min(calcLevelFromXp(loadedStats.strength), MAX_LEVEL),
+            mind:     Math.min(calcLevelFromXp(loadedStats.mind),     MAX_LEVEL),
+            spirit:   Math.min(calcLevelFromXp(loadedStats.spirit),   MAX_LEVEL),
+            agility:  Math.min(calcLevelFromXp(loadedStats.agility),  MAX_LEVEL),
+          };
+          const derivedTotalLevel = Math.min(
+            Math.floor((derivedLevels.strength + derivedLevels.mind + derivedLevels.spirit + derivedLevels.agility) / 4),
+            MAX_LEVEL
+          );
+
+          const fetchedPrayerQuests = extras.prayerQuests || defaultState.prayerQuests;
+
+          const mergedState: GameState = {
+            ...defaultState,
+            isOnboarded: extras.isOnboarded ?? true,
+            playerName: savedState.name_player || defaultState.playerName,
+            gold: savedState.gold_player ?? defaultState.gold,
+            hp: savedState.hp_player ?? defaultState.hp,
+            maxHp: savedState.hp_max ?? defaultState.maxHp,
+            energy: savedState.mb_player ?? defaultState.energy,
+            maxEnergy: savedState.mp_max ?? defaultState.maxEnergy,
+            shadowPoints: savedState.void_player ?? defaultState.shadowPoints,
+            equippedTitle: extras.equippedTitle || defaultState.equippedTitle,
+            stats: loadedStats,
+            levels: derivedLevels,
+            totalLevel: savedState.level_player ?? derivedTotalLevel,
+            playerTitle: extras.playerTitle || defaultState.playerTitle,
+            playerJob: extras.playerJob || defaultState.playerJob,
+            quests: parsedQuests.length > 0 ? parsedQuests : defaultState.quests,
+            grandQuest: parsedGrandQuest,
+            currentBoss: extras.currentBoss || defaultState.currentBoss,
+            abilities: extras.abilities || defaultState.abilities,
+            achievements: extras.achievements || defaultState.achievements,
+            inventory: extras.inventory || defaultState.inventory,
+            equipment: extras.equipment || defaultState.equipment,
+            prayerQuests: Array.isArray(fetchedPrayerQuests) && fetchedPrayerQuests.length > 0 ? fetchedPrayerQuests : defaultState.prayerQuests,
+            shadowSoldiers: extras.shadowSoldiers || defaultState.shadowSoldiers,
+            gates: extras.gates || defaultState.gates,
+            dailyStats: extras.dailyStats || defaultState.dailyStats,
+            totalQuestsCompleted: extras.totalQuestsCompleted ?? defaultState.totalQuestsCompleted,
+            streakDays: extras.streakDays ?? defaultState.streakDays,
+            lastActiveDate: extras.lastActiveDate || defaultState.lastActiveDate,
+            punishment: {
+              ...defaultState.punishment,
+              active: !!savedState.punishment_active,
+              endTime: savedState.punishment_end_at || null,
+            },
+            punishmentEndTime: savedState.punishment_end_at || null,
+            missedQuestsCount: extras.missedQuestsCount ?? defaultState.missedQuestsCount,
+            selectedReciter: extras.selectedReciter || defaultState.selectedReciter,
+            soundEnabled: extras.soundEnabled ?? defaultState.soundEnabled,
+            lastBossAttackTime: extras.lastBossAttackTime || defaultState.lastBossAttackTime,
+          };
+
           const today = new Date().toISOString().split('T')[0];
           const isNewDay = mergedState.lastActiveDate !== today;
-          
+
           if (isNewDay && mergedState.quests && mergedState.quests.length > 0) {
             const hasUncompletedMainQuests = mergedState.quests.some((q: any) => q.isMainQuest && !q.completed);
             if (hasUncompletedMainQuests) {
@@ -372,23 +393,29 @@ export const useGameState = () => {
 
           const needsQuestSeed = isNewDay || !mergedState.quests || mergedState.quests.length === 0;
           if (needsQuestSeed) {
-            mergedState.quests = [...getRotatingQuests(), ...getSideQuests()];
+            // Seed daily/main quests but PRESERVE completed/in-progress entries from DB
+            const seeded = [...getRotatingQuests(), ...getSideQuests()];
+            const existingById = new Map(mergedState.quests.map(q => [q.id, q] as const));
+            mergedState.quests = seeded.map(sq => {
+              const prior = existingById.get(sq.id);
+              if (!prior) return sq;
+              // On a new day, daily quests reset; same-day load keeps progress.
+              if (isNewDay && sq.dailyReset) return sq;
+              return { ...sq, ...prior };
+            });
             mergedState.lastActiveDate = today;
           }
-          
+
           if (!mergedState.prayerQuests || mergedState.prayerQuests.length === 0) {
             mergedState.prayerQuests = getInitialPrayerQuests();
           } else if (isNewDay) {
             mergedState.prayerQuests = mergedState.prayerQuests.map((p: PrayerQuest) => ({ ...p, completed: false }));
           }
-          
+
           if (!mergedState.gates || mergedState.gates.length === 0 || isNewDay) mergedState.gates = getScheduledGates(mergedState.totalLevel || 1);
           if (!mergedState.abilities || mergedState.abilities.length === 0) mergedState.abilities = getInitialAbilities();
           if (!mergedState.achievements || mergedState.achievements.length === 0) mergedState.achievements = getInitialAchievements();
-          if (!mergedState.levels || Object.keys(mergedState.levels).length === 0) {
-            mergedState.levels = { strength: 1, mind: 1, spirit: 1, agility: 1 };
-            mergedState.totalLevel = 1;
-          }
+
           setGameState(mergedState);
           saveToLocalBackup(mergedState, user.id);
         } else {
