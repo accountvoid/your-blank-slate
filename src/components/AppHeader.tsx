@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { AppLogo } from '@/components/LoadingScreen';
 import { cn } from '@/lib/utils';
-import { BuyGold } from '@/components/Buy_Gold'; // استيراد المكون المطلوب
+import BuyGold from '@/components/Buy_Gold';
 
 /**
  * Global SETVOID header — logo.
