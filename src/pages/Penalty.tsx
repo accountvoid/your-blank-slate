@@ -16,17 +16,18 @@ const TOTAL_ROUNDS = 4;
 
 const Penalty = () => {
   const navigate = useNavigate();
-  const { active, endAt, start, refresh } = usePunishment();
-  const started = useRef(false);
+  const { active, endAt, refresh } = usePunishment();
   const [now, setNow] = useState(Date.now());
 
+  // Punishment is now activated server-side (start_punishment / check_and_apply_punishment).
+  // The Penalty page is purely a display + countdown. If the user reaches here without
+  // an active punishment, send them home.
   useEffect(() => {
-    if (started.current) return;
     if (!active && !endAt) {
-      started.current = true;
-      start(4);
+      const t = setTimeout(() => navigate('/', { replace: true }), 200);
+      return () => clearTimeout(t);
     }
-  }, [active, endAt, start]);
+  }, [active, endAt, navigate]);
 
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 1000);
