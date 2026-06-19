@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGameState } from '@/hooks/useGameState';
 import { useProfile } from '@/hooks/useProfile';
+import { useGatesCatalog } from '@/hooks/useGatesCatalog';
 import { BottomNav } from '@/components/BottomNav';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { GateLootModal, generateGateLoot, LootItem } from '@/components/GateLootModal';
@@ -53,7 +54,10 @@ const Gates = () => {
   const totalLevel = gameState.totalLevel || 1;
   const playerPower = totalLevel;
 
-  const gates = gameState.gates || [];
+  // Source of truth = Supabase gates_catalog. Falls back to legacy gameState.gates
+  // only if catalog hook errored (e.g., migration not yet applied).
+  const { gates: catalogGates, loading: gatesLoading, error: gatesError } = useGatesCatalog(totalLevel);
+  const gates = gatesError ? (gameState.gates || []) : catalogGates;
 
   const hasManaGauge = gameState.inventory?.some(item => item.id === 'mana_meter' && item.quantity > 0);
 
@@ -153,7 +157,7 @@ const Gates = () => {
     );
   }
 
-  if (profileLoading) {
+  if (profileLoading || gatesLoading) {
     return <LoadingScreen fullScreen message="GATES" />;
   }
 
