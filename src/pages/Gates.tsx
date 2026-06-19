@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGameState } from '@/hooks/useGameState';
 import { useProfile } from '@/hooks/useProfile';
+import { useGatesCatalog } from '@/hooks/useGatesCatalog';
 import { BottomNav } from '@/components/BottomNav';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { GateLootModal, generateGateLoot, LootItem } from '@/components/GateLootModal';
