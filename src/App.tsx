@@ -58,6 +58,9 @@ const queryClient = new QueryClient({
 const AppContent = () => {
   const { gameState, levelUpInfo, dismissLevelUp, resetGame } = useGameState();
   const { user, loading: authLoading } = useAuth();
+  const { active: punishmentActive, enforceDeadline } = usePunishment();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   // Warm assets + lazy chunks once authed.
   useEffect(() => {
@@ -76,6 +79,24 @@ const AppContent = () => {
     window.addEventListener('mp-too-low', handler);
     return () => window.removeEventListener('mp-too-low', handler);
   }, []);
+
+  // Re-enforce deadline whenever the app regains visibility.
+  useEffect(() => {
+    if (!user) return;
+    const onVis = () => {
+      if (document.visibilityState === 'visible') enforceDeadline();
+    };
+    document.addEventListener('visibilitychange', onVis);
+    return () => document.removeEventListener('visibilitychange', onVis);
+  }, [user, enforceDeadline]);
+
+  // Force redirect to /penalty whenever punishment is active.
+  useEffect(() => {
+    if (!user) return;
+    if (punishmentActive && location.pathname !== '/penalty') {
+      navigate('/penalty', { replace: true });
+    }
+  }, [user, punishmentActive, location.pathname, navigate]);
 
   if (authLoading) {
     return <LoadingScreen fullScreen message="SETVOID" />;
