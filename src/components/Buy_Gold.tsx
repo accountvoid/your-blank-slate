@@ -5,7 +5,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Coins, Loader2, Shield, CheckCircle2, ExternalLink, AlertTriangle, Clock } from 'lucide-react';
+import { Coins, Loader2, Shield, CheckCircle2, ExternalLink, AlertTriangle, Clock, Smartphone, Bitcoin } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
@@ -24,7 +24,8 @@ const NETWORKS = [
 ] as const;
 
 type Network = typeof NETWORKS[number]['id'];
-type Step = 'offers' | 'network' | 'paying' | 'status' | 'error';
+type Step = 'offers' | 'method' | 'network' | 'paying' | 'status' | 'error' | 'gplay';
+type Method = 'gplay' | 'crypto';
 
 interface Props {
   gold: number;
@@ -67,6 +68,11 @@ export default function BuyGold({ gold, compact }: Props) {
     setStep('offers'); setOffer(null); setInvoiceUrl(''); setOrderId(null);
     setPaymentStatus('waiting'); setCredited(false);
     setErrorMsg(''); setErrorDetail('');
+  };
+
+  const pickMethod = (m: Method) => {
+    if (m === 'gplay') setStep('gplay');
+    else setStep('network');
   };
 
   // Realtime + polling fallback for status.
@@ -176,19 +182,85 @@ export default function BuyGold({ gold, compact }: Props) {
             {OFFERS.map((o) => (
               <button
                 key={o.gold}
-                onClick={() => { setOffer(o); setStep('network'); }}
+                onClick={() => { setOffer(o); setStep('method'); }}
                 className="flex w-full items-center justify-between rounded border border-yellow-500/30 bg-yellow-500/5 p-3 text-left transition hover:bg-yellow-500/10"
               >
                 <div className="flex items-center gap-3">
                   <Coins className="h-5 w-5 text-yellow-400" />
                   <div>
                     <p className="font-bold tabular-nums">{o.gold.toLocaleString()} GOLD</p>
-                    <p className="text-xs text-gray-400">${o.usd} USDT</p>
+                    <p className="text-xs text-gray-400">${o.usd}</p>
                   </div>
                 </div>
                 <span className="text-xs text-yellow-400/70">Select →</span>
               </button>
             ))}
+          </div>
+        )}
+
+        {step === 'method' && offer && (
+          <div className="space-y-3">
+            <div className="rounded border border-yellow-500/20 bg-yellow-500/5 p-3 text-sm">
+              <span className="text-gray-400">الباقة:</span>{' '}
+              <span className="font-bold text-yellow-300">{offer.gold.toLocaleString()} GOLD</span>{' '}
+              <span className="text-gray-500">· ${offer.usd}</span>
+            </div>
+            <p className="text-xs text-gray-400">اختر طريقة الدفع:</p>
+
+            {/* Primary — Google Play */}
+            <button
+              onClick={() => pickMethod('gplay')}
+              className="flex w-full items-center justify-between rounded-lg border-2 border-green-500/60 bg-green-500/10 p-4 text-left transition hover:bg-green-500/20"
+            >
+              <div className="flex items-center gap-3">
+                <Smartphone className="h-6 w-6 text-green-400" />
+                <div>
+                  <p className="text-sm font-bold text-green-300">Google Play</p>
+                  <p className="text-[11px] text-green-200/70">الطريقة الأساسية · داخل التطبيق</p>
+                </div>
+              </div>
+              <span className="rounded bg-green-500/20 px-2 py-0.5 text-[10px] font-bold text-green-300">موصى به</span>
+            </button>
+
+            {/* Secondary — Crypto */}
+            <button
+              onClick={() => pickMethod('crypto')}
+              className="flex w-full items-center justify-between rounded-lg border border-yellow-500/30 bg-yellow-500/5 p-3 text-left transition hover:bg-yellow-500/10"
+            >
+              <div className="flex items-center gap-3">
+                <Bitcoin className="h-5 w-5 text-yellow-400" />
+                <div>
+                  <p className="text-sm font-semibold text-yellow-300">العملات الرقمية</p>
+                  <p className="text-[11px] text-gray-400">USDT · TRC20 / BEP20 / ERC20</p>
+                </div>
+              </div>
+              <span className="text-xs text-yellow-400/70">→</span>
+            </button>
+
+            <Button variant="outline" className="w-full" onClick={reset}>رجوع</Button>
+          </div>
+        )}
+
+        {step === 'gplay' && offer && (
+          <div className="space-y-4 py-4 text-center">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-green-500/40 bg-green-500/10">
+              <Smartphone className="h-8 w-8 text-green-400" />
+            </div>
+            <div>
+              <p className="text-base font-bold text-green-300">Google Play Billing</p>
+              <p className="mt-2 text-sm text-gray-400">
+                الدفع عبر Google Play سيكون متاحاً تلقائياً عند تثبيت تطبيق SETVOID من متجر Google Play على Android.
+              </p>
+              <p className="mt-2 text-xs text-gray-500">
+                حالياً على المتصفح، استخدم العملات الرقمية أدناه.
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" className="flex-1" onClick={() => setStep('method')}>رجوع</Button>
+              <Button className="flex-1 bg-yellow-500 text-black hover:bg-yellow-400" onClick={() => setStep('network')}>
+                استخدم العملات الرقمية
+              </Button>
+            </div>
           </div>
         )}
 
@@ -221,7 +293,7 @@ export default function BuyGold({ gold, compact }: Props) {
               ))}
             </div>
             <div className="flex gap-2 pt-2">
-              <Button variant="outline" className="flex-1" onClick={reset}>Back</Button>
+              <Button variant="outline" className="flex-1" onClick={() => setStep('method')}>Back</Button>
               <Button className="flex-1 bg-yellow-500 text-black hover:bg-yellow-400" onClick={submit}>
                 Continue
               </Button>
