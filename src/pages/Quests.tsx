@@ -202,14 +202,15 @@ const Quests = () => {
         </div>
 
         <div className="space-y-12">
-          {getFilteredQuests().length === 0 ? (
+          {getFilteredQuests().length === 0 && sponsoredAds.length === 0 ? (
             <div className="text-center py-12">
               <div className="text-4xl mb-4">✅</div>
               <p className="text-slate-400 text-sm">{t('quests.empty.title', 'No quests available')}</p>
               <p className="text-slate-500 text-xs mt-1">{t('quests.empty.subtitle', 'You completed all quests!')}</p>
             </div>
           ) : (
-            getFilteredQuests().map((quest) => {
+            <>
+              {getFilteredQuests().map((quest) => {
               const isClaiming = claimingQuests.has(quest.id);
               const progressPercent = quest.requiredTime 
                 ? Math.min(100, ((quest.timeProgress || 0) / (quest.requiredTime * 60)) * 100)
@@ -287,7 +288,11 @@ const Quests = () => {
                   </div>
                 </div>
               );
-            })
+            })}
+              {sponsoredAds.map(ad => (
+                <SponsoredMissionCard key={ad.id} ad={ad} />
+              ))}
+            </>
           )}
         </div>
       </main>
