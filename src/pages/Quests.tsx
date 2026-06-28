@@ -202,6 +202,9 @@ const Quests = () => {
           ))}
         </div>
 
+        {/* Main Quests from Supabase, per active category */}
+        <TodayMainQuests category={activeTab === 'all' ? undefined : (activeTab as StatType)} />
+
         <div className="space-y-12">
           {getFilteredQuests().length === 0 && sponsoredAds.length === 0 ? (
             <div className="text-center py-12">
