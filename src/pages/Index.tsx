@@ -20,6 +20,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
 import { AdBanner } from '@/components/ads/AdBanner';
+import { TodayMainQuests } from '@/components/quests/TodayMainQuests';
 
 const Index = () => {
   const navigate = useNavigate();
