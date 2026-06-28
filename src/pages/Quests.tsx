@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import type { Quest, StatType } from '@/types';
 import { useAds, type AdCategory } from '@/hooks/useAds';
 import { SponsoredMissionCard } from '@/components/ads/SponsoredMissionCard';
+import { TodayMainQuests } from '@/components/quests/TodayMainQuests';
 
 type QuestTab = 'all' | StatType;
 
@@ -200,6 +201,9 @@ const Quests = () => {
             </button>
           ))}
         </div>
+
+        {/* Main Quests from Supabase, per active category */}
+        <TodayMainQuests category={activeTab === 'all' ? undefined : (activeTab as StatType)} />
 
         <div className="space-y-12">
           {getFilteredQuests().length === 0 && sponsoredAds.length === 0 ? (

@@ -722,6 +722,38 @@ export const useGameState = () => {
     });
   }, [calculateLevel, getTotalLevel]);
 
+  // Awards XP & Gold directly to a category. Used by the Main Quest engine.
+  const awardCategoryXp = useCallback((category: StatType, xp: number, gold: number = 0) => {
+    setGameState(prev => {
+      const newStats = { ...prev.stats };
+      newStats[category] = (newStats[category] || 0) + xp;
+      const newLevels = { ...prev.levels };
+      const oldLevel = newLevels[category];
+      newLevels[category] = calculateLevel(newStats[category]);
+      const newTotalLevel = getTotalLevel(newLevels);
+      if (newLevels[category] > oldLevel) {
+        setTimeout(() => setLevelUpInfo({ show: true, newLevel: newLevels[category], category }), 100);
+      }
+      const today = new Date().toISOString().split('T')[0];
+      const idx = prev.dailyStats.findIndex(s => s.date === today);
+      const dailyStats = [...prev.dailyStats];
+      if (idx >= 0) {
+        dailyStats[idx] = { ...dailyStats[idx], [category]: (dailyStats[idx][category] || 0) + xp, questsCompleted: dailyStats[idx].questsCompleted + 1 };
+      } else {
+        dailyStats.push({ date: today, strength: category === 'strength' ? xp : 0, mind: category === 'mind' ? xp : 0, spirit: category === 'spirit' ? xp : 0, agility: category === 'agility' ? xp : 0, questsCompleted: 1 });
+      }
+      return {
+        ...prev,
+        stats: newStats,
+        levels: newLevels,
+        totalLevel: newTotalLevel,
+        gold: (prev.gold || 0) + gold,
+        totalQuestsCompleted: prev.totalQuestsCompleted + 1,
+        dailyStats: dailyStats.slice(-30),
+      };
+    });
+  }, [calculateLevel, getTotalLevel]);
+
   const completePrayerQuest = useCallback((prayerId: string) => {
     setGameState(prev => {
       const prayer = prev.prayerQuests.find(p => p.id === prayerId);
@@ -1084,6 +1116,6 @@ export const useGameState = () => {
   }, []);
 
   return {
-    gameState, levelUpInfo, completeQuest, completePrayerQuest, startGrandQuest, completeGrandQuestDay, updatePlayerInfo, setPlayerJob, completeOnboarding, useAbility, summonShadowSoldier, purchaseItem, useItem, consumeItem, spendGold, equipTitle, unequipTitle, takeDamage, failQuest, applyPunishment, clearPunishment, toggleSound, resetGame, dismissLevelUp, getXpProgress, calculateLevel, getTotalLevel, getRank, startSideQuest, updateSideQuestProgress, claimSideQuest, closeSideQuest, updatePlayerData, completeGate, resetAndReallocateXP, mergeCuttingStones, consumeManaStone, claimGateLoot,
+    gameState, levelUpInfo, completeQuest, completePrayerQuest, startGrandQuest, completeGrandQuestDay, updatePlayerInfo, setPlayerJob, completeOnboarding, useAbility, summonShadowSoldier, purchaseItem, useItem, consumeItem, spendGold, equipTitle, unequipTitle, takeDamage, failQuest, applyPunishment, clearPunishment, toggleSound, resetGame, dismissLevelUp, getXpProgress, calculateLevel, getTotalLevel, getRank, startSideQuest, updateSideQuestProgress, claimSideQuest, closeSideQuest, updatePlayerData, completeGate, resetAndReallocateXP, mergeCuttingStones, consumeManaStone, claimGateLoot, awardCategoryXp,
   };
 };
