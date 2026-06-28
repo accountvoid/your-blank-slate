@@ -340,5 +340,38 @@
     "revealing": "Revealing...",
     "guaranteed": "Gold guaranteed",
     "bonusChance": "15% chance for each item"
+  },
+  "quest": {
+    "mainQuest": "Main Quest",
+    "todayMain": "Today's Main Quests",
+    "time": "Time",
+    "xp": "XP",
+    "gold": "Gold",
+    "difficulty": "Difficulty",
+    "difficulty_easy": "Easy",
+    "difficulty_medium": "Medium",
+    "difficulty_hard": "Hard",
+    "difficulty_legendary": "Legendary",
+    "progress": "Progress",
+    "accept": "Accept Quest",
+    "claim": "Complete & Claim",
+    "completeAllSteps": "Complete all steps",
+    "completed": "Completed",
+    "startedTitle": "Quest accepted",
+    "completedTitle": "Quest completed",
+    "noneToday": "No main quests scheduled in this category today.",
+    "restDay": "Today is a recovery day — no strength workout. Stretch and hydrate."
+  },
+  "recovery": {
+    "title": "Recovery Assessment",
+    "subtitle": "Three quick questions to tailor your weekly STR program.",
+    "q_sleep": "Is your sleep good?",
+    "q_nutrition": "Is your nutrition good?",
+    "q_protein": "Do you consume enough protein regularly?",
+    "yes": "Yes",
+    "no": "No",
+    "save": "Save & Continue",
+    "update": "Recovery",
+    "set": "Set recovery"
   }
 }
