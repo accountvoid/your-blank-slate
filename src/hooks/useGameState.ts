@@ -1116,6 +1116,6 @@ export const useGameState = () => {
   }, []);
 
   return {
-    gameState, levelUpInfo, completeQuest, completePrayerQuest, startGrandQuest, completeGrandQuestDay, updatePlayerInfo, setPlayerJob, completeOnboarding, useAbility, summonShadowSoldier, purchaseItem, useItem, consumeItem, spendGold, equipTitle, unequipTitle, takeDamage, failQuest, applyPunishment, clearPunishment, toggleSound, resetGame, dismissLevelUp, getXpProgress, calculateLevel, getTotalLevel, getRank, startSideQuest, updateSideQuestProgress, claimSideQuest, closeSideQuest, updatePlayerData, completeGate, resetAndReallocateXP, mergeCuttingStones, consumeManaStone, claimGateLoot,
+    gameState, levelUpInfo, completeQuest, completePrayerQuest, startGrandQuest, completeGrandQuestDay, updatePlayerInfo, setPlayerJob, completeOnboarding, useAbility, summonShadowSoldier, purchaseItem, useItem, consumeItem, spendGold, equipTitle, unequipTitle, takeDamage, failQuest, applyPunishment, clearPunishment, toggleSound, resetGame, dismissLevelUp, getXpProgress, calculateLevel, getTotalLevel, getRank, startSideQuest, updateSideQuestProgress, claimSideQuest, closeSideQuest, updatePlayerData, completeGate, resetAndReallocateXP, mergeCuttingStones, consumeManaStone, claimGateLoot, awardCategoryXp,
   };
 };
