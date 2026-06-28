@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import type { Quest, StatType } from '@/types';
 import { useAds, type AdCategory } from '@/hooks/useAds';
 import { SponsoredMissionCard } from '@/components/ads/SponsoredMissionCard';
+import { TodayMainQuests } from '@/components/quests/TodayMainQuests';
 
 type QuestTab = 'all' | StatType;
 
