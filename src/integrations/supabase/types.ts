@@ -306,6 +306,172 @@ export type Database = {
         }
         Relationships: []
       }
+      quest_template_steps: {
+        Row: {
+          created_at: string
+          detail_ar: string | null
+          detail_en: string | null
+          duration_minutes: number | null
+          id: string
+          order_index: number
+          reps: Json | null
+          sets: number | null
+          step_type: Database["public"]["Enums"]["quest_step_type"]
+          template_id: string
+          title_ar: string
+          title_en: string
+        }
+        Insert: {
+          created_at?: string
+          detail_ar?: string | null
+          detail_en?: string | null
+          duration_minutes?: number | null
+          id?: string
+          order_index: number
+          reps?: Json | null
+          sets?: number | null
+          step_type?: Database["public"]["Enums"]["quest_step_type"]
+          template_id: string
+          title_ar: string
+          title_en: string
+        }
+        Update: {
+          created_at?: string
+          detail_ar?: string | null
+          detail_en?: string | null
+          duration_minutes?: number | null
+          id?: string
+          order_index?: number
+          reps?: Json | null
+          sets?: number | null
+          step_type?: Database["public"]["Enums"]["quest_step_type"]
+          template_id?: string
+          title_ar?: string
+          title_en?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quest_template_steps_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "quest_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quest_templates: {
+        Row: {
+          active: boolean
+          category: Database["public"]["Enums"]["quest_category"]
+          created_at: string
+          day_of_week: number | null
+          description_ar: string
+          description_en: string
+          difficulty: Database["public"]["Enums"]["quest_difficulty"]
+          estimated_minutes: number
+          gold_reward: number
+          id: string
+          priority: number
+          program_tag: string | null
+          recovery_required: boolean
+          title_ar: string
+          title_en: string
+          updated_at: string
+          warning_ar: string | null
+          warning_en: string | null
+          xp_reward: number
+        }
+        Insert: {
+          active?: boolean
+          category: Database["public"]["Enums"]["quest_category"]
+          created_at?: string
+          day_of_week?: number | null
+          description_ar: string
+          description_en: string
+          difficulty?: Database["public"]["Enums"]["quest_difficulty"]
+          estimated_minutes?: number
+          gold_reward?: number
+          id?: string
+          priority?: number
+          program_tag?: string | null
+          recovery_required?: boolean
+          title_ar: string
+          title_en: string
+          updated_at?: string
+          warning_ar?: string | null
+          warning_en?: string | null
+          xp_reward?: number
+        }
+        Update: {
+          active?: boolean
+          category?: Database["public"]["Enums"]["quest_category"]
+          created_at?: string
+          day_of_week?: number | null
+          description_ar?: string
+          description_en?: string
+          difficulty?: Database["public"]["Enums"]["quest_difficulty"]
+          estimated_minutes?: number
+          gold_reward?: number
+          id?: string
+          priority?: number
+          program_tag?: string | null
+          recovery_required?: boolean
+          title_ar?: string
+          title_en?: string
+          updated_at?: string
+          warning_ar?: string | null
+          warning_en?: string | null
+          xp_reward?: number
+        }
+        Relationships: []
+      }
+      user_quest_runs: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          progress_percent: number
+          started_at: string
+          status: Database["public"]["Enums"]["quest_run_status"]
+          step_progress: Json
+          template_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          progress_percent?: number
+          started_at?: string
+          status?: Database["public"]["Enums"]["quest_run_status"]
+          step_progress?: Json
+          template_id: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          progress_percent?: number
+          started_at?: string
+          status?: Database["public"]["Enums"]["quest_run_status"]
+          step_progress?: Json
+          template_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_quest_runs_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "quest_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -346,6 +512,18 @@ export type Database = {
       ad_event_type: "view" | "click" | "start" | "complete" | "claim"
       ad_status: "active" | "inactive" | "archived"
       ad_type: "banner" | "video" | "sponsored_mission"
+      quest_category: "strength" | "mind" | "spirit" | "agility"
+      quest_difficulty: "easy" | "medium" | "hard" | "legendary"
+      quest_run_status: "active" | "completed" | "failed" | "abandoned"
+      quest_step_type:
+        | "warmup"
+        | "exercise"
+        | "set"
+        | "reading"
+        | "practice"
+        | "stretch"
+        | "note"
+        | "cardio"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -478,6 +656,19 @@ export const Constants = {
       ad_event_type: ["view", "click", "start", "complete", "claim"],
       ad_status: ["active", "inactive", "archived"],
       ad_type: ["banner", "video", "sponsored_mission"],
+      quest_category: ["strength", "mind", "spirit", "agility"],
+      quest_difficulty: ["easy", "medium", "hard", "legendary"],
+      quest_run_status: ["active", "completed", "failed", "abandoned"],
+      quest_step_type: [
+        "warmup",
+        "exercise",
+        "set",
+        "reading",
+        "practice",
+        "stretch",
+        "note",
+        "cardio",
+      ],
     },
   },
 } as const
