@@ -326,6 +326,9 @@ const Index = () => {
         {/* Sponsored banner (dynamic from Supabase, hidden when no active ad) */}
         <AdBanner placement="home" />
 
+        {/* New Main Quest engine (database-driven, all categories) */}
+        <TodayMainQuests />
+
 
 
         {/* Daily Quest Card */}
