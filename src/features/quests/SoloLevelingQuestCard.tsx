@@ -649,10 +649,10 @@ export const SoloLevelingQuestCard = ({
               </div>
               
               <h2 className="text-2xl font-black text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.4)] mb-2 tracking-wider">
-                QUEST COMPLETE
+                {t('quest.questCompleteHeading', 'QUEST COMPLETE')}
               </h2>
               <p className="text-sm text-slate-400 mb-6">
-                لقد أتممت جميع المهمات اليومية!
+                {t('quest.allDailyDone', 'You completed all daily quests!')}
               </p>
               <p className="text-4xl font-black text-white drop-shadow-[0_0_30px_rgba(255,255,255,0.5)] mb-6">
                 +{displayQuests.reduce((sum, q) => sum + q.xpReward, 0) * 2} XP
@@ -661,7 +661,7 @@ export const SoloLevelingQuestCard = ({
                 onClick={() => setShowCompletion(false)}
                 className="w-full py-4 rounded-sm bg-gradient-to-r from-white to-slate-200 text-black font-black tracking-wider shadow-[0_0_40px_rgba(255,255,255,0.2)]"
               >
-                CONTINUE
+                {t('common.continue', 'CONTINUE')}
               </button>
             </div>
           </div>
