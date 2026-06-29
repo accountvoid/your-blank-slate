@@ -12,12 +12,35 @@ import {
   Play,
   X,
   CheckCircle,
+  Check,
   Timer,
   Crown,
+  AlertTriangle,
   Target
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { StatType, Quest } from '@/types/game';
 import { useNavigate } from 'react-router-dom';
+
+export interface QuestStepDetail {
+  id: string;
+  title: string;
+  detail?: string | null;
+  reps?: number[] | null;
+  durationMinutes?: number | null;
+  done: boolean;
+}
+
+export interface QuestRichDetail {
+  description?: string;
+  warning?: string | null;
+  steps: QuestStepDetail[];
+  status: 'available' | 'active' | 'completed';
+  xpReward: number;
+  goldReward: number;
+  onToggleStep: (stepId: string) => void;
+  onClaim: () => void;
+}
 
 interface QuestCardProps {
   quests: Quest[];
@@ -26,6 +49,10 @@ interface QuestCardProps {
   onUpdateQuestProgress?: (questId: string, timeProgress: number) => void;
   timeRemaining?: string;
   onPenalty?: () => void;
+  /** When provided and returns data for a quest, the modal will render an
+   *  embedded step-based panel (description / steps / status / claim)
+   *  mirroring the side-quest UX from the Quests page. */
+  getQuestDetail?: (quest: Quest) => QuestRichDetail | undefined;
 }
 
 const categoryConfig = {
@@ -58,9 +85,11 @@ interface QuestModalProps {
   onStart: () => void;
   onComplete: () => void;
   onUpdateProgress?: (timeProgress: number) => void;
+  detail?: QuestRichDetail;
 }
 
-const QuestModal = ({ quest, allQuests, onClose, onStart, onComplete, onUpdateProgress }: QuestModalProps) => {
+const QuestModal = ({ quest, allQuests, onClose, onStart, onComplete, onUpdateProgress, detail }: QuestModalProps) => {
+  const { t } = useTranslation();
   const [now, setNow] = useState(Date.now());
   const [isVisible, setIsVisible] = useState(false);
   const config = categoryConfig[quest.category];
