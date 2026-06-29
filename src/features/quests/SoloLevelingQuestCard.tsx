@@ -814,7 +814,7 @@ export const SoloLevelingQuestCard = ({
                 <div className="flex items-center gap-2 px-4 py-1.5 border border-cyan-500/20 bg-cyan-500/5">
                   <Target className="w-4 h-4 text-cyan-400" />
                   <span className="text-xs font-black text-cyan-300 tracking-wider">
-                    {completedTasks}/{displayQuests.length} COMPLETED
+                    {t('quest.completedCount', '{{done}}/{{total}} COMPLETED', { done: completedTasks, total: displayQuests.length })}
                   </span>
                 </div>
               </div>
@@ -823,8 +823,7 @@ export const SoloLevelingQuestCard = ({
 
               <div className="px-2 pb-1">
                 <p className="text-xs text-slate-500 text-center leading-relaxed">
-                  <span className="text-red-400 font-bold">WARNING:</span> Failure to complete
-                  the daily quest will result in an appropriate <span className="text-red-400 font-bold">penalty</span>.
+                  <span className="text-red-400 font-bold">{t('common.warningTitle', 'WARNING')}:</span> {t('quest.penaltyWarning', 'Failure to complete the daily quest will result in an appropriate penalty.')}
                 </p>
               </div>
 
@@ -833,7 +832,7 @@ export const SoloLevelingQuestCard = ({
                   <div className="flex items-center gap-2 px-4 py-2 border border-cyan-500/20 bg-cyan-500/5">
                     <Clock className="w-4 h-4 text-cyan-400" />
                     <span className="text-xs font-black text-cyan-300 tracking-[0.15em] font-mono">
-                      TIME REMAINING: {dailyTimeLeft}
+                      {t('quest.timeRemaining', 'TIME REMAINING')}: {dailyTimeLeft}
                     </span>
                   </div>
                 )}
@@ -851,6 +850,7 @@ export const SoloLevelingQuestCard = ({
           onStart={handleStartQuest}
           onComplete={handleCompleteQuest}
           onUpdateProgress={handleUpdateProgress}
+          detail={getQuestDetail?.(selectedQuest)}
         />
       )}
     </>
