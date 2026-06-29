@@ -240,13 +240,13 @@ const QuestModal = ({ quest, allQuests, onClose, onStart, onComplete, onUpdatePr
               </div>
               <div className="border-2 border-slate-400/60 px-5 py-1.5 bg-transparent">
                 <span className="text-sm font-black tracking-[0.3em] text-white uppercase">
-                  QUEST INFO
+                  {t('quest.questInfoTitle', 'QUEST INFO')}
                 </span>
               </div>
             </div>
             
             <p className="text-sm text-slate-400 font-mono">
-              [Daily Quest: <span className="text-cyan-300 font-bold">{quest.title}</span> has arrived.]
+              [{t('quests.dailyQuest', 'Daily Quest')}: <span className="text-cyan-300 font-bold">{quest.title}</span> {t('quest.hasArrived', 'has arrived.')}]
             </p>
           </div>
 
