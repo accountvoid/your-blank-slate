@@ -20,6 +20,9 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
 import { AdBanner } from '@/components/ads/AdBanner';
+import { useMainQuests } from '@/hooks/useMainQuests';
+import type { QuestRichDetail } from '@/features/quests/SoloLevelingQuestCard';
+import { toast } from '@/hooks/use-toast';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -36,7 +39,10 @@ const Index = () => {
     startSideQuest,
     updateSideQuestProgress,
     failQuest,
-  } = useGameState();
+    awardCategoryXp,
+  } = useGameState() as any;
+
+  const { todayQuests, runByTemplate, startRun, toggleStep, completeRun } = useMainQuests();
   
   const { playQuestComplete, playUseAbility } = useSoundEffects();
   const [activePrayerQuest, setActivePrayerQuest] = useState<string | null>(null);
@@ -324,6 +330,56 @@ const Index = () => {
 
         {/* Sponsored banner (dynamic from Supabase, hidden when no active ad) */}
         <AdBanner placement="home" />
+
+        {/* Daily Quest Card (outer shape unchanged; modal now shows steps + status from Supabase) */}
+        <SoloLevelingQuestCard
+          quests={hybridQuestsState}
+          onTaskComplete={handleTaskComplete}
+          onStartQuest={handleStartQuest}
+          onUpdateQuestProgress={handleUpdateQuestProgress}
+          onPenalty={() => navigate('/penalty')}
+          getQuestDetail={(quest) => {
+            const lang = (typeof navigator !== 'undefined' && navigator.language?.startsWith('ar')) ? 'ar' : 'en';
+            const tpl = todayQuests.find(q => q.category === quest.category);
+            if (!tpl) return undefined;
+            const run = runByTemplate[tpl.id];
+            const status: QuestRichDetail['status'] = run?.status === 'completed' || quest.completed
+              ? 'completed'
+              : run?.status === 'active' || quest.startedAt ? 'active' : 'available';
+            return {
+              description: lang === 'ar' ? tpl.description_ar : tpl.description_en,
+              warning: lang === 'ar' ? tpl.warning_ar : tpl.warning_en,
+              status,
+              xpReward: tpl.xp_reward,
+              goldReward: tpl.gold_reward,
+              steps: tpl.steps.map(s => ({
+                id: s.id,
+                title: lang === 'ar' ? s.title_ar : s.title_en,
+                detail: lang === 'ar' ? s.detail_ar : s.detail_en,
+                reps: s.reps,
+                durationMinutes: s.duration_minutes,
+                done: !!run?.step_progress?.[s.id],
+              })),
+              onToggleStep: async (stepId) => {
+                let activeRun = run;
+                if (!activeRun) {
+                  activeRun = (await startRun(tpl.id)) ?? undefined;
+                }
+                if (activeRun) toggleStep(activeRun, stepId, tpl.steps.length);
+              },
+              onClaim: async () => {
+                if (run) await completeRun(run.id);
+                if (typeof awardCategoryXp === 'function') {
+                  awardCategoryXp(tpl.category, tpl.xp_reward, tpl.gold_reward);
+                }
+                toast({
+                  title: t('quest.completedTitle', 'Quest completed'),
+                  description: `+${tpl.xp_reward} XP · +${tpl.gold_reward} G`,
+                });
+              },
+            };
+          }}
+        />
       </main>
 
       <BottomNav />
