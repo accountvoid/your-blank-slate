@@ -524,9 +524,11 @@ export const SoloLevelingQuestCard = ({
   onStartQuest,
   onUpdateQuestProgress,
   timeRemaining,
-  onPenalty
+  onPenalty,
+  getQuestDetail,
 }: QuestCardProps) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(true);
   const [selectedQuest, setSelectedQuest] = useState<Quest | null>(null);
   const [showCompletion, setShowCompletion] = useState(false);
