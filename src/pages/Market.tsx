@@ -6,6 +6,7 @@ import { Coins, Loader2, AlertTriangle, ShieldAlert, X, Zap, CreditCard, Wallet,
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
+import { AdBanner } from '@/components/ads/AdBanner';
 
 const Market = () => {
   const { gameState, purchaseItem, mergeCuttingStones } = useGameState();
@@ -470,6 +471,7 @@ const Market = () => {
       </header>
 
       <main className="relative z-10 max-w-md mx-auto space-y-12 animate-in fade-in duration-1000">
+        <AdBanner placement="shop" />
         {visibleItems.map((item) => {
           const isAlphaLocked = item.difficulty === 'S' || item.difficulty === 'A';
           const rarity = RARITY_CONFIG[item.difficulty] || RARITY_CONFIG.E;

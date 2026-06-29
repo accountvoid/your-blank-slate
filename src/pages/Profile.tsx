@@ -54,6 +54,7 @@ const FloatingParticles = () => {
 
 // Use shared rank utility
 import { getRankFromLevel } from '@/lib/ranks';
+import { AdBanner } from '@/components/ads/AdBanner';
 const getRankData = (level: number) => getRankFromLevel(level);
 
 const Profile = () => {
@@ -160,6 +161,7 @@ const Profile = () => {
 
       {/* Scrollable Content */}
       <main className="flex-1 overflow-y-auto z-10 px-4 pb-24 space-y-5">
+        <AdBanner placement="profile" />
 
         {/* ═══════════════ MANA ENCRYPTION STATUS ═══════════════ */}
         {!isDiscordLinked ? (
