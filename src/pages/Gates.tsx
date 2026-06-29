@@ -10,6 +10,7 @@ import { AlertTriangle, Zap, Target, Clock, X, Skull, Activity, Scan, Shield, Ma
 import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 import { Gate } from '@/types/game';
+import { AdBanner } from '@/components/ads/AdBanner';
 
 const useGateTimer = (closingTime?: string) => {
   const [remaining, setRemaining] = useState(0);
@@ -185,6 +186,7 @@ const Gates = () => {
         </div>
       ) : (
         <main className="relative z-10 px-6 space-y-40 mt-16">
+          <AdBanner placement="gates" />
           {gates.map((gate, idx) => (
             <GateCard
               key={gate.id}

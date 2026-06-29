@@ -12,12 +12,35 @@ import {
   Play,
   X,
   CheckCircle,
+  Check,
   Timer,
   Crown,
+  AlertTriangle,
   Target
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { StatType, Quest } from '@/types/game';
 import { useNavigate } from 'react-router-dom';
+
+export interface QuestStepDetail {
+  id: string;
+  title: string;
+  detail?: string | null;
+  reps?: number[] | null;
+  durationMinutes?: number | null;
+  done: boolean;
+}
+
+export interface QuestRichDetail {
+  description?: string;
+  warning?: string | null;
+  steps: QuestStepDetail[];
+  status: 'available' | 'active' | 'completed';
+  xpReward: number;
+  goldReward: number;
+  onToggleStep: (stepId: string) => void;
+  onClaim: () => void;
+}
 
 interface QuestCardProps {
   quests: Quest[];
@@ -26,6 +49,10 @@ interface QuestCardProps {
   onUpdateQuestProgress?: (questId: string, timeProgress: number) => void;
   timeRemaining?: string;
   onPenalty?: () => void;
+  /** When provided and returns data for a quest, the modal will render an
+   *  embedded step-based panel (description / steps / status / claim)
+   *  mirroring the side-quest UX from the Quests page. */
+  getQuestDetail?: (quest: Quest) => QuestRichDetail | undefined;
 }
 
 const categoryConfig = {
@@ -58,9 +85,11 @@ interface QuestModalProps {
   onStart: () => void;
   onComplete: () => void;
   onUpdateProgress?: (timeProgress: number) => void;
+  detail?: QuestRichDetail;
 }
 
-const QuestModal = ({ quest, allQuests, onClose, onStart, onComplete, onUpdateProgress }: QuestModalProps) => {
+const QuestModal = ({ quest, allQuests, onClose, onStart, onComplete, onUpdateProgress, detail }: QuestModalProps) => {
+  const { t } = useTranslation();
   const [now, setNow] = useState(Date.now());
   const [isVisible, setIsVisible] = useState(false);
   const config = categoryConfig[quest.category];
@@ -211,13 +240,13 @@ const QuestModal = ({ quest, allQuests, onClose, onStart, onComplete, onUpdatePr
               </div>
               <div className="border-2 border-slate-400/60 px-5 py-1.5 bg-transparent">
                 <span className="text-sm font-black tracking-[0.3em] text-white uppercase">
-                  QUEST INFO
+                  {t('quest.questInfoTitle', 'QUEST INFO')}
                 </span>
               </div>
             </div>
             
             <p className="text-sm text-slate-400 font-mono">
-              [Daily Quest: <span className="text-cyan-300 font-bold">{quest.title}</span> has arrived.]
+              [{t('quests.dailyQuest', 'Daily Quest')}: <span className="text-cyan-300 font-bold">{quest.title}</span> {t('quest.hasArrived', 'has arrived.')}]
             </p>
           </div>
 
@@ -225,9 +254,16 @@ const QuestModal = ({ quest, allQuests, onClose, onStart, onComplete, onUpdatePr
 
           <div className="px-6 py-5">
             <h3 className="text-center text-lg font-black tracking-[0.2em] text-white mb-5 underline underline-offset-8 decoration-slate-600">
-              GOAL
+              {t('quest.goalHeading', 'GOAL')}
             </h3>
-            
+
+            {/* Rich description (from Supabase main quest) */}
+            {detail?.description && (
+              <p className="px-4 mb-4 text-[12px] text-slate-300/90 leading-relaxed text-center">
+                {detail.description}
+              </p>
+            )}
+
             <div className="space-y-4 mb-5">
               <div className="flex items-center justify-between px-4">
                 <div className="flex items-center gap-3">
@@ -235,7 +271,11 @@ const QuestModal = ({ quest, allQuests, onClose, onStart, onComplete, onUpdatePr
                   <span className="text-sm text-slate-300 font-medium">{quest.title}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  {quest.requiredTime ? (
+                  {detail ? (
+                    <span className="text-sm text-slate-400 font-mono">
+                      [{detail.steps.filter(s => s.done).length}/{detail.steps.length}]
+                    </span>
+                  ) : quest.requiredTime ? (
                     <span className="text-sm text-slate-400 font-mono">
                       [{formatTime(timeProgress)}/{formatTime(requiredTimeInSeconds)}]
                     </span>
@@ -248,18 +288,79 @@ const QuestModal = ({ quest, allQuests, onClose, onStart, onComplete, onUpdatePr
                   )}
                   <div className={cn(
                     "w-5 h-5 border flex items-center justify-center",
-                    isCompleted || quest.completed
+                    (detail?.status === 'completed') || isCompleted || quest.completed
                       ? "border-emerald-500/60 bg-emerald-500/10"
                       : "border-slate-600"
                   )}>
-                    {(isCompleted || quest.completed) && (
+                    {((detail?.status === 'completed') || isCompleted || quest.completed) && (
                       <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
                     )}
                   </div>
                 </div>
               </div>
 
-              {quest.requiredTime && (
+              {/* Status row */}
+              <div className="flex items-center justify-between px-4 text-[10px] uppercase tracking-widest">
+                <span className="text-slate-500">{t('quests.status', 'Status')}</span>
+                <span className={cn(
+                  'font-bold',
+                  detail?.status === 'completed' || quest.completed ? 'text-emerald-400'
+                  : detail?.status === 'active' || quest.startedAt ? 'text-cyan-300 animate-pulse'
+                  : 'text-slate-400'
+                )}>
+                  {detail?.status === 'completed' || quest.completed
+                    ? t('quest.completed', 'Completed')
+                    : detail?.status === 'active' || quest.startedAt
+                      ? t('quests.inProgress', 'In Progress')
+                      : t('quests.statusAvailable', 'Available')}
+                </span>
+              </div>
+
+              {/* Step-based panel (from Supabase) */}
+              {detail && detail.steps.length > 0 && (
+                <ol className="px-4 space-y-1.5">
+                  {detail.steps.map((s, idx) => (
+                    <li key={s.id}>
+                      <button
+                        type="button"
+                        disabled={detail.status === 'completed'}
+                        onClick={() => detail.onToggleStep(s.id)}
+                        className={cn(
+                          'w-full text-left flex gap-2 items-start p-2 border transition',
+                          s.done ? 'border-emerald-500/40 bg-emerald-500/5' : 'border-slate-700/60 bg-black/30',
+                          detail.status === 'completed' && 'opacity-80 cursor-default'
+                        )}
+                      >
+                        <span className={cn(
+                          'mt-0.5 w-4 h-4 shrink-0 border flex items-center justify-center text-[9px] font-bold',
+                          s.done ? 'border-emerald-400 bg-emerald-500/30 text-emerald-100' : 'border-slate-500 text-slate-500'
+                        )}>
+                          {s.done ? <Check className="w-3 h-3" /> : idx + 1}
+                        </span>
+                        <span className="flex-1">
+                          <span className="block text-[11px] font-bold text-white">{s.title}</span>
+                          {s.detail && <span className="block text-[10px] text-slate-400">{s.detail}</span>}
+                          {Array.isArray(s.reps) && s.reps.length > 0 && (
+                            <span className="mt-1 flex flex-wrap gap-1">
+                              {s.reps.map((r, i) => (
+                                <span key={i} className="px-1.5 py-0.5 bg-blue-500/15 border border-blue-500/30 text-[9px] font-bold text-blue-200">{r}</span>
+                              ))}
+                            </span>
+                          )}
+                          {s.durationMinutes && !s.reps && (
+                            <span className="mt-1 inline-block px-1.5 py-0.5 bg-slate-700/30 border border-slate-600/40 text-[9px] text-slate-300">
+                              {s.durationMinutes}m
+                            </span>
+                          )}
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ol>
+              )}
+
+              {/* Timer progress (only when no rich detail) */}
+              {!detail && quest.requiredTime && (
                 <div className="px-4">
                   <div className="h-1.5 bg-slate-800/80 rounded-full overflow-hidden border border-slate-700/30">
                     <div 
@@ -274,7 +375,7 @@ const QuestModal = ({ quest, allQuests, onClose, onStart, onComplete, onUpdatePr
                   </div>
                   {isRunning && !isCompleted && (
                     <p className="text-[9px] text-cyan-500/60 text-center mt-1.5 animate-pulse font-mono">
-                      ▸ Timer active...
+                      ▸ {t('quest.timerActive', 'Timer active...')}
                     </p>
                   )}
                 </div>
@@ -283,38 +384,89 @@ const QuestModal = ({ quest, allQuests, onClose, onStart, onComplete, onUpdatePr
               <div className="flex items-center justify-between px-4 pt-2 border-t border-slate-700/30">
                 <div className="flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-cyan-400" />
-                  <span className="text-xs text-slate-500 uppercase tracking-wider">Reward</span>
+                  <span className="text-xs text-slate-500 uppercase tracking-wider">{t('quests.reward', 'Reward')}</span>
                 </div>
-                <span className="text-sm font-black text-cyan-300 tracking-wider">+{quest.xpReward} XP</span>
+                <span className="text-sm font-black text-cyan-300 tracking-wider">+{detail?.xpReward ?? quest.xpReward} XP</span>
               </div>
 
-              {quest.goldReward && (
+              {(detail?.goldReward ?? quest.goldReward) ? (
                 <div className="flex items-center justify-between px-4">
                   <div className="flex items-center gap-2">
                     <Crown className="w-4 h-4 text-yellow-500/70" />
-                    <span className="text-xs text-slate-500 uppercase tracking-wider">Gold</span>
+                    <span className="text-xs text-slate-500 uppercase tracking-wider">{t('quest.gold', 'Gold')}</span>
                   </div>
-                  <span className="text-sm font-black text-yellow-400/80 tracking-wider">+{quest.goldReward} G</span>
+                  <span className="text-sm font-black text-yellow-400/80 tracking-wider">+{detail?.goldReward ?? quest.goldReward} G</span>
                 </div>
-              )}
+              ) : null}
             </div>
           </div>
 
           <div className="mx-6 h-[1px] bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent" />
 
+          {detail?.warning && (
+            <div className="mx-6 mt-3 flex gap-2 border-l-2 border-amber-500 bg-amber-500/10 p-2">
+              <AlertTriangle className="w-3.5 h-3.5 text-amber-300 shrink-0 mt-0.5" />
+              <p className="text-[10px] text-amber-100 leading-relaxed">{detail.warning}</p>
+            </div>
+          )}
+
           <div className="px-6 py-4">
             <p className="text-xs text-slate-500 text-center leading-relaxed">
-              <span className="text-red-400 font-bold">WARNING:</span> Failure to complete the daily quest will result in an appropriate <span className="text-red-400 font-bold">penalty</span>.
+              <span className="text-red-400 font-bold">{t('common.warningTitle', 'WARNING')}:</span> {t('quest.penaltyWarning', 'Failure to complete the daily quest will result in an appropriate penalty.')}
             </p>
           </div>
 
           <div className="px-6 pb-6 pt-2">
-            {quest.completed ? (
+            {detail ? (
+              detail.status === 'completed' || quest.completed ? (
+                <div className="flex items-center justify-center gap-3 py-4 border border-emerald-500/30 bg-emerald-500/5">
+                  <div className="w-7 h-7 border-2 border-emerald-500/50 flex items-center justify-center bg-emerald-500/10">
+                    <CheckCircle className="w-4 h-4 text-emerald-400" />
+                  </div>
+                  <span className="font-black text-emerald-400 tracking-[0.2em] text-sm">{t('quest.completed', 'COMPLETED')}</span>
+                </div>
+              ) : detail.status === 'available' ? (
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={handleClose}
+                    className="py-3.5 border border-slate-700/50 text-slate-500 font-bold text-xs tracking-[0.2em] uppercase hover:text-slate-300 hover:border-slate-500/50 transition-all"
+                  >
+                    {t('common.close', 'CLOSE')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleStart}
+                    className="py-3.5 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-black text-xs tracking-[0.2em] uppercase shadow-[0_0_30px_rgba(56,189,248,0.3)] hover:shadow-[0_0_40px_rgba(56,189,248,0.4)] transition-all flex items-center justify-center gap-2 active:scale-95"
+                  >
+                    <Play className="w-4 h-4" />
+                    {t('quest.accept', 'ACCEPT')}
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => { detail.onClaim(); onComplete(); }}
+                  disabled={detail.steps.some(s => !s.done)}
+                  className={cn(
+                    'w-full py-4 font-black text-sm tracking-[0.2em] uppercase transition-all flex items-center justify-center gap-2',
+                    !detail.steps.some(s => !s.done)
+                      ? 'bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-[0_0_30px_rgba(16,185,129,0.3)] active:scale-95'
+                      : 'border border-slate-700/50 text-slate-600 cursor-not-allowed'
+                  )}
+                >
+                  <CheckCircle className="w-5 h-5" />
+                  {!detail.steps.some(s => !s.done)
+                    ? t('quests.claimReward', 'CLAIM REWARD')
+                    : t('quest.completeAllSteps', 'Complete all steps')}
+                </button>
+              )
+            ) : quest.completed ? (
               <div className="flex items-center justify-center gap-3 py-4 border border-emerald-500/30 bg-emerald-500/5">
                 <div className="w-7 h-7 border-2 border-emerald-500/50 flex items-center justify-center bg-emerald-500/10">
                   <CheckCircle className="w-4 h-4 text-emerald-400" />
                 </div>
-                <span className="font-black text-emerald-400 tracking-[0.2em] text-sm">COMPLETED</span>
+                <span className="font-black text-emerald-400 tracking-[0.2em] text-sm">{t('quest.completed', 'COMPLETED')}</span>
               </div>
             ) : !quest.startedAt ? (
               <div className="grid grid-cols-2 gap-3">
@@ -323,7 +475,7 @@ const QuestModal = ({ quest, allQuests, onClose, onStart, onComplete, onUpdatePr
                   onClick={handleClose}
                   className="py-3.5 border border-slate-700/50 text-slate-500 font-bold text-xs tracking-[0.2em] uppercase hover:text-slate-300 hover:border-slate-500/50 transition-all"
                 >
-                  CLOSE
+                  {t('common.close', 'CLOSE')}
                 </button>
                 <button
                   type="button"
@@ -331,7 +483,7 @@ const QuestModal = ({ quest, allQuests, onClose, onStart, onComplete, onUpdatePr
                   className="py-3.5 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-black text-xs tracking-[0.2em] uppercase shadow-[0_0_30px_rgba(56,189,248,0.3)] hover:shadow-[0_0_40px_rgba(56,189,248,0.4)] transition-all flex items-center justify-center gap-2 active:scale-95"
                 >
                   <Play className="w-4 h-4" />
-                  ACCEPT
+                  {t('quest.accept', 'ACCEPT')}
                 </button>
               </div>
             ) : (
@@ -349,12 +501,12 @@ const QuestModal = ({ quest, allQuests, onClose, onStart, onComplete, onUpdatePr
                 {isCompleted ? (
                   <>
                     <CheckCircle className="w-5 h-5" />
-                    CLAIM REWARD
+                    {t('quests.claimReward', 'CLAIM REWARD')}
                   </>
                 ) : (
                   <span className="flex items-center gap-2">
                     <Timer className="w-4 h-4 animate-pulse" />
-                    {Math.ceil((requiredTimeInSeconds - timeProgress) / 60)}m REMAINING
+                    {t('quest.minutesRemaining', '{{m}}m REMAINING', { m: Math.ceil((requiredTimeInSeconds - timeProgress) / 60) })}
                   </span>
                 )}
               </button>
@@ -372,9 +524,11 @@ export const SoloLevelingQuestCard = ({
   onStartQuest,
   onUpdateQuestProgress,
   timeRemaining,
-  onPenalty
+  onPenalty,
+  getQuestDetail,
 }: QuestCardProps) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(true);
   const [selectedQuest, setSelectedQuest] = useState<Quest | null>(null);
   const [showCompletion, setShowCompletion] = useState(false);
@@ -495,10 +649,10 @@ export const SoloLevelingQuestCard = ({
               </div>
               
               <h2 className="text-2xl font-black text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.4)] mb-2 tracking-wider">
-                QUEST COMPLETE
+                {t('quest.questCompleteHeading', 'QUEST COMPLETE')}
               </h2>
               <p className="text-sm text-slate-400 mb-6">
-                لقد أتممت جميع المهمات اليومية!
+                {t('quest.allDailyDone', 'You completed all daily quests!')}
               </p>
               <p className="text-4xl font-black text-white drop-shadow-[0_0_30px_rgba(255,255,255,0.5)] mb-6">
                 +{displayQuests.reduce((sum, q) => sum + q.xpReward, 0) * 2} XP
@@ -507,7 +661,7 @@ export const SoloLevelingQuestCard = ({
                 onClick={() => setShowCompletion(false)}
                 className="w-full py-4 rounded-sm bg-gradient-to-r from-white to-slate-200 text-black font-black tracking-wider shadow-[0_0_40px_rgba(255,255,255,0.2)]"
               >
-                CONTINUE
+                {t('common.continue', 'CONTINUE')}
               </button>
             </div>
           </div>
@@ -560,7 +714,7 @@ export const SoloLevelingQuestCard = ({
                 </div>
                 <div className="border-2 border-slate-400/60 px-5 py-1.5 bg-transparent">
                   <span className="text-sm font-black tracking-[0.3em] text-white uppercase">
-                    QUEST INFO
+                    {t('quest.questInfoTitle', 'QUEST INFO')}
                   </span>
                 </div>
               </div>
@@ -575,7 +729,7 @@ export const SoloLevelingQuestCard = ({
             </div>
 
             <p className="text-sm text-slate-400 font-mono text-center">
-              [Daily Quest: <span className="text-cyan-300 font-bold">Strength Training</span> has arrived.]
+              [{t('quests.dailyQuest', 'Daily Quest')}: <span className="text-cyan-300 font-bold">{t('quest.strengthTraining', 'Strength Training')}</span> {t('quest.hasArrived', 'has arrived.')}]
             </p>
           </div>
 
@@ -584,7 +738,7 @@ export const SoloLevelingQuestCard = ({
           {isExpanded && (
             <div className="relative z-10 px-5 py-5 animate-fade-in">
               <h3 className="text-center text-base font-black tracking-[0.25em] text-white mb-5 underline underline-offset-8 decoration-slate-600/60">
-                GOALS
+                {t('quest.goalsHeading', 'GOALS')}
               </h3>
               
               <div className="space-y-1">
@@ -660,7 +814,7 @@ export const SoloLevelingQuestCard = ({
                 <div className="flex items-center gap-2 px-4 py-1.5 border border-cyan-500/20 bg-cyan-500/5">
                   <Target className="w-4 h-4 text-cyan-400" />
                   <span className="text-xs font-black text-cyan-300 tracking-wider">
-                    {completedTasks}/{displayQuests.length} COMPLETED
+                    {t('quest.completedCount', '{{done}}/{{total}} COMPLETED', { done: completedTasks, total: displayQuests.length })}
                   </span>
                 </div>
               </div>
@@ -669,8 +823,7 @@ export const SoloLevelingQuestCard = ({
 
               <div className="px-2 pb-1">
                 <p className="text-xs text-slate-500 text-center leading-relaxed">
-                  <span className="text-red-400 font-bold">WARNING:</span> Failure to complete
-                  the daily quest will result in an appropriate <span className="text-red-400 font-bold">penalty</span>.
+                  <span className="text-red-400 font-bold">{t('common.warningTitle', 'WARNING')}:</span> {t('quest.penaltyWarning', 'Failure to complete the daily quest will result in an appropriate penalty.')}
                 </p>
               </div>
 
@@ -679,7 +832,7 @@ export const SoloLevelingQuestCard = ({
                   <div className="flex items-center gap-2 px-4 py-2 border border-cyan-500/20 bg-cyan-500/5">
                     <Clock className="w-4 h-4 text-cyan-400" />
                     <span className="text-xs font-black text-cyan-300 tracking-[0.15em] font-mono">
-                      TIME REMAINING: {dailyTimeLeft}
+                      {t('quest.timeRemaining', 'TIME REMAINING')}: {dailyTimeLeft}
                     </span>
                   </div>
                 )}
@@ -697,6 +850,7 @@ export const SoloLevelingQuestCard = ({
           onStart={handleStartQuest}
           onComplete={handleCompleteQuest}
           onUpdateProgress={handleUpdateProgress}
+          detail={getQuestDetail?.(selectedQuest)}
         />
       )}
     </>
