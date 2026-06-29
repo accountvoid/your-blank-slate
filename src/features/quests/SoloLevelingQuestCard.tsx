@@ -501,12 +501,12 @@ const QuestModal = ({ quest, allQuests, onClose, onStart, onComplete, onUpdatePr
                 {isCompleted ? (
                   <>
                     <CheckCircle className="w-5 h-5" />
-                    CLAIM REWARD
+                    {t('quests.claimReward', 'CLAIM REWARD')}
                   </>
                 ) : (
                   <span className="flex items-center gap-2">
                     <Timer className="w-4 h-4 animate-pulse" />
-                    {Math.ceil((requiredTimeInSeconds - timeProgress) / 60)}m REMAINING
+                    {t('quest.minutesRemaining', '{{m}}m REMAINING', { m: Math.ceil((requiredTimeInSeconds - timeProgress) / 60) })}
                   </span>
                 )}
               </button>
