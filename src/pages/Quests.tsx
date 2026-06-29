@@ -27,7 +27,7 @@ const catIconMap = { strength: Dumbbell, mind: Brain, spirit: Heart, agility: Za
 
 const Quests = () => {
   const { loading: profileLoading } = useProfile();
-  const { awardCategoryXp } = useGameState() as any;
+  const { awardCategoryXp, gameState, getXpProgress } = useGameState() as any;
   const { t, i18n } = useTranslation();
   const ar = i18n.language?.startsWith('ar');
   const [activeTab, setActiveTab] = useState<QuestTab>('all');
@@ -107,6 +107,44 @@ const Quests = () => {
       </header>
 
       <main className="relative z-10 max-w-md mx-auto space-y-8">
+        {/* Total XP progress across all categories (realtime via gameState) */}
+        {gameState?.stats && (
+          <div className="border border-blue-500/30 bg-black/60 p-3 space-y-3 shadow-[0_0_20px_rgba(30,58,138,0.25)]">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-blue-300">
+                {t('quests.totalXp', 'Total Progress')}
+              </span>
+              <span className="text-[10px] font-mono text-slate-300">
+                {(gameState.stats.strength + gameState.stats.mind + gameState.stats.spirit + gameState.stats.agility)} XP
+              </span>
+            </div>
+            <div className="grid grid-cols-4 gap-2">
+              {(['strength','mind','agility','spirit'] as const).map((k) => {
+                const Icon = catIconMap[k];
+                const xp = gameState.stats[k] ?? 0;
+                const pct = typeof getXpProgress === 'function' ? Math.min(100, Math.round(getXpProgress(xp))) : 0;
+                const colors: Record<string,string> = {
+                  strength: 'from-red-500 to-orange-400',
+                  mind: 'from-cyan-500 to-blue-500',
+                  agility: 'from-emerald-500 to-lime-400',
+                  spirit: 'from-violet-500 to-fuchsia-400',
+                };
+                return (
+                  <div key={k} className="space-y-1">
+                    <div className="flex items-center justify-between text-[9px] text-slate-400">
+                      <span className="flex items-center gap-1"><Icon className="w-3 h-3" />{t(`stats.${k}`, k.toUpperCase())}</span>
+                      <span className="font-mono">{xp}</span>
+                    </div>
+                    <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                      <div className={cn('h-full bg-gradient-to-r transition-all duration-500', colors[k])} style={{ width: `${pct}%` }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         <div className="flex gap-1 p-1 bg-black/40 border border-slate-800 rounded-lg overflow-x-auto">
           {tabs.map((tab) => (
             <button
