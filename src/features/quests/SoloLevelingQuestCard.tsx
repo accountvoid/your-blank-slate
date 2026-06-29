@@ -738,7 +738,7 @@ export const SoloLevelingQuestCard = ({
           {isExpanded && (
             <div className="relative z-10 px-5 py-5 animate-fade-in">
               <h3 className="text-center text-base font-black tracking-[0.25em] text-white mb-5 underline underline-offset-8 decoration-slate-600/60">
-                GOALS
+                {t('quest.goalsHeading', 'GOALS')}
               </h3>
               
               <div className="space-y-1">
