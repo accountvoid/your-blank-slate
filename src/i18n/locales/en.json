@@ -35,7 +35,8 @@
     "available": "Available",
     "successTitle": "Success",
     "warningTitle": "Warning",
-    "errorTitle": "Error"
+    "errorTitle": "Error",
+    "continue": "CONTINUE"
   },
   "index": {
     "menuTitle": "Menu",
@@ -135,7 +136,8 @@
     "empty": {
       "title": "No quests available",
       "subtitle": "You completed all quests!"
-    }
+    },
+    "totalXp": "Total Progress"
   },
   "gates": {
     "title": "Gates",
@@ -302,14 +304,38 @@
       "useOnly": "1 Use Only",
       "usesCount": "{{count}} Uses Only"
     },
-    "hp_elixir": { "name": "HP Elixir", "description": "Restores 50% HP." },
-    "mp_elixir": { "name": "MP Elixir", "description": "Restores 50% MP." },
-    "xp_book": { "name": "XP Book", "description": "Grants 75 XP." },
-    "stone_dagger": { "name": "Stone Dagger", "description": "A basic weapon for new hunters." },
-    "shadow_dagger": { "name": "Dagger of Shadows", "description": "A powerful weapon charged with shadow energy." },
-    "cutting_stones": { "name": "Cutting Stones", "description": "A fragment of magical stone. Merge 5 into one Mana Stone." },
-    "mana_stone": { "name": "Mana Stone", "description": "A rare stone granting one powerful action." },
-    "mana_analyst": { "name": "Mana Analyst", "description": "A tool to analyze item energy." }
+    "hp_elixir": {
+      "name": "HP Elixir",
+      "description": "Restores 50% HP."
+    },
+    "mp_elixir": {
+      "name": "MP Elixir",
+      "description": "Restores 50% MP."
+    },
+    "xp_book": {
+      "name": "XP Book",
+      "description": "Grants 75 XP."
+    },
+    "stone_dagger": {
+      "name": "Stone Dagger",
+      "description": "A basic weapon for new hunters."
+    },
+    "shadow_dagger": {
+      "name": "Dagger of Shadows",
+      "description": "A powerful weapon charged with shadow energy."
+    },
+    "cutting_stones": {
+      "name": "Cutting Stones",
+      "description": "A fragment of magical stone. Merge 5 into one Mana Stone."
+    },
+    "mana_stone": {
+      "name": "Mana Stone",
+      "description": "A rare stone granting one powerful action."
+    },
+    "mana_analyst": {
+      "name": "Mana Analyst",
+      "description": "A tool to analyze item energy."
+    }
   },
   "marketExt": {
     "merge": "Merge",
@@ -323,11 +349,26 @@
     "title": "Mana Stone",
     "subtitle": "Choose one action. The stone will be consumed immediately.",
     "actions": {
-      "exit_gate": { "name": "Exit Gate", "desc": "Safely exit the current gate." },
-      "system_chat": { "name": "System Chat", "desc": "Open a temporary communication session." },
-      "ability_development": { "name": "Ability Development", "desc": "Use the stone to enhance abilities." },
-      "name_change": { "name": "Name Change", "desc": "Change your character's name." },
-      "grand_mission": { "name": "Grand Mission Access", "desc": "Activate a grand mission slot." }
+      "exit_gate": {
+        "name": "Exit Gate",
+        "desc": "Safely exit the current gate."
+      },
+      "system_chat": {
+        "name": "System Chat",
+        "desc": "Open a temporary communication session."
+      },
+      "ability_development": {
+        "name": "Ability Development",
+        "desc": "Use the stone to enhance abilities."
+      },
+      "name_change": {
+        "name": "Name Change",
+        "desc": "Change your character's name."
+      },
+      "grand_mission": {
+        "name": "Grand Mission Access",
+        "desc": "Activate a grand mission slot."
+      }
     },
     "exitGateOnly": "Only available while inside a gate",
     "confirm": "Confirm",
@@ -360,7 +401,20 @@
     "startedTitle": "Quest accepted",
     "completedTitle": "Quest completed",
     "noneToday": "No main quests scheduled in this category today.",
-    "restDay": "Today is a recovery day — no strength workout. Stretch and hydrate."
+    "restDay": "Today is a recovery day — no strength workout. Stretch and hydrate.",
+    "questInfoTitle": "QUEST INFO",
+    "goalHeading": "GOAL",
+    "goalsHeading": "GOALS",
+    "hasArrived": "has arrived.",
+    "viewSteps": "View Steps",
+    "completedCount": "{{done}}/{{total}} COMPLETED",
+    "timeRemaining": "TIME REMAINING",
+    "strengthTraining": "Strength Training",
+    "timerActive": "Timer active...",
+    "minutesRemaining": "{{m}}m REMAINING",
+    "questCompleteHeading": "QUEST COMPLETE",
+    "allDailyDone": "You completed all daily quests!",
+    "penaltyWarning": "Failure to complete the daily quest will result in an appropriate penalty."
   },
   "recovery": {
     "title": "Recovery Assessment",

@@ -35,7 +35,8 @@
     "available": "متوفر",
     "successTitle": "تم بنجاح",
     "warningTitle": "تحذير",
-    "errorTitle": "خطأ"
+    "errorTitle": "خطأ",
+    "continue": "متابعة"
   },
   "index": {
     "menuTitle": "القائمة",
@@ -135,7 +136,8 @@
     "empty": {
       "title": "لا توجد مهمات متاحة",
       "subtitle": "أكملت جميع المهمات!"
-    }
+    },
+    "totalXp": "إجمالي التقدم"
   },
   "gates": {
     "title": "البوابات",
@@ -302,14 +304,38 @@
       "useOnly": "استخدام واحد فقط",
       "usesCount": "{{count}} استخدامات"
     },
-    "hp_elixir": { "name": "إكسير الصحة", "description": "يستعيد 50% من الصحة." },
-    "mp_elixir": { "name": "إكسير المانا", "description": "يستعيد 50% من المانا." },
-    "xp_book": { "name": "كتاب الخبرة", "description": "يمنح 75 نقطة خبرة." },
-    "stone_dagger": { "name": "خنجر حجري", "description": "سلاح أساسي للمبتدئين." },
-    "shadow_dagger": { "name": "خنجر الظلال", "description": "سلاح قوي مشحون بطاقة الظلام." },
-    "cutting_stones": { "name": "أحجار القطع", "description": "شظية حجر سحري. ادمج 5 منها لصنع حجر مانا." },
-    "mana_stone": { "name": "حجر المانا", "description": "حجر نادر يمنحك إجراءً واحداً قوياً." },
-    "mana_analyst": { "name": "محلل المانا", "description": "أداة لتحليل طاقة العناصر." }
+    "hp_elixir": {
+      "name": "إكسير الصحة",
+      "description": "يستعيد 50% من الصحة."
+    },
+    "mp_elixir": {
+      "name": "إكسير المانا",
+      "description": "يستعيد 50% من المانا."
+    },
+    "xp_book": {
+      "name": "كتاب الخبرة",
+      "description": "يمنح 75 نقطة خبرة."
+    },
+    "stone_dagger": {
+      "name": "خنجر حجري",
+      "description": "سلاح أساسي للمبتدئين."
+    },
+    "shadow_dagger": {
+      "name": "خنجر الظلال",
+      "description": "سلاح قوي مشحون بطاقة الظلام."
+    },
+    "cutting_stones": {
+      "name": "أحجار القطع",
+      "description": "شظية حجر سحري. ادمج 5 منها لصنع حجر مانا."
+    },
+    "mana_stone": {
+      "name": "حجر المانا",
+      "description": "حجر نادر يمنحك إجراءً واحداً قوياً."
+    },
+    "mana_analyst": {
+      "name": "محلل المانا",
+      "description": "أداة لتحليل طاقة العناصر."
+    }
   },
   "marketExt": {
     "merge": "دمج",
@@ -323,11 +349,26 @@
     "title": "حجر المانا",
     "subtitle": "اختر إجراءً واحداً. سيُستهلك الحجر فوراً.",
     "actions": {
-      "exit_gate": { "name": "الخروج من البوابة", "desc": "يخرجك بأمان من البوابة الحالية." },
-      "system_chat": { "name": "محادثة النظام", "desc": "افتح جلسة تواصل مؤقتة." },
-      "ability_development": { "name": "تطوير القدرات", "desc": "استخدم الحجر لتعزيز قدراتك." },
-      "name_change": { "name": "تغيير الاسم", "desc": "غيّر اسم شخصيتك." },
-      "grand_mission": { "name": "الوصول للمهمة الكبرى", "desc": "فعّل وصول مهمة كبرى." }
+      "exit_gate": {
+        "name": "الخروج من البوابة",
+        "desc": "يخرجك بأمان من البوابة الحالية."
+      },
+      "system_chat": {
+        "name": "محادثة النظام",
+        "desc": "افتح جلسة تواصل مؤقتة."
+      },
+      "ability_development": {
+        "name": "تطوير القدرات",
+        "desc": "استخدم الحجر لتعزيز قدراتك."
+      },
+      "name_change": {
+        "name": "تغيير الاسم",
+        "desc": "غيّر اسم شخصيتك."
+      },
+      "grand_mission": {
+        "name": "الوصول للمهمة الكبرى",
+        "desc": "فعّل وصول مهمة كبرى."
+      }
     },
     "exitGateOnly": "متاح فقط داخل البوابة",
     "confirm": "تأكيد",
@@ -360,7 +401,20 @@
     "startedTitle": "تم قبول المهمة",
     "completedTitle": "تم إكمال المهمة",
     "noneToday": "لا توجد مهام رئيسية في هذه الفئة اليوم.",
-    "restDay": "اليوم يوم استشفاء — لا يوجد تمرين قوة. قم بالإطالة واشرب الماء."
+    "restDay": "اليوم يوم استشفاء — لا يوجد تمرين قوة. قم بالإطالة واشرب الماء.",
+    "questInfoTitle": "بيانات المهمة",
+    "goalHeading": "الهدف",
+    "goalsHeading": "الأهداف",
+    "hasArrived": "قد بدأت.",
+    "viewSteps": "عرض الخطوات",
+    "completedCount": "{{done}}/{{total}} مكتملة",
+    "timeRemaining": "الوقت المتبقي",
+    "strengthTraining": "تدريب القوة",
+    "timerActive": "المؤقت يعمل...",
+    "minutesRemaining": "متبقي {{m}} دقيقة",
+    "questCompleteHeading": "اكتملت المهمة",
+    "allDailyDone": "لقد أتممت جميع المهمات اليومية!",
+    "penaltyWarning": "الفشل في إتمام المهمة اليومية يؤدي إلى عقوبة مناسبة."
   },
   "recovery": {
     "title": "تقييم الاستشفاء",
