@@ -20,7 +20,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
 import { AdBanner } from '@/components/ads/AdBanner';
-import { TodayMainQuests } from '@/components/quests/TodayMainQuests';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -325,22 +324,6 @@ const Index = () => {
 
         {/* Sponsored banner (dynamic from Supabase, hidden when no active ad) */}
         <AdBanner placement="home" />
-
-        {/* New Main Quest engine (database-driven, all categories) */}
-        <TodayMainQuests />
-
-
-
-        {/* Daily Quest Card */}
-        <section>
-          <SoloLevelingQuestCard
-            quests={hybridQuestsState}
-            onTaskComplete={handleTaskComplete}
-            onStartQuest={handleStartQuest}
-            onUpdateQuestProgress={handleUpdateQuestProgress}
-            onPenalty={() => navigate('/penalty')}
-          />
-        </section>
       </main>
 
       <BottomNav />
