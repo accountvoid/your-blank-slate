@@ -455,11 +455,13 @@ export const useGameState = () => {
             };
 
             setGameState(prev => {
+              // NEVER regress XP or gold: guards against stale realtime frames
+              // that would wipe out a just-awarded XP burst (race with debounced sync).
               const nextStats = {
-                strength: mappedStats.strength ?? prev.stats.strength,
-                agility:  mappedStats.agility  ?? prev.stats.agility,
-                spirit:   mappedStats.spirit   ?? prev.stats.spirit,
-                mind:     mappedStats.mind     ?? prev.stats.mind,
+                strength: Math.max(prev.stats.strength, mappedStats.strength ?? prev.stats.strength),
+                agility:  Math.max(prev.stats.agility,  mappedStats.agility  ?? prev.stats.agility),
+                spirit:   Math.max(prev.stats.spirit,   mappedStats.spirit   ?? prev.stats.spirit),
+                mind:     Math.max(prev.stats.mind,     mappedStats.mind     ?? prev.stats.mind),
               };
               const nextLevels = {
                 strength: Math.min(calcLevelFromXp(nextStats.strength), MAX_LEVEL),
@@ -470,13 +472,13 @@ export const useGameState = () => {
               const updated: GameState = {
                 ...prev,
                 playerName: n.name_player || prev.playerName,
-                gold: n.gold_player ?? prev.gold,
+                gold: Math.max(prev.gold, n.gold_player ?? prev.gold),
                 hp: n.hp_player ?? prev.hp,
                 maxHp: n.hp_max ?? prev.maxHp,
                 energy: n.mb_player ?? prev.energy,
                 maxEnergy: n.mp_max ?? prev.maxEnergy,
-                shadowPoints: n.void_player ?? prev.shadowPoints,
-                totalLevel: n.level_player ?? prev.totalLevel,
+                shadowPoints: Math.max(prev.shadowPoints || 0, n.void_player ?? prev.shadowPoints ?? 0),
+                totalLevel: Math.max(prev.totalLevel, n.level_player ?? prev.totalLevel),
                 stats: nextStats,
                 levels: nextLevels,
                 punishment: {
@@ -723,7 +725,12 @@ export const useGameState = () => {
   }, [calculateLevel, getTotalLevel]);
 
   // Awards XP & Gold directly to a category. Used by the Main Quest engine.
+  // Persists IMMEDIATELY to Supabase (bypasses 800ms debounce) so a refresh
+  // or tab-close right after Claim never loses the reward.
   const awardCategoryXp = useCallback((category: StatType, xp: number, gold: number = 0) => {
+    // Suppress the very next realtime frame from wiping local optimism.
+    skipNextRealtimeUpdateRef.current = true;
+    let snapshot: GameState | null = null;
     setGameState(prev => {
       const newStats = { ...prev.stats };
       newStats[category] = (newStats[category] || 0) + xp;
@@ -742,7 +749,7 @@ export const useGameState = () => {
       } else {
         dailyStats.push({ date: today, strength: category === 'strength' ? xp : 0, mind: category === 'mind' ? xp : 0, spirit: category === 'spirit' ? xp : 0, agility: category === 'agility' ? xp : 0, questsCompleted: 1 });
       }
-      return {
+      const next: GameState = {
         ...prev,
         stats: newStats,
         levels: newLevels,
@@ -751,8 +758,27 @@ export const useGameState = () => {
         totalQuestsCompleted: prev.totalQuestsCompleted + 1,
         dailyStats: dailyStats.slice(-30),
       };
+      snapshot = next;
+      return next;
     });
-  }, [calculateLevel, getTotalLevel]);
+
+    // Eager, minimal-payload write so XP/Gold/Level are durable immediately.
+    if (user?.id && snapshot) {
+      const s = snapshot as GameState;
+      saveToLocalBackup(s, user.id);
+      profilesTable()
+        .update({
+          gold_player: s.gold,
+          level_player: s.totalLevel,
+          rank_player: getRank(s.totalLevel),
+          stats_player: { STR: s.stats.strength, AGI: s.stats.agility, SPI: s.stats.spirit, MIN: s.stats.mind },
+        })
+        .eq('user_id', user.id)
+        .then(({ error }: any) => {
+          if (error) console.error('awardCategoryXp eager save failed:', error);
+        });
+    }
+  }, [calculateLevel, getTotalLevel, user, saveToLocalBackup]);
 
   const completePrayerQuest = useCallback((prayerId: string) => {
     setGameState(prev => {

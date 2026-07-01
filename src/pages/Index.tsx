@@ -368,6 +368,8 @@ const Index = () => {
                 if (activeRun) toggleStep(activeRun, stepId, tpl.steps.length);
               },
               onClaim: async () => {
+                // Idempotency: if run already completed, do NOT re-award.
+                if (run?.status === 'completed') return;
                 if (run) await completeRun(run.id);
                 if (typeof awardCategoryXp === 'function') {
                   awardCategoryXp(tpl.category, tpl.xp_reward, tpl.gold_reward);

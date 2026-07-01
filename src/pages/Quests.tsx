@@ -58,6 +58,11 @@ const Quests = () => {
   const handleClaim = async (tpl: QuestTemplate) => {
     const run = runByTemplate[tpl.id];
     if (!run) return;
+    // Idempotency: never award twice for the same run.
+    if (run.status === 'completed') {
+      toast({ title: t('quest.completed', 'Completed'), description: ar ? tpl.title_ar : tpl.title_en });
+      return;
+    }
     await completeRun(run.id);
     if (typeof awardCategoryXp === 'function') {
       awardCategoryXp(tpl.category, tpl.xp_reward, tpl.gold_reward);
