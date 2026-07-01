@@ -455,11 +455,13 @@ export const useGameState = () => {
             };
 
             setGameState(prev => {
+              // NEVER regress XP or gold: guards against stale realtime frames
+              // that would wipe out a just-awarded XP burst (race with debounced sync).
               const nextStats = {
-                strength: mappedStats.strength ?? prev.stats.strength,
-                agility:  mappedStats.agility  ?? prev.stats.agility,
-                spirit:   mappedStats.spirit   ?? prev.stats.spirit,
-                mind:     mappedStats.mind     ?? prev.stats.mind,
+                strength: Math.max(prev.stats.strength, mappedStats.strength ?? prev.stats.strength),
+                agility:  Math.max(prev.stats.agility,  mappedStats.agility  ?? prev.stats.agility),
+                spirit:   Math.max(prev.stats.spirit,   mappedStats.spirit   ?? prev.stats.spirit),
+                mind:     Math.max(prev.stats.mind,     mappedStats.mind     ?? prev.stats.mind),
               };
               const nextLevels = {
                 strength: Math.min(calcLevelFromXp(nextStats.strength), MAX_LEVEL),
@@ -470,13 +472,13 @@ export const useGameState = () => {
               const updated: GameState = {
                 ...prev,
                 playerName: n.name_player || prev.playerName,
-                gold: n.gold_player ?? prev.gold,
+                gold: Math.max(prev.gold, n.gold_player ?? prev.gold),
                 hp: n.hp_player ?? prev.hp,
                 maxHp: n.hp_max ?? prev.maxHp,
                 energy: n.mb_player ?? prev.energy,
                 maxEnergy: n.mp_max ?? prev.maxEnergy,
-                shadowPoints: n.void_player ?? prev.shadowPoints,
-                totalLevel: n.level_player ?? prev.totalLevel,
+                shadowPoints: Math.max(prev.shadowPoints || 0, n.void_player ?? prev.shadowPoints ?? 0),
+                totalLevel: Math.max(prev.totalLevel, n.level_player ?? prev.totalLevel),
                 stats: nextStats,
                 levels: nextLevels,
                 punishment: {
