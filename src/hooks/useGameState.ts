@@ -725,7 +725,12 @@ export const useGameState = () => {
   }, [calculateLevel, getTotalLevel]);
 
   // Awards XP & Gold directly to a category. Used by the Main Quest engine.
+  // Persists IMMEDIATELY to Supabase (bypasses 800ms debounce) so a refresh
+  // or tab-close right after Claim never loses the reward.
   const awardCategoryXp = useCallback((category: StatType, xp: number, gold: number = 0) => {
+    // Suppress the very next realtime frame from wiping local optimism.
+    skipNextRealtimeUpdateRef.current = true;
+    let snapshot: GameState | null = null;
     setGameState(prev => {
       const newStats = { ...prev.stats };
       newStats[category] = (newStats[category] || 0) + xp;
@@ -744,7 +749,7 @@ export const useGameState = () => {
       } else {
         dailyStats.push({ date: today, strength: category === 'strength' ? xp : 0, mind: category === 'mind' ? xp : 0, spirit: category === 'spirit' ? xp : 0, agility: category === 'agility' ? xp : 0, questsCompleted: 1 });
       }
-      return {
+      const next: GameState = {
         ...prev,
         stats: newStats,
         levels: newLevels,
@@ -753,8 +758,27 @@ export const useGameState = () => {
         totalQuestsCompleted: prev.totalQuestsCompleted + 1,
         dailyStats: dailyStats.slice(-30),
       };
+      snapshot = next;
+      return next;
     });
-  }, [calculateLevel, getTotalLevel]);
+
+    // Eager, minimal-payload write so XP/Gold/Level are durable immediately.
+    if (user?.id && snapshot) {
+      const s = snapshot as GameState;
+      saveToLocalBackup(s, user.id);
+      profilesTable()
+        .update({
+          gold_player: s.gold,
+          level_player: s.totalLevel,
+          rank_player: getRank(s.totalLevel),
+          stats_player: { STR: s.stats.strength, AGI: s.stats.agility, SPI: s.stats.spirit, MIN: s.stats.mind },
+        })
+        .eq('user_id', user.id)
+        .then(({ error }: any) => {
+          if (error) console.error('awardCategoryXp eager save failed:', error);
+        });
+    }
+  }, [calculateLevel, getTotalLevel, user, saveToLocalBackup]);
 
   const completePrayerQuest = useCallback((prayerId: string) => {
     setGameState(prev => {
