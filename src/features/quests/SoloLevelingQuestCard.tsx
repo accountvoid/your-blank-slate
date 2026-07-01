@@ -189,26 +189,38 @@ const QuestModal = ({ quest, allQuests, onClose, onStart, onComplete, onUpdatePr
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div 
+    <div
+      className="fixed inset-0 z-50 flex items-start sm:items-center justify-center overflow-y-auto"
+      style={{
+        paddingTop: 'max(env(safe-area-inset-top), 12px)',
+        paddingBottom: 'max(env(safe-area-inset-bottom), 12px)',
+        paddingLeft: 'max(env(safe-area-inset-left), 12px)',
+        paddingRight: 'max(env(safe-area-inset-right), 12px)',
+      }}
+    >
+      <div
         className={cn(
           "absolute inset-0 backdrop-blur-md transition-all duration-500",
           isVisible ? "bg-black/90" : "bg-black/0"
         )}
         onClick={handleClose}
       />
-      
+
       <div className={cn(
-        "relative z-10 w-full max-w-sm transition-all duration-700 ease-[cubic-bezier(0.2,1,0.2,1)]",
+        "relative z-10 w-full max-w-sm my-auto transition-all duration-700 ease-[cubic-bezier(0.2,1,0.2,1)]",
         isVisible ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 translate-y-8"
       )}>
         <div className="pointer-events-none absolute -inset-2 bg-gradient-to-b from-cyan-500/20 via-blue-500/10 to-cyan-500/20 blur-xl opacity-60" />
-        
-        <div className="relative overflow-hidden" style={{
-          background: 'linear-gradient(180deg, rgba(8,20,40,0.98) 0%, rgba(4,12,28,0.99) 50%, rgba(8,20,40,0.98) 100%)',
-          border: '2px solid rgba(56,189,248,0.4)',
-          boxShadow: '0 0 60px rgba(56,189,248,0.15), inset 0 0 60px rgba(56,189,248,0.05)',
-        }}>
+
+        <div
+          className="relative overflow-y-auto overscroll-contain"
+          style={{
+            background: 'linear-gradient(180deg, rgba(8,20,40,0.98) 0%, rgba(4,12,28,0.99) 50%, rgba(8,20,40,0.98) 100%)',
+            border: '2px solid rgba(56,189,248,0.4)',
+            boxShadow: '0 0 60px rgba(56,189,248,0.15), inset 0 0 60px rgba(56,189,248,0.05)',
+            maxHeight: 'calc(100dvh - max(env(safe-area-inset-top), 12px) - max(env(safe-area-inset-bottom), 12px) - 8px)',
+          }}
+        >
           <div className="pointer-events-none absolute inset-0 opacity-[0.07]" style={{
             backgroundImage: `
               linear-gradient(rgba(56,189,248,0.5) 1px, transparent 1px),
