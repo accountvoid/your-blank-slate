@@ -546,38 +546,51 @@ export const SoloLevelingQuestCard = ({
   const [showCompletion, setShowCompletion] = useState(false);
   const [dailyTimeLeft, setDailyTimeLeft] = useState('');
 
+  // Countdown to the next LOCAL midnight (00:00 in the player's timezone).
+  // Every player gets the same daily reset boundary regardless of first-login
+  // time, and a date rollover while the app is open is detected automatically.
   useEffect(() => {
-    const getDailyDeadline = () => {
-      const key = 'daily_quest_start';
-      let startTime = localStorage.getItem(key);
-      const today = new Date().toDateString();
-      const storedDate = localStorage.getItem('daily_quest_date');
-      
-      if (!startTime || storedDate !== today) {
-        const now = Date.now().toString();
-        localStorage.setItem(key, now);
-        localStorage.setItem('daily_quest_date', today);
-        return parseInt(now);
-      }
-      return parseInt(startTime);
+    // One-time cleanup of the legacy first-login-based keys.
+    try {
+      localStorage.removeItem('daily_quest_start');
+      localStorage.removeItem('daily_quest_date');
+    } catch { /* ignore */ }
+
+    const PENALTY_KEY = 'daily_quest_penalty_date';
+    const localDateStr = () => {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    };
+    const nextMidnight = () => {
+      const now = new Date();
+      return new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0, 0).getTime();
     };
 
-    const startTime = getDailyDeadline();
-    const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
+    let deadline = nextMidnight();
+    let currentDay = localDateStr();
 
     const tick = () => {
-      const elapsed = Date.now() - startTime;
-      const remaining = TWENTY_FOUR_HOURS - elapsed;
+      const now = Date.now();
+      const today = localDateStr();
 
-      if (remaining <= 0) {
+      // Date rolled over (either the deadline was crossed or the device clock
+      // jumped). Fire the penalty once for the day that just ended if any main
+      // quest was still open, then rearm for the new day.
+      if (today !== currentDay || now >= deadline) {
+        const yesterday = currentDay;
         const allDone = quests.filter(q => q.dailyReset && q.isMainQuest !== false).every(q => q.completed);
         if (!allDone && onPenalty) {
-          onPenalty();
+          const lastPenaltyDay = (() => { try { return localStorage.getItem(PENALTY_KEY); } catch { return null; } })();
+          if (lastPenaltyDay !== yesterday) {
+            try { localStorage.setItem(PENALTY_KEY, yesterday); } catch { /* ignore */ }
+            onPenalty();
+          }
         }
-        setDailyTimeLeft('00:00:00');
-        return;
+        currentDay = today;
+        deadline = nextMidnight();
       }
 
+      const remaining = Math.max(0, deadline - now);
       const hours = Math.floor(remaining / (1000 * 60 * 60));
       const mins = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
       const secs = Math.floor((remaining % (1000 * 60)) / 1000);
@@ -586,8 +599,16 @@ export const SoloLevelingQuestCard = ({
 
     tick();
     const interval = setInterval(tick, 1000);
-    return () => clearInterval(interval);
+    const onFocus = () => tick();
+    document.addEventListener('visibilitychange', onFocus);
+    window.addEventListener('focus', onFocus);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', onFocus);
+      window.removeEventListener('focus', onFocus);
+    };
   }, [quests, onPenalty]);
+
 
   useEffect(() => {
     if (selectedQuest) {
