@@ -138,12 +138,21 @@ export function useMainQuests() {
     return () => { cancelled = true; };
   }, []);
 
-  // Load + subscribe to runs for current user.
+  // Load + subscribe to runs for current user. Fetch a small window (last 7
+  // days) so the streak/history logic keeps working; today's runs are picked
+  // out via `runByTemplate` below.
   useEffect(() => {
     if (!user?.id) { setRuns([]); return; }
     let cancelled = false;
+    const since = new Date();
+    since.setDate(since.getDate() - 7);
+    const sinceKey = localDateKey(since);
     (async () => {
-      const { data } = await sb().from('user_quest_runs').select('*').eq('user_id', user.id);
+      const { data } = await sb()
+        .from('user_quest_runs')
+        .select('*')
+        .eq('user_id', user.id)
+        .gte('run_date', sinceKey);
       if (!cancelled) setRuns((data || []) as QuestRun[]);
     })();
     const channel = sb()
@@ -161,7 +170,8 @@ export function useMainQuests() {
       })
       .subscribe();
     return () => { cancelled = true; sb().removeChannel(channel); };
-  }, [user?.id]);
+  }, [user?.id, todayKey]);
+
 
   // Pick today's quests (1 per category).
   const todayQuests = useMemo(() => {
