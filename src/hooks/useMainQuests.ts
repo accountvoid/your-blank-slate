@@ -58,12 +58,53 @@ const sb = () => supabase as any;
 
 const todayDow = () => new Date().getDay();
 
+// Local calendar date in YYYY-MM-DD (used as the daily reset key). Aligned to
+// the player's local timezone so every player rolls over at their local 00:00.
+const localDateKey = (d = new Date()) => {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+};
+
+// Milliseconds until the next local midnight (exclusive).
+const msUntilNextLocalMidnight = () => {
+  const now = new Date();
+  const next = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0, 0);
+  return next.getTime() - now.getTime();
+};
+
 export function useMainQuests() {
   const { user } = useAuth();
   const { programTag, loaded: recoveryLoaded } = useRecoveryProfile();
   const [templates, setTemplates] = useState<QuestTemplate[]>([]);
   const [runs, setRuns] = useState<QuestRun[]>([]);
   const [loading, setLoading] = useState(true);
+  // Bumps at every local midnight so memos re-pick today's quests without a reload.
+  const [todayKey, setTodayKey] = useState<string>(localDateKey());
+
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
+    const schedule = () => {
+      timer = setTimeout(() => {
+        setTodayKey(localDateKey());
+        schedule();
+      }, msUntilNextLocalMidnight() + 250);
+    };
+    schedule();
+    const onVis = () => {
+      const key = localDateKey();
+      setTodayKey(prev => (prev === key ? prev : key));
+    };
+    document.addEventListener('visibilitychange', onVis);
+    window.addEventListener('focus', onVis);
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('visibilitychange', onVis);
+      window.removeEventListener('focus', onVis);
+    };
+  }, []);
+
 
   // Load catalog (templates + steps).
   useEffect(() => {
