@@ -173,10 +173,12 @@ export function useMainQuests() {
   }, [user?.id, todayKey]);
 
 
-  // Pick today's quests (1 per category).
+  // Pick today's quests (1 per category) using the local calendar date so all
+  // players see the same set for that day and the pick refreshes at midnight.
   const todayQuests = useMemo(() => {
     if (!recoveryLoaded) return [] as QuestTemplate[];
-    const dow = todayDow();
+    const now = new Date();
+    const dow = now.getDay();
     const pickByCategory = (cat: QuestCategory): QuestTemplate | null => {
       const pool = templates.filter(t => t.category === cat);
       if (cat === 'strength') {
@@ -188,33 +190,53 @@ export function useMainQuests() {
       const matched = pool.filter(t => t.day_of_week === dow);
       const base = matched.length ? matched : pool;
       if (!base.length) return null;
-      // deterministic by date for stable daily pick
-      const d = new Date();
-      const seed = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate() + cat.length;
+      // deterministic by local calendar date for a stable daily pick
+      const seed = now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate() + cat.length;
       return base[seed % base.length];
     };
     return (['strength','mind','agility','spirit'] as QuestCategory[])
       .map(pickByCategory)
       .filter((q): q is QuestTemplate => !!q);
-  }, [templates, programTag, recoveryLoaded]);
+    // todayKey ticks at midnight so this refreshes without a reload.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [templates, programTag, recoveryLoaded, todayKey]);
 
+  // Map template -> run scoped to TODAY only. Yesterday's completed runs no
+  // longer mark today's quests as done.
   const runByTemplate = useMemo(() => {
     const map: Record<string, QuestRun | undefined> = {};
-    runs.forEach(r => { map[r.template_id] = r; });
+    runs.forEach(r => {
+      if (r.run_date === todayKey) map[r.template_id] = r;
+    });
     return map;
-  }, [runs]);
+  }, [runs, todayKey]);
 
   // Mutations
   const startRun = useCallback(async (templateId: string) => {
     if (!user?.id) return null;
-    const existing = runs.find(r => r.template_id === templateId && r.status === 'active');
+    const runDate = localDateKey();
+    const existing = runs.find(r => r.template_id === templateId && r.run_date === runDate);
     if (existing) return existing;
     const { data, error } = await sb()
       .from('user_quest_runs')
-      .insert({ user_id: user.id, template_id: templateId, status: 'active', step_progress: {}, progress_percent: 0 })
+      .insert({ user_id: user.id, template_id: templateId, status: 'active', step_progress: {}, progress_percent: 0, run_date: runDate })
       .select()
       .single();
-    if (error) { console.error('startRun', error); return null; }
+    if (error) {
+      // Unique-violation race: another tab already created today's run — fetch it.
+      if ((error as any).code === '23505') {
+        const { data: existingRow } = await sb()
+          .from('user_quest_runs')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('template_id', templateId)
+          .eq('run_date', runDate)
+          .maybeSingle();
+        return (existingRow as QuestRun) || null;
+      }
+      console.error('startRun', error);
+      return null;
+    }
     return data as QuestRun;
   }, [user?.id, runs]);
 
@@ -228,6 +250,7 @@ export function useMainQuests() {
   const completeRun = useCallback(async (runId: string) => {
     await sb().from('user_quest_runs').update({ status: 'completed', progress_percent: 100, completed_at: new Date().toISOString() }).eq('id', runId);
   }, []);
+
 
   return { templates, runs, runByTemplate, todayQuests, startRun, toggleStep, completeRun, loading };
 }
