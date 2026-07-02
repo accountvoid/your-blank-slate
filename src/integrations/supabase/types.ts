@@ -431,6 +431,7 @@ export type Database = {
           created_at: string
           id: string
           progress_percent: number
+          run_date: string
           started_at: string
           status: Database["public"]["Enums"]["quest_run_status"]
           step_progress: Json
@@ -443,6 +444,7 @@ export type Database = {
           created_at?: string
           id?: string
           progress_percent?: number
+          run_date?: string
           started_at?: string
           status?: Database["public"]["Enums"]["quest_run_status"]
           step_progress?: Json
@@ -455,6 +457,7 @@ export type Database = {
           created_at?: string
           id?: string
           progress_percent?: number
+          run_date?: string
           started_at?: string
           status?: Database["public"]["Enums"]["quest_run_status"]
           step_progress?: Json
