@@ -52,7 +52,9 @@ export interface QuestRun {
   progress_percent: number;
   started_at: string;
   completed_at: string | null;
+  run_date: string; // YYYY-MM-DD local calendar day
 }
+
 
 const sb = () => supabase as any;
 
