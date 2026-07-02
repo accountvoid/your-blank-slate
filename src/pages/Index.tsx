@@ -122,31 +122,43 @@ const Index = () => {
     }
   }, [maxLevel]);
 
-  // عقوبة انتهاء الوقت (24 ساعة)
+  // Local-midnight rollover penalty: if any main quest is still open when the
+  // player's local calendar date changes, trigger the penalty flow once.
   useEffect(() => {
     if (hybridQuestsState.length === 0) return;
-    
-    const checkExpired = () => {
-      const startTimeStr = localStorage.getItem('daily_quest_start');
-      if (!startTimeStr) return;
-      
-      const startTime = parseInt(startTimeStr);
-      const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
-      const elapsed = Date.now() - startTime;
 
-      if (elapsed >= TWENTY_FOUR_HOURS) {
-        const allCompleted = hybridQuestsState.every(q => q.completed);
-        if (!allCompleted) {
-          // تفجير العقوبة فوراً
-          failQuest(hybridQuestsState[0].id);
-          navigate('/penalty');
-        }
-      }
+    const localDateStr = () => {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     };
-    
-    const interval = setInterval(checkExpired, 5000);
-    return () => clearInterval(interval);
+    let currentDay = localDateStr();
+    const PENALTY_KEY = 'daily_quest_penalty_date_index';
+
+    const checkRollover = () => {
+      const today = localDateStr();
+      if (today === currentDay) return;
+      const finishedDay = currentDay;
+      currentDay = today;
+      const allCompleted = hybridQuestsState.every(q => q.completed);
+      if (allCompleted) return;
+      const last = (() => { try { return localStorage.getItem(PENALTY_KEY); } catch { return null; } })();
+      if (last === finishedDay) return;
+      try { localStorage.setItem(PENALTY_KEY, finishedDay); } catch { /* ignore */ }
+      failQuest(hybridQuestsState[0].id);
+      navigate('/penalty');
+    };
+
+    const interval = setInterval(checkRollover, 5000);
+    const onFocus = () => checkRollover();
+    document.addEventListener('visibilitychange', onFocus);
+    window.addEventListener('focus', onFocus);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', onFocus);
+      window.removeEventListener('focus', onFocus);
+    };
   }, [hybridQuestsState, failQuest, navigate]);
+
 
   // فحص أوقات الصلوات
   useEffect(() => {
