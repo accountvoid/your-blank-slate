@@ -34,7 +34,7 @@ const Quests = () => {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [showRecovery, setShowRecovery] = useState(false);
 
-  const { todayQuests, runByTemplate, startRun, toggleStep, completeRun, loading } = useMainQuests();
+  const { missions, progressByMission, startMission, toggleStep, completeMission, loading } = useSideMissions();
   const { needsAssessment, profile } = useRecoveryProfile();
 
   useEffect(() => { if (needsAssessment) setShowRecovery(true); }, [needsAssessment]);
@@ -44,32 +44,31 @@ const Quests = () => {
   const { ads: sponsoredAds } = useAds({ type: 'sponsored_mission', category: adCategory });
 
   const filtered = activeTab === 'all'
-    ? todayQuests
-    : todayQuests.filter(q => q.category === (activeTab as QuestCategory));
+    ? missions
+    : missions.filter(m => m.category === (activeTab as SideCategory));
 
-  const handleInitialize = async (tpl: QuestTemplate) => {
-    const r = await startRun(tpl.id);
+  const handleInitialize = async (m: SideMission) => {
+    const r = await startMission(m.id);
     if (r) {
-      setExpandedId(tpl.id);
-      toast({ title: t('quests.questInitialized', 'Quest accepted'), description: ar ? tpl.title_ar : tpl.title_en });
+      setExpandedId(m.id);
+      toast({ title: t('quests.questInitialized', 'Quest accepted'), description: ar ? m.title_ar : m.title_en });
     }
   };
 
-  const handleClaim = async (tpl: QuestTemplate) => {
-    const run = runByTemplate[tpl.id];
-    if (!run) return;
-    // Idempotency: never award twice for the same run.
-    if (run.status === 'completed') {
-      toast({ title: t('quest.completed', 'Completed'), description: ar ? tpl.title_ar : tpl.title_en });
+  const handleClaim = async (m: SideMission) => {
+    const row = progressByMission[m.id];
+    if (!row) return;
+    if (row.status === 'completed') {
+      toast({ title: t('quest.completed', 'Completed'), description: ar ? m.title_ar : m.title_en });
       return;
     }
-    await completeRun(run.id);
+    await completeMission(row.id);
     if (typeof awardCategoryXp === 'function') {
-      awardCategoryXp(tpl.category, tpl.xp_reward, tpl.gold_reward);
+      awardCategoryXp(m.category, m.xp_reward, m.gold_reward);
     }
     toast({
       title: t('quests.rewardsClaimed', 'Quest completed'),
-      description: `+${tpl.xp_reward} XP · +${tpl.gold_reward} G`,
+      description: `+${m.xp_reward} XP · +${m.gold_reward} G`,
     });
   };
 
