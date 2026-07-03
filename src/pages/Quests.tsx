@@ -13,7 +13,7 @@ import { useTranslation } from 'react-i18next';
 import type { StatType } from '@/types';
 import { useAds, type AdCategory } from '@/hooks/useAds';
 import { SponsoredMissionCard } from '@/components/ads/SponsoredMissionCard';
-import { useMainQuests, type QuestCategory, type QuestTemplate, type QuestRun } from '@/hooks/useMainQuests';
+import { useSideMissions, type SideCategory, type SideMission, type SideMissionProgress } from '@/hooks/useSideMissions';
 import { useRecoveryProfile } from '@/hooks/useRecoveryProfile';
 import { RecoveryAssessmentModal } from '@/components/quests/RecoveryAssessmentModal';
 
@@ -34,7 +34,7 @@ const Quests = () => {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [showRecovery, setShowRecovery] = useState(false);
 
-  const { todayQuests, runByTemplate, startRun, toggleStep, completeRun, loading } = useMainQuests();
+  const { missions, progressByMission, startMission, toggleStep, completeMission, loading } = useSideMissions();
   const { needsAssessment, profile } = useRecoveryProfile();
 
   useEffect(() => { if (needsAssessment) setShowRecovery(true); }, [needsAssessment]);
@@ -44,32 +44,31 @@ const Quests = () => {
   const { ads: sponsoredAds } = useAds({ type: 'sponsored_mission', category: adCategory });
 
   const filtered = activeTab === 'all'
-    ? todayQuests
-    : todayQuests.filter(q => q.category === (activeTab as QuestCategory));
+    ? missions
+    : missions.filter(m => m.category === (activeTab as SideCategory));
 
-  const handleInitialize = async (tpl: QuestTemplate) => {
-    const r = await startRun(tpl.id);
+  const handleInitialize = async (m: SideMission) => {
+    const r = await startMission(m.id);
     if (r) {
-      setExpandedId(tpl.id);
-      toast({ title: t('quests.questInitialized', 'Quest accepted'), description: ar ? tpl.title_ar : tpl.title_en });
+      setExpandedId(m.id);
+      toast({ title: t('quests.questInitialized', 'Quest accepted'), description: ar ? m.title_ar : m.title_en });
     }
   };
 
-  const handleClaim = async (tpl: QuestTemplate) => {
-    const run = runByTemplate[tpl.id];
-    if (!run) return;
-    // Idempotency: never award twice for the same run.
-    if (run.status === 'completed') {
-      toast({ title: t('quest.completed', 'Completed'), description: ar ? tpl.title_ar : tpl.title_en });
+  const handleClaim = async (m: SideMission) => {
+    const row = progressByMission[m.id];
+    if (!row) return;
+    if (row.status === 'completed') {
+      toast({ title: t('quest.completed', 'Completed'), description: ar ? m.title_ar : m.title_en });
       return;
     }
-    await completeRun(run.id);
+    await completeMission(row.id);
     if (typeof awardCategoryXp === 'function') {
-      awardCategoryXp(tpl.category, tpl.xp_reward, tpl.gold_reward);
+      awardCategoryXp(m.category, m.xp_reward, m.gold_reward);
     }
     toast({
       title: t('quests.rewardsClaimed', 'Quest completed'),
-      description: `+${tpl.xp_reward} XP · +${tpl.gold_reward} G`,
+      description: `+${m.xp_reward} XP · +${m.gold_reward} G`,
     });
   };
 
@@ -83,8 +82,8 @@ const Quests = () => {
 
   if (profileLoading) return <LoadingScreen fullScreen message="QUESTS" />;
 
-  const activeCount = filtered.filter(tpl => {
-    const r = runByTemplate[tpl.id];
+  const activeCount = filtered.filter(m => {
+    const r = progressByMission[m.id];
     return !r || r.status !== 'completed';
   }).length;
 
@@ -185,7 +184,7 @@ const Quests = () => {
           ) : (
             <>
               {filtered.map(tpl => {
-                const run = runByTemplate[tpl.id];
+                const run = progressByMission[tpl.id];
                 const Icon = catIconMap[tpl.category];
                 const title = ar ? tpl.title_ar : tpl.title_en;
                 const desc = ar ? tpl.description_ar : tpl.description_en;
@@ -289,7 +288,7 @@ const Quests = () => {
                                     <button
                                       type="button"
                                       disabled={!run || isCompleted}
-                                      onClick={() => run && toggleStep(run as QuestRun, s.id, total)}
+                                      onClick={() => run && toggleStep(run as SideMissionProgress, s.id, total)}
                                       className={cn(
                                         'w-full text-left flex gap-2 items-start p-2 border transition',
                                         done ? 'border-emerald-500/40 bg-emerald-500/5' : 'border-slate-700/60 bg-black/30',
