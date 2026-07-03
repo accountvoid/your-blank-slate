@@ -82,8 +82,8 @@ const Quests = () => {
 
   if (profileLoading) return <LoadingScreen fullScreen message="QUESTS" />;
 
-  const activeCount = filtered.filter(tpl => {
-    const r = runByTemplate[tpl.id];
+  const activeCount = filtered.filter(m => {
+    const r = progressByMission[m.id];
     return !r || r.status !== 'completed';
   }).length;
 
