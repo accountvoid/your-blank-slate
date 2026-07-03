@@ -184,7 +184,7 @@ const Quests = () => {
           ) : (
             <>
               {filtered.map(tpl => {
-                const run = runByTemplate[tpl.id];
+                const run = progressByMission[tpl.id];
                 const Icon = catIconMap[tpl.category];
                 const title = ar ? tpl.title_ar : tpl.title_en;
                 const desc = ar ? tpl.description_ar : tpl.description_en;
@@ -288,7 +288,7 @@ const Quests = () => {
                                     <button
                                       type="button"
                                       disabled={!run || isCompleted}
-                                      onClick={() => run && toggleStep(run as QuestRun, s.id, total)}
+                                      onClick={() => run && toggleStep(run as SideMissionProgress, s.id, total)}
                                       className={cn(
                                         'w-full text-left flex gap-2 items-start p-2 border transition',
                                         done ? 'border-emerald-500/40 bg-emerald-500/5' : 'border-slate-700/60 bg-black/30',
