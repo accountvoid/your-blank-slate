@@ -425,6 +425,122 @@ export type Database = {
         }
         Relationships: []
       }
+      side_mission_progress: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          mission_id: string
+          progress_percent: number
+          run_date: string
+          started_at: string
+          status: string
+          step_progress: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          mission_id: string
+          progress_percent?: number
+          run_date?: string
+          started_at?: string
+          status?: string
+          step_progress?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          mission_id?: string
+          progress_percent?: number
+          run_date?: string
+          started_at?: string
+          status?: string
+          step_progress?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "side_mission_progress_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "side_missions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      side_missions: {
+        Row: {
+          category: string
+          created_at: string
+          description_ar: string
+          description_en: string
+          difficulty: string
+          estimated_minutes: number
+          gold_reward: number
+          id: string
+          is_active: boolean
+          is_repeatable: boolean
+          mission_key: string
+          priority: number
+          steps: Json
+          title_ar: string
+          title_en: string
+          updated_at: string
+          warning_ar: string | null
+          warning_en: string | null
+          xp_reward: number
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description_ar?: string
+          description_en?: string
+          difficulty?: string
+          estimated_minutes?: number
+          gold_reward?: number
+          id?: string
+          is_active?: boolean
+          is_repeatable?: boolean
+          mission_key: string
+          priority?: number
+          steps?: Json
+          title_ar: string
+          title_en: string
+          updated_at?: string
+          warning_ar?: string | null
+          warning_en?: string | null
+          xp_reward?: number
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description_ar?: string
+          description_en?: string
+          difficulty?: string
+          estimated_minutes?: number
+          gold_reward?: number
+          id?: string
+          is_active?: boolean
+          is_repeatable?: boolean
+          mission_key?: string
+          priority?: number
+          steps?: Json
+          title_ar?: string
+          title_en?: string
+          updated_at?: string
+          warning_ar?: string | null
+          warning_en?: string | null
+          xp_reward?: number
+        }
+        Relationships: []
+      }
       user_quest_runs: {
         Row: {
           completed_at: string | null
