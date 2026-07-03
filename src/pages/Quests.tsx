@@ -13,7 +13,7 @@ import { useTranslation } from 'react-i18next';
 import type { StatType } from '@/types';
 import { useAds, type AdCategory } from '@/hooks/useAds';
 import { SponsoredMissionCard } from '@/components/ads/SponsoredMissionCard';
-import { useMainQuests, type QuestCategory, type QuestTemplate, type QuestRun } from '@/hooks/useMainQuests';
+import { useSideMissions, type SideCategory, type SideMission, type SideMissionProgress } from '@/hooks/useSideMissions';
 import { useRecoveryProfile } from '@/hooks/useRecoveryProfile';
 import { RecoveryAssessmentModal } from '@/components/quests/RecoveryAssessmentModal';
 
