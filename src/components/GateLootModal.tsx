@@ -141,31 +141,44 @@ export const GateLootModal = ({ show, rank, loot, onClose, onCollect }: GateLoot
 };
 
 /**
- * Generate Gate rewards per SETVOID spec:
+ * Hook that returns a stable `generate(rank)` function producing gate loot
+ * from the DB-driven `gate_items` catalog.
  *  - GOLD is ALWAYS granted (mandatory, scales by rank).
- *  - Each bonus item drops independently at 15%: XP Book, HP Elixir, MP Elixir, Cutting Stones.
+ *  - Every gate_item whose gate_rank matches (or ALL) rolls independently
+ *    against its own drop_rate.
  */
-export const generateGateLoot = (rank: string): LootItem[] => {
-  const loot: LootItem[] = [];
-  const gold = GATE_GOLD_BY_RANK[rank] ?? GATE_GOLD_BY_RANK.E;
-  loot.push({
-    id: 'gold',
-    icon: '💰',
-    quantity: gold,
-    rarity: 'common',
-    type: 'gold',
-  });
-  for (const def of GATE_BONUS_LOOT) {
-    if (Math.random() < def.chance) {
+export const useGateLootGenerator = () => {
+  const { items, rollDropsForRank } = useGateItems();
+
+  const generate = useCallback((rank: string): LootItem[] => {
+    const loot: LootItem[] = [];
+    const gold = GATE_GOLD_BY_RANK[rank] ?? GATE_GOLD_BY_RANK.E;
+    loot.push({ id: 'gold', icon: '💰', quantity: gold, rarity: 'common', type: 'gold' });
+    for (const it of rollDropsForRank(rank)) {
+      const rarity = (['common', 'uncommon', 'rare', 'epic', 'legendary'] as const).includes(it.rarity as any)
+        ? (it.rarity as LootItem['rarity'])
+        : 'common';
       loot.push({
-        id: def.id,
-        i18nKey: `items.${def.id}`,
-        icon: def.icon,
-        quantity: def.quantity,
-        rarity: def.rarity,
+        id: it.item_key,
+        i18nKey: `items.${it.item_key}`,
+        icon: it.icon,
+        quantity: it.quantity,
+        rarity,
         type: 'item',
       });
     }
-  }
-  return loot;
+    return loot;
+  }, [items, rollDropsForRank]);
+
+  return { generate, ready: items.length > 0 };
+};
+
+/**
+ * @deprecated Kept for backward-compat with callers that don't yet use
+ * `useGateLootGenerator`. Returns only mandatory gold; DB-driven bonus drops
+ * are only available through the hook.
+ */
+export const generateGateLoot = (rank: string): LootItem[] => {
+  const gold = GATE_GOLD_BY_RANK[rank] ?? GATE_GOLD_BY_RANK.E;
+  return [{ id: 'gold', icon: '💰', quantity: gold, rarity: 'common', type: 'gold' }];
 };
