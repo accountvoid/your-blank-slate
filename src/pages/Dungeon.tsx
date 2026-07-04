@@ -12,7 +12,7 @@ import { DungeonSystemMessage } from '@/features/dungeon/DungeonSystemMessage';
 import { StaminaModal } from '@/features/dungeon/DungeonEncounter';
 import { generateDungeon, countRoomTypes, STAMINA_TASKS } from '@/features/dungeon/dungeonGenerator';
 import { DungeonRoom, Position, SystemMessage, StaminaTask } from '@/features/dungeon/DungeonTypes';
-import { GateLootModal, generateGateLoot, type LootItem } from '@/components/GateLootModal';
+import { GateLootModal, useGateLootGenerator, type LootItem } from '@/components/GateLootModal';
 let username: string = "ALXMUS";
 const GRID_SIZE = 8;
 
@@ -43,6 +43,7 @@ const Dungeon = () => {
   const [searchParams] = useSearchParams();
   const { gameState, consumeItem, claimGateLoot } = useGameState();
   const { playPathSelect, playMonsterEncounter, playTreasureFound, playDungeonEnter, playBossEncounter } = useSoundEffects();
+  const { generate: generateGateLoot } = useGateLootGenerator();
   const rank = (searchParams.get('rank') || 'E').toUpperCase();
   const theme = RANK_THEMES[rank] || RANK_THEMES['E'];
 

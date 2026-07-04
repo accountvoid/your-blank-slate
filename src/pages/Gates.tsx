@@ -5,7 +5,7 @@ import { useProfile } from '@/hooks/useProfile';
 import { useGatesCatalog } from '@/hooks/useGatesCatalog';
 import { BottomNav } from '@/components/BottomNav';
 import { LoadingScreen } from '@/components/LoadingScreen';
-import { GateLootModal, generateGateLoot, LootItem } from '@/components/GateLootModal';
+import { GateLootModal, LootItem } from '@/components/GateLootModal';
 import { AlertTriangle, Zap, Target, Clock, X, Skull, Activity, Scan, Shield, Map as MapIcon, LocateFixed, Gift } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';

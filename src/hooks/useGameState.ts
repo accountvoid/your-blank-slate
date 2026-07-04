@@ -857,16 +857,20 @@ export const useGameState = () => {
     { id: 'mana_stone',     name: 'Mana Stone',        description: 'Forged from 5 Cutting Stones', type: 'tool', category: 'stone',  effect: 0,  price: 0,    quantity: 0, icon: '🔮' },
   ];
 
-  const purchaseItem = useCallback((itemId: string) => {
+  const purchaseItem = useCallback((itemId: string, catalogOverride?: Partial<InventoryItem>) => {
     setGameState(prev => {
       let item = prev.inventory.find(i => i.id === itemId);
       if (!item) {
-        item = MARKET_ITEMS.find(i => i.id === itemId);
-        if (!item || prev.gold < item.price) return prev;
-        return { ...prev, inventory: [...prev.inventory, { ...item, quantity: 1 }], gold: prev.gold - item.price };
+        const base = MARKET_ITEMS.find(i => i.id === itemId);
+        const merged: InventoryItem | undefined = catalogOverride
+          ? { ...(base as InventoryItem), ...catalogOverride, id: itemId, quantity: 0 } as InventoryItem
+          : base;
+        if (!merged || prev.gold < merged.price) return prev;
+        return { ...prev, inventory: [...prev.inventory, { ...merged, quantity: 1 }], gold: prev.gold - merged.price };
       }
-      if (prev.gold < item.price) return prev;
-      return { ...prev, inventory: prev.inventory.map(i => i.id === itemId ? { ...i, quantity: i.quantity + 1 } : i), gold: prev.gold - item.price };
+      const price = catalogOverride?.price ?? item.price;
+      if (prev.gold < price) return prev;
+      return { ...prev, inventory: prev.inventory.map(i => i.id === itemId ? { ...i, quantity: i.quantity + 1 } : i), gold: prev.gold - price };
     });
   }, []);
 
