@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useGameState } from '@/hooks/useGameState';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { BottomNav } from '@/components/BottomNav';
@@ -7,24 +7,46 @@ import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 import { AdBanner } from '@/components/ads/AdBanner';
+import { useShopItems } from '@/hooks/useShopItems';
 
 const Market = () => {
   const { gameState, purchaseItem, mergeCuttingStones } = useGameState();
   const { playPurchase } = useSoundEffects();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isAr = i18n.language?.startsWith('ar');
   const cuttingStonesOwned = (gameState.inventory || []).find(i => i.id === 'cutting_stones')?.quantity || 0;
   const CUTTING_NEED = 5;
-  
+
+  // ---- Database-driven catalog (shop_items) ----
+  const { items: dbShopItems, loading: shopLoading } = useShopItems();
+  const SOLO_ITEMS = useMemo(
+    () =>
+      dbShopItems.map((row) => ({
+        id: row.item_key,
+        i18nKey: `items.${row.item_key}`,
+        category: row.category,
+        difficulty: row.rank_required,
+        price: row.price_gold,
+        icon: row.icon,
+        rankLevel: row.level_required ?? 0,
+        name: isAr ? row.name_ar : row.name_en,
+        arabicName: row.name_ar,
+        description: isAr ? row.description_ar : row.description_en,
+        extra: '',
+        raw: row,
+      })),
+    [dbShopItems, isAr],
+  );
+
   const [isScanning, setIsScanning] = useState(false);
-  const [isExiting, setIsExiting] = useState(false); 
+  const [isExiting, setIsExiting] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [scanResult, setScanResult] = useState<'idle' | 'searching' | 'failed'>('idle');
   const [activeItem, setActiveItem] = useState(null);
 
-  // --- حالات متجر الذهب الجبارة ---
   const [showGoldShop, setShowGoldShop] = useState(false);
   const [goldShopExiting, setGoldShopExiting] = useState(false);
-  const [paymentStep, setPaymentStep] = useState('offers'); // offers, details, confirm
+  const [paymentStep, setPaymentStep] = useState('offers');
   const [selectedOffer, setSelectedOffer] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('');
   const [transactionId, setTransactionId] = useState('');
@@ -42,23 +64,9 @@ const Market = () => {
     A: { border: 'border-purple-500', text: 'text-purple-400', locked: true },
     B: { border: 'border-blue-500', text: 'text-blue-400', locked: false },
     C: { border: 'border-white/50', text: 'text-white', locked: false },
+    D: { border: 'border-gray-500', text: 'text-gray-300', locked: false },
     E: { border: 'border-gray-600', text: 'text-gray-400', locked: false },
   };
-
-  const SOLO_ITEMS = [
-    { id: 'hp_elixir',      i18nKey: 'items.hp_elixir',      category: 'consumable',       difficulty: 'E', price: 300,   icon: '🧪', rankLevel: 0, extra: t('items.stats.useOnly') },
-    { id: 'mp_elixir',      i18nKey: 'items.mp_elixir',      category: 'consumable',       difficulty: 'E', price: 300,   icon: '⚡', rankLevel: 0, extra: t('items.stats.useOnly') },
-    { id: 'xp_book',        i18nKey: 'items.xp_book',        category: 'consumable',       difficulty: 'E', price: 250,   icon: '📚', rankLevel: 0, extra: t('items.stats.useOnly') },
-    { id: 'stone_dagger',   i18nKey: 'items.stone_dagger',   category: 'weapon',           difficulty: 'D', price: 600,   icon: '🗡️', rankLevel: 0, extra: `+16 ${t('items.stats.health')} · +23 ${t('items.stats.damage')} · 150 ${t('items.stats.blows')}` },
-    { id: 'shadow_dagger',  i18nKey: 'items.shadow_dagger',  category: 'weapon',           difficulty: 'B', price: 11000, icon: '🗡️', rankLevel: 0, extra: `+92 ${t('items.stats.health')} · +231 ${t('items.stats.damage')} · 600 ${t('items.stats.blows')}` },
-    { id: 'cutting_stones', i18nKey: 'items.cutting_stones', category: 'special_material', difficulty: 'C', price: 7000,  icon: '💎', rankLevel: 0, extra: '' },
-    { id: 'mana_analyst',   i18nKey: 'items.mana_analyst',   category: 'utility',          difficulty: 'D', price: 1000,  icon: '📊', rankLevel: 0, extra: t('items.stats.usesCount', { count: 2 }) },
-  ].map(i => ({
-    ...i,
-    name: t(`${i.i18nKey}.name`),
-    arabicName: t(`${i.i18nKey}.name`),
-    description: t(`${i.i18nKey}.description`),
-  }));
 
   const getPlayerRank = () => {
     const level = gameState.totalLevel || 1;
