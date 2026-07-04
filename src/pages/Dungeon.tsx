@@ -43,6 +43,7 @@ const Dungeon = () => {
   const [searchParams] = useSearchParams();
   const { gameState, consumeItem, claimGateLoot } = useGameState();
   const { playPathSelect, playMonsterEncounter, playTreasureFound, playDungeonEnter, playBossEncounter } = useSoundEffects();
+  const { generate: generateGateLoot } = useGateLootGenerator();
   const rank = (searchParams.get('rank') || 'E').toUpperCase();
   const theme = RANK_THEMES[rank] || RANK_THEMES['E'];
 
