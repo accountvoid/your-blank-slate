@@ -246,6 +246,123 @@ export type Database = {
           },
         ]
       }
+      audit_logs: {
+        Row: {
+          action: string
+          admin_id: string | null
+          affected_record: string | null
+          affected_table: string
+          created_at: string
+          id: string
+          ip_address: string | null
+          new_value: Json | null
+          old_value: Json | null
+          user_agent: string | null
+        }
+        Insert: {
+          action: string
+          admin_id?: string | null
+          affected_record?: string | null
+          affected_table: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          new_value?: Json | null
+          old_value?: Json | null
+          user_agent?: string | null
+        }
+        Update: {
+          action?: string
+          admin_id?: string | null
+          affected_record?: string | null
+          affected_table?: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          new_value?: Json | null
+          old_value?: Json | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
+      gate_items: {
+        Row: {
+          category: string
+          created_at: string
+          description_ar: string
+          description_en: string
+          drop_rate: number
+          duration_minutes: number | null
+          effect_type: string | null
+          effect_value: number | null
+          gate_rank: string
+          icon: string
+          id: string
+          image: string | null
+          is_active: boolean
+          item_key: string
+          max_stack: number
+          metadata: Json
+          name_ar: string
+          name_en: string
+          quantity: number
+          rarity: string
+          sort_order: number
+          stackable: boolean
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description_ar?: string
+          description_en?: string
+          drop_rate?: number
+          duration_minutes?: number | null
+          effect_type?: string | null
+          effect_value?: number | null
+          gate_rank?: string
+          icon?: string
+          id?: string
+          image?: string | null
+          is_active?: boolean
+          item_key: string
+          max_stack?: number
+          metadata?: Json
+          name_ar: string
+          name_en: string
+          quantity?: number
+          rarity?: string
+          sort_order?: number
+          stackable?: boolean
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description_ar?: string
+          description_en?: string
+          drop_rate?: number
+          duration_minutes?: number | null
+          effect_type?: string | null
+          effect_value?: number | null
+          gate_rank?: string
+          icon?: string
+          id?: string
+          image?: string | null
+          is_active?: boolean
+          item_key?: string
+          max_stack?: number
+          metadata?: Json
+          name_ar?: string
+          name_en?: string
+          quantity?: number
+          rarity?: string
+          sort_order?: number
+          stackable?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       payments: {
         Row: {
           amount_usd: number
@@ -425,6 +542,87 @@ export type Database = {
         }
         Relationships: []
       }
+      shop_items: {
+        Row: {
+          can_purchase: boolean
+          category: string
+          created_at: string
+          description_ar: string
+          description_en: string
+          duration_minutes: number | null
+          effect_type: string | null
+          effect_value: number | null
+          icon: string
+          id: string
+          image: string | null
+          is_active: boolean
+          item_key: string
+          level_required: number
+          max_stack: number
+          metadata: Json
+          name_ar: string
+          name_en: string
+          price_gold: number
+          rank_required: string
+          rarity: string
+          sort_order: number
+          stackable: boolean
+          updated_at: string
+        }
+        Insert: {
+          can_purchase?: boolean
+          category: string
+          created_at?: string
+          description_ar?: string
+          description_en?: string
+          duration_minutes?: number | null
+          effect_type?: string | null
+          effect_value?: number | null
+          icon?: string
+          id?: string
+          image?: string | null
+          is_active?: boolean
+          item_key: string
+          level_required?: number
+          max_stack?: number
+          metadata?: Json
+          name_ar: string
+          name_en: string
+          price_gold?: number
+          rank_required?: string
+          rarity?: string
+          sort_order?: number
+          stackable?: boolean
+          updated_at?: string
+        }
+        Update: {
+          can_purchase?: boolean
+          category?: string
+          created_at?: string
+          description_ar?: string
+          description_en?: string
+          duration_minutes?: number | null
+          effect_type?: string | null
+          effect_value?: number | null
+          icon?: string
+          id?: string
+          image?: string | null
+          is_active?: boolean
+          item_key?: string
+          level_required?: number
+          max_stack?: number
+          metadata?: Json
+          name_ar?: string
+          name_en?: string
+          price_gold?: number
+          rank_required?: string
+          rarity?: string
+          sort_order?: number
+          stackable?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       side_mission_progress: {
         Row: {
           completed_at: string | null
@@ -541,6 +739,48 @@ export type Database = {
         }
         Relationships: []
       }
+      user_inventory: {
+        Row: {
+          acquired_at: string
+          created_at: string
+          equipped: boolean
+          expires_at: string | null
+          id: string
+          item_key: string
+          metadata: Json
+          quantity: number
+          source: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          acquired_at?: string
+          created_at?: string
+          equipped?: boolean
+          expires_at?: string | null
+          id?: string
+          item_key: string
+          metadata?: Json
+          quantity?: number
+          source: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          acquired_at?: string
+          created_at?: string
+          equipped?: boolean
+          expires_at?: string | null
+          id?: string
+          item_key?: string
+          metadata?: Json
+          quantity?: number
+          source?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_quest_runs: {
         Row: {
           completed_at: string | null
@@ -591,6 +831,30 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          granted_by: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          granted_by?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          granted_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -624,6 +888,15 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_admin_or_higher: { Args: { _user_id: string }; Returns: boolean }
+      is_super_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       ad_banner_size: "horizontal" | "square" | "full_width"
@@ -631,6 +904,7 @@ export type Database = {
       ad_event_type: "view" | "click" | "start" | "complete" | "claim"
       ad_status: "active" | "inactive" | "archived"
       ad_type: "banner" | "video" | "sponsored_mission"
+      app_role: "user" | "moderator" | "admin" | "super_admin"
       quest_category: "strength" | "mind" | "spirit" | "agility"
       quest_difficulty: "easy" | "medium" | "hard" | "legendary"
       quest_run_status: "active" | "completed" | "failed" | "abandoned"
@@ -775,6 +1049,7 @@ export const Constants = {
       ad_event_type: ["view", "click", "start", "complete", "claim"],
       ad_status: ["active", "inactive", "archived"],
       ad_type: ["banner", "video", "sponsored_mission"],
+      app_role: ["user", "moderator", "admin", "super_admin"],
       quest_category: ["strength", "mind", "spirit", "agility"],
       quest_difficulty: ["easy", "medium", "hard", "legendary"],
       quest_run_status: ["active", "completed", "failed", "abandoned"],
