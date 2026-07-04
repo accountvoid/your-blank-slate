@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { X, Gift, Sparkles, Package } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
-import { GATE_BONUS_LOOT, GATE_GOLD_BY_RANK } from '@/lib/marketItems';
+import { GATE_GOLD_BY_RANK } from '@/lib/marketItems';
+import { useGateItems } from '@/hooks/useGateItems';
 
 export interface LootItem {
   id: string;
