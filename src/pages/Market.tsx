@@ -491,6 +491,14 @@ const Market = () => {
 
       <main className="relative z-10 max-w-md mx-auto space-y-12 animate-in fade-in duration-1000">
         <AdBanner placement="shop" />
+        {shopLoading && visibleItems.length === 0 && (
+          <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 text-blue-400 animate-spin" /></div>
+        )}
+        {!shopLoading && visibleItems.length === 0 && (
+          <div className="text-center text-slate-500 text-xs uppercase tracking-widest py-10">
+            {t('market.notFound')}
+          </div>
+        )}
         {visibleItems.map((item) => {
           const isAlphaLocked = item.difficulty === 'S' || item.difficulty === 'A';
           const rarity = RARITY_CONFIG[item.difficulty] || RARITY_CONFIG.E;
