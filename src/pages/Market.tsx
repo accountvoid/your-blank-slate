@@ -121,10 +121,20 @@ const Market = () => {
     }, 800);
   };
 
+  const overrideFor = (item: any) => ({
+    name: item.arabicName || item.name,
+    description: item.description,
+    price: item.price,
+    icon: item.icon,
+    category: item.category,
+    effect: Number(item.raw?.effect_value ?? 0),
+    type: (item.raw?.effect_type as any) || 'tool',
+  });
+
   const handlePurchase = (item) => {
     if (!canSeeItem(item)) { startSystemScan(item); return; }
     if (gameState.gold >= item.price) {
-      purchaseItem(item.id);
+      purchaseItem(item.id, overrideFor(item));
       playPurchase();
       toast({ title: t('common.successTitle'), description: t('market.successAcquired', { name: item.name }) });
     } else {
@@ -136,7 +146,8 @@ const Market = () => {
     if (!canSeeItem(item)) { startSystemScan(item); return; }
     const maxAffordable = Math.floor(gameState.gold / item.price);
     if (maxAffordable > 0) {
-      for (let i = 0; i < maxAffordable; i++) purchaseItem(item.id);
+      const ov = overrideFor(item);
+      for (let i = 0; i < maxAffordable; i++) purchaseItem(item.id, ov);
       playPurchase();
       toast({ title: t('common.successTitle'), description: t('market.maxAcquired', { count: maxAffordable, name: item.name }) });
     } else {
