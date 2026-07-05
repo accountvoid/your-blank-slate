@@ -12,12 +12,14 @@
 - Market page reads shop_items via realtime; Dungeon uses `useGateLootGenerator`
 - `purchaseItem` accepts DB catalog override so prices/effects come from DB
 
-## Phase 2 — Admin Panel foundation (next)
-- `/admin` route + `RequireRole` guard using `useUserRole`
-- Layout with sidebar, dark theme, responsive
-- Dashboard: users, active users, XP total, gold total, gates completed, missions completed, recent registrations, recent activities
-- Reusable `AdminTable` (search, sort, filter, paginate, enable/disable, duplicate, delete)
-- `audit_log` helper that logs every mutation
+## Phase 2 — Admin Panel foundation — DONE (this turn)
+- `RequireRole` guard using `useUserRole`
+- `AdminLayout` with sidebar + mobile top-scroll nav (dark, responsive)
+- `AdminTable` reusable (search, sort, paginate, actions slot)
+- `logAudit` helper in `src/lib/audit.ts` (never-throws)
+- `admin_dashboard_stats()` SECURITY DEFINER RPC (admins only) — users/active/registrations/gates/missions/inventory/ads/payments/gold/audits
+- `/admin` route mounted with placeholder pages for the CRUD modules
+- AppHeader hidden on `/admin/*`
 
 ## Phase 3 — CRUD modules
 Shop Items · Gate Items · Users · Main Missions · Side Missions · Gates · Monsters · Bosses · Achievements · Titles · Ranks · Rewards · Notifications · Redeem Codes · Daily Missions · Weekly Missions · Skills · Equipment · Inventory Templates · Settings · Events
