@@ -36,9 +36,6 @@ const Penalty = lazy(() => import("./pages/Penalty"));
 const AdminLayout = lazy(() => import("./components/admin/AdminLayout"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const AdminPlaceholder = lazy(() => import("./pages/admin/AdminPlaceholder"));
-const RequireRoleLazy = lazy(() =>
-  import("./components/admin/RequireRole").then((m) => ({ default: m.RequireRole })),
-);
 
 const LAZY_LOADERS = [
   () => import("./pages/Quests"),
