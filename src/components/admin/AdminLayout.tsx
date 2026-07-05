@@ -16,7 +16,6 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUserRole } from '@/hooks/useUserRole';
-import { useNavigate as useNav } from 'react-router-dom';
 
 interface NavItem {
   to: string;
