@@ -113,7 +113,7 @@ const AppContent = () => {
 
   return (
     <>
-      <AppHeader />
+      {!location.pathname.startsWith('/admin') && <AppHeader />}
       <Suspense fallback={<LoadingScreen fullScreen message="LOADING" />}>
         <Routes>
           <Route path="/" element={<Index />} />
@@ -131,6 +131,24 @@ const AppContent = () => {
           <Route path="/onboarding" element={<Navigate to="/" replace />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/penalty" element={<Penalty />} />
+          <Route
+            path="/admin"
+            element={
+              <RequireRole role="admin">
+                <AdminLayout />
+              </RequireRole>
+            }
+          >
+            <Route index element={<AdminDashboard />} />
+            <Route path="shop-items" element={<AdminPlaceholder title="Shop Items" description="Manage the market catalog." />} />
+            <Route path="gate-items" element={<AdminPlaceholder title="Gate Items" description="Manage gate drop pools." />} />
+            <Route path="users" element={<AdminPlaceholder title="Users" description="Search, ban, and adjust player state." />} />
+            <Route path="side-missions" element={<AdminPlaceholder title="Side Missions" description="Manage the daily side mission catalog." />} />
+            <Route path="main-quests" element={<AdminPlaceholder title="Main Quests" description="Manage main quest templates." />} />
+            <Route path="ads" element={<AdminPlaceholder title="Ads" description="Manage advertising campaigns." />} />
+            <Route path="audit" element={<AdminPlaceholder title="Audit Logs" description="Every admin action recorded." />} />
+            <Route path="settings" element={<AdminPlaceholder title="Settings" description="Global multipliers, timers, and drop rates." />} />
+          </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
