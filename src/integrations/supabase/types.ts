@@ -860,6 +860,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_dashboard_stats: { Args: never; Returns: Json }
       credit_payment_gold: {
         Args: { payment_id: string }
         Returns: {
