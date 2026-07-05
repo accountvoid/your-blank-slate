@@ -7,7 +7,6 @@ import {
   Users,
   ClipboardList,
   Swords,
-  Sparkles,
   Megaphone,
   ScrollText,
   Settings,
