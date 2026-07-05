@@ -18,6 +18,7 @@ import Index from "./pages/Index";
 import Onboarding from "./pages/Onboarding";
 import AuthCallback from "./pages/AuthCallback";
 import NotFound from "./pages/NotFound";
+import { RequireRole } from "./components/admin/RequireRole";
 
 // Lazy chunks — preloaded on idle after auth.
 const Quests = lazy(() => import("./pages/Quests"));
