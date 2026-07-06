@@ -142,8 +142,8 @@ const AppContent = () => {
             }
           >
             <Route index element={<AdminDashboard />} />
-            <Route path="shop-items" element={<AdminPlaceholder title="Shop Items" description="Manage the market catalog." />} />
-            <Route path="gate-items" element={<AdminPlaceholder title="Gate Items" description="Manage gate drop pools." />} />
+            <Route path="shop-items" element={<AdminShopItems />} />
+            <Route path="gate-items" element={<AdminGateItems />} />
             <Route path="users" element={<AdminPlaceholder title="Users" description="Search, ban, and adjust player state." />} />
             <Route path="side-missions" element={<AdminPlaceholder title="Side Missions" description="Manage the daily side mission catalog." />} />
             <Route path="main-quests" element={<AdminPlaceholder title="Main Quests" description="Manage main quest templates." />} />
