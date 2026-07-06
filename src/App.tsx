@@ -36,6 +36,8 @@ const Penalty = lazy(() => import("./pages/Penalty"));
 const AdminLayout = lazy(() => import("./components/admin/AdminLayout"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const AdminPlaceholder = lazy(() => import("./pages/admin/AdminPlaceholder"));
+const AdminShopItems = lazy(() => import("./pages/admin/AdminShopItems"));
+const AdminGateItems = lazy(() => import("./pages/admin/AdminGateItems"));
 
 const LAZY_LOADERS = [
   () => import("./pages/Quests"),
@@ -140,8 +142,8 @@ const AppContent = () => {
             }
           >
             <Route index element={<AdminDashboard />} />
-            <Route path="shop-items" element={<AdminPlaceholder title="Shop Items" description="Manage the market catalog." />} />
-            <Route path="gate-items" element={<AdminPlaceholder title="Gate Items" description="Manage gate drop pools." />} />
+            <Route path="shop-items" element={<AdminShopItems />} />
+            <Route path="gate-items" element={<AdminGateItems />} />
             <Route path="users" element={<AdminPlaceholder title="Users" description="Search, ban, and adjust player state." />} />
             <Route path="side-missions" element={<AdminPlaceholder title="Side Missions" description="Manage the daily side mission catalog." />} />
             <Route path="main-quests" element={<AdminPlaceholder title="Main Quests" description="Manage main quest templates." />} />
