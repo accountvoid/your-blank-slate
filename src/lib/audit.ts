@@ -32,12 +32,12 @@ export const logAudit = async ({ action, table, recordId, oldValue, newValue }: 
     const adminId = u.user?.id;
     if (!adminId) return;
     await supabase.from('audit_logs').insert({
-      admin_id: adminId,
+      actor_id: adminId,
       action,
-      affected_table: table,
-      affected_record: recordId ?? null,
-      old_value: (oldValue ?? null) as never,
-      new_value: (newValue ?? null) as never,
+      table_name: table,
+      record_id: recordId ?? null,
+      before: (oldValue ?? null) as never,
+      after: (newValue ?? null) as never,
       user_agent: typeof navigator !== 'undefined' ? navigator.userAgent : null,
     });
   } catch {
