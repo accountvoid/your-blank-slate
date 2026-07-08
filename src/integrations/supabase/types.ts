@@ -158,6 +158,81 @@ export type Database = {
         }
         Relationships: []
       }
+      gate_items: {
+        Row: {
+          category: string
+          created_at: string
+          description_ar: string | null
+          description_en: string | null
+          drop_rate: number
+          duration_minutes: number | null
+          effect_type: string | null
+          effect_value: number | null
+          gate_rank: string
+          icon: string
+          id: string
+          image: string | null
+          is_active: boolean
+          item_key: string
+          max_stack: number
+          name_ar: string
+          name_en: string
+          quantity: number
+          rarity: string
+          sort_order: number
+          stackable: boolean
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description_ar?: string | null
+          description_en?: string | null
+          drop_rate?: number
+          duration_minutes?: number | null
+          effect_type?: string | null
+          effect_value?: number | null
+          gate_rank?: string
+          icon?: string
+          id?: string
+          image?: string | null
+          is_active?: boolean
+          item_key: string
+          max_stack?: number
+          name_ar: string
+          name_en: string
+          quantity?: number
+          rarity?: string
+          sort_order?: number
+          stackable?: boolean
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description_ar?: string | null
+          description_en?: string | null
+          drop_rate?: number
+          duration_minutes?: number | null
+          effect_type?: string | null
+          effect_value?: number | null
+          gate_rank?: string
+          icon?: string
+          id?: string
+          image?: string | null
+          is_active?: boolean
+          item_key?: string
+          max_stack?: number
+          name_ar?: string
+          name_en?: string
+          quantity?: number
+          rarity?: string
+          sort_order?: number
+          stackable?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       gates: {
         Row: {
           battle_sessions: Json
@@ -548,6 +623,84 @@ export type Database = {
         }
         Relationships: []
       }
+      shop_items: {
+        Row: {
+          can_purchase: boolean
+          category: string
+          created_at: string
+          description_ar: string | null
+          description_en: string | null
+          duration_minutes: number | null
+          effect_type: string | null
+          effect_value: number | null
+          icon: string
+          id: string
+          image: string | null
+          is_active: boolean
+          item_key: string
+          level_required: number
+          max_stack: number
+          name_ar: string
+          name_en: string
+          price_gold: number
+          rank_required: string
+          rarity: string
+          sort_order: number
+          stackable: boolean
+          updated_at: string
+        }
+        Insert: {
+          can_purchase?: boolean
+          category?: string
+          created_at?: string
+          description_ar?: string | null
+          description_en?: string | null
+          duration_minutes?: number | null
+          effect_type?: string | null
+          effect_value?: number | null
+          icon?: string
+          id?: string
+          image?: string | null
+          is_active?: boolean
+          item_key: string
+          level_required?: number
+          max_stack?: number
+          name_ar: string
+          name_en: string
+          price_gold?: number
+          rank_required?: string
+          rarity?: string
+          sort_order?: number
+          stackable?: boolean
+          updated_at?: string
+        }
+        Update: {
+          can_purchase?: boolean
+          category?: string
+          created_at?: string
+          description_ar?: string | null
+          description_en?: string | null
+          duration_minutes?: number | null
+          effect_type?: string | null
+          effect_value?: number | null
+          icon?: string
+          id?: string
+          image?: string | null
+          is_active?: boolean
+          item_key?: string
+          level_required?: number
+          max_stack?: number
+          name_ar?: string
+          name_en?: string
+          price_gold?: number
+          rank_required?: string
+          rarity?: string
+          sort_order?: number
+          stackable?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       side_items: {
         Row: {
           buy_price: number
@@ -683,6 +836,42 @@ export type Database = {
           updated_at?: string
           updated_by?: string | null
           value?: Json
+        }
+        Relationships: []
+      }
+      user_inventory: {
+        Row: {
+          acquired_at: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          item_key: string
+          quantity: number
+          source: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          acquired_at?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          item_key: string
+          quantity?: number
+          source?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          acquired_at?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          item_key?: string
+          quantity?: number
+          source?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -955,7 +1144,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "super_admin" | "admin" | "moderator"
+      app_role: "super_admin" | "admin" | "moderator" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1083,7 +1272,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["super_admin", "admin", "moderator"],
+      app_role: ["super_admin", "admin", "moderator", "user"],
     },
   },
 } as const
