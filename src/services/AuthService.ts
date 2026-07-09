@@ -8,8 +8,8 @@ import { supabase } from '@/integrations/supabase/client';
 export const AuthService = {
   getSession: () => supabase.auth.getSession(),
   getUser: () => supabase.auth.getUser(),
-  onAuthStateChange: (cb: Parameters<typeof supabase.auth.onAuthStateChange>[0]) =>
-    supabase.auth.onAuthStateChange(cb),
+  onAuthStateChange: (cb: (event: string, session: any) => void | Promise<void>) =>
+    supabase.auth.onAuthStateChange(cb as any),
 
   signUp: (email: string, password: string, playerName: string) =>
     supabase.auth.signUp({ email, password, options: { data: { player_name: playerName } } }),
