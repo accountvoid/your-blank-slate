@@ -1,12 +1,8 @@
-import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMainQuests, QuestCategory, QuestTemplate, QuestStep } from '@/hooks/useMainQuests';
-import { useRecoveryProfile } from '@/hooks/useRecoveryProfile';
 import { useGameState } from '@/hooks/useGameState';
 import { MainQuestCard } from './MainQuestCard';
-import { RecoveryAssessmentModal } from './RecoveryAssessmentModal';
 import { toast } from '@/hooks/use-toast';
-import { Settings2 } from 'lucide-react';
 
 interface Props {
   /** When set, only render quests for this category (used in Quests page tabs). */
@@ -20,13 +16,7 @@ interface Props {
 export function TodayMainQuests({ category }: Props) {
   const { t } = useTranslation();
   const { todayQuests, runByTemplate, startRun, toggleStep, completeRun, loading } = useMainQuests();
-  const { needsAssessment, profile } = useRecoveryProfile();
   const { awardCategoryXp } = useGameState() as any;
-  const [showRecovery, setShowRecovery] = useState(false);
-
-  useEffect(() => {
-    if (needsAssessment) setShowRecovery(true);
-  }, [needsAssessment]);
 
   const quests = category ? todayQuests.filter(q => q.category === category) : todayQuests;
 
@@ -60,22 +50,13 @@ export function TodayMainQuests({ category }: Props) {
         <h2 className="text-[11px] font-black tracking-[0.3em] uppercase text-slate-300">
           {t('quest.todayMain', "Today's Main Quests")}
         </h2>
-        <button
-          onClick={() => setShowRecovery(true)}
-          className="flex items-center gap-1 text-[9px] uppercase tracking-widest text-blue-300/70 hover:text-blue-300"
-        >
-          <Settings2 className="w-3 h-3" />
-          {profile ? t('recovery.update', 'Recovery') : t('recovery.set', 'Set recovery')}
-        </button>
       </div>
 
       {loading ? (
         <div className="text-center text-[10px] text-slate-500 py-6">{t('common.loading', 'Loading...')}</div>
       ) : quests.length === 0 ? (
         <div className="border border-slate-800 bg-black/30 p-4 text-center text-[10px] text-slate-400">
-          {category === 'strength'
-            ? t('quest.restDay', 'Today is a recovery day — no strength workout. Stretch and hydrate.')
-            : t('quest.noneToday', 'No main quests scheduled in this category today.')}
+          {t('quest.noneToday', 'No main quests available. Check back soon.')}
         </div>
       ) : (
         <div className="space-y-5">
@@ -91,8 +72,6 @@ export function TodayMainQuests({ category }: Props) {
           ))}
         </div>
       )}
-
-      <RecoveryAssessmentModal open={showRecovery} onClose={() => setShowRecovery(false)} />
     </section>
   );
 }

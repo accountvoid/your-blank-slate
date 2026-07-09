@@ -875,6 +875,51 @@ export type Database = {
         }
         Relationships: []
       }
+      user_quest_runs: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          progress_percent: number
+          quest_id: string
+          quest_kind: string
+          run_date: string
+          started_at: string
+          status: string
+          step_progress: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          progress_percent?: number
+          quest_id: string
+          quest_kind: string
+          run_date?: string
+          started_at?: string
+          status?: string
+          step_progress?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          progress_percent?: number
+          quest_id?: string
+          quest_kind?: string
+          run_date?: string
+          started_at?: string
+          status?: string
+          step_progress?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string

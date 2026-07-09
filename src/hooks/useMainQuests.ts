@@ -1,27 +1,30 @@
-import { useEffect, useState, useCallback, useMemo } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { useRecoveryProfile } from '@/hooks/useRecoveryProfile';
+import { QuestService, type MainQuestRow, type QuestRunRow } from '@/services/QuestService';
 
 export type QuestCategory = 'strength' | 'mind' | 'spirit' | 'agility';
 export type QuestDifficulty = 'easy' | 'medium' | 'hard' | 'legendary';
-export type QuestStepType = 'warmup' | 'exercise' | 'set' | 'reading' | 'practice' | 'stretch' | 'note' | 'cardio';
 export type QuestRunStatus = 'active' | 'completed' | 'failed' | 'abandoned';
 
+/**
+ * A step inside a quest. Steps are stored as a JSONB array on
+ * `main_quests.steps` (and side_quests / grand_quests). Steps are unlimited
+ * and defined 100% in the database — no frontend fallbacks.
+ */
 export interface QuestStep {
   id: string;
-  template_id: string;
   order_index: number;
-  step_type: QuestStepType;
+  step_type?: string;
   title_en: string;
   title_ar: string;
-  detail_en: string | null;
-  detail_ar: string | null;
-  reps: number[] | null;
-  sets: number | null;
-  duration_minutes: number | null;
+  detail_en?: string | null;
+  detail_ar?: string | null;
+  reps?: number[] | null;
+  sets?: number | null;
+  duration_minutes?: number | null;
 }
 
+/** Legacy alias kept so existing components keep compiling. */
 export interface QuestTemplate {
   id: string;
   category: QuestCategory;
@@ -33,35 +36,24 @@ export interface QuestTemplate {
   estimated_minutes: number;
   xp_reward: number;
   gold_reward: number;
-  recovery_required: boolean;
-  day_of_week: number | null;
-  program_tag: string | null;
   warning_en: string | null;
   warning_ar: string | null;
-  active: boolean;
-  priority: number;
   steps: QuestStep[];
 }
 
 export interface QuestRun {
   id: string;
   user_id: string;
-  template_id: string;
+  template_id: string; // = quest_id (legacy name kept for card compatibility)
   status: QuestRunStatus;
   step_progress: Record<string, boolean>;
   progress_percent: number;
   started_at: string;
   completed_at: string | null;
-  run_date: string; // YYYY-MM-DD local calendar day
+  run_date: string;
 }
 
-
-const sb = () => supabase as any;
-
-const todayDow = () => new Date().getDay();
-
-// Local calendar date in YYYY-MM-DD (used as the daily reset key). Aligned to
-// the player's local timezone so every player rolls over at their local 00:00.
+/** Local calendar-day key used to reset progress at each player's midnight. */
 const localDateKey = (d = new Date()) => {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, '0');
@@ -69,35 +61,70 @@ const localDateKey = (d = new Date()) => {
   return `${y}-${m}-${day}`;
 };
 
-// Milliseconds until the next local midnight (exclusive).
-const msUntilNextLocalMidnight = () => {
+const msUntilNextMidnight = () => {
   const now = new Date();
   const next = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0, 0);
   return next.getTime() - now.getTime();
 };
 
+const normaliseSteps = (raw: unknown): QuestStep[] => {
+  if (!Array.isArray(raw)) return [];
+  return raw.map((s: any, idx: number) => ({
+    id: String(s?.id ?? idx),
+    order_index: Number(s?.order_index ?? idx),
+    step_type: s?.step_type ?? undefined,
+    title_en: String(s?.title_en ?? s?.title ?? ''),
+    title_ar: String(s?.title_ar ?? s?.title ?? ''),
+    detail_en: s?.detail_en ?? null,
+    detail_ar: s?.detail_ar ?? null,
+    reps: Array.isArray(s?.reps) ? s.reps : null,
+    sets: s?.sets ?? null,
+    duration_minutes: s?.duration_minutes ?? null,
+  })).sort((a, b) => a.order_index - b.order_index);
+};
+
+const toTemplate = (r: MainQuestRow): QuestTemplate => ({
+  id: r.id,
+  category: (r.category as QuestCategory) ?? 'mind',
+  title_en: r.title_en ?? '',
+  title_ar: r.title_ar ?? '',
+  description_en: r.description_en ?? '',
+  description_ar: r.description_ar ?? '',
+  difficulty: (r.difficulty as QuestDifficulty) ?? 'easy',
+  estimated_minutes: r.estimated_minutes ?? 0,
+  xp_reward: r.xp_reward ?? 0,
+  gold_reward: r.gold_reward ?? 0,
+  warning_en: r.warning_en ?? null,
+  warning_ar: r.warning_ar ?? null,
+  steps: normaliseSteps((r as any).steps),
+});
+
+/**
+ * Loads the Main Quest catalog from `main_quests`, plus this user's daily
+ * runs from `user_quest_runs`. Fully realtime — admin edits and progress
+ * updates propagate instantly. No hardcoded quest data anywhere.
+ */
 export function useMainQuests() {
   const { user } = useAuth();
-  const { programTag, loaded: recoveryLoaded } = useRecoveryProfile();
   const [templates, setTemplates] = useState<QuestTemplate[]>([]);
-  const [runs, setRuns] = useState<QuestRun[]>([]);
+  const [runs, setRuns] = useState<QuestRunRow[]>([]);
   const [loading, setLoading] = useState(true);
-  // Bumps at every local midnight so memos re-pick today's quests without a reload.
   const [todayKey, setTodayKey] = useState<string>(localDateKey());
 
+  // Refresh the local-day key at midnight (and on tab focus).
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;
     const schedule = () => {
       timer = setTimeout(() => {
         setTodayKey(localDateKey());
         schedule();
-      }, msUntilNextLocalMidnight() + 250);
+      }, msUntilNextMidnight() + 250);
     };
     schedule();
-    const onVis = () => {
-      const key = localDateKey();
-      setTodayKey(prev => (prev === key ? prev : key));
-    };
+    const onVis = () => setTodayKey(prev => {
+      const k = localDateKey();
+      return k === prev ? prev : k;
+    });
     document.addEventListener('visibilitychange', onVis);
     window.addEventListener('focus', onVis);
     return () => {
@@ -107,150 +134,83 @@ export function useMainQuests() {
     };
   }, []);
 
-
-  // Load catalog (templates + steps).
+  // Load catalog + subscribe to admin changes.
   useEffect(() => {
     let cancelled = false;
-    (async () => {
-      setLoading(true);
-      const { data: tpls, error: e1 } = await sb()
-        .from('quest_templates')
-        .select('*')
-        .eq('active', true);
-      if (cancelled) return;
-      if (e1 || !tpls) {
-        setTemplates([]);
+    const load = async () => {
+      const rows = await QuestService.listMain();
+      if (!cancelled) {
+        setTemplates(rows.map(toTemplate));
         setLoading(false);
-        return;
       }
-      const ids = tpls.map((t: any) => t.id);
-      const { data: steps } = ids.length
-        ? await sb().from('quest_template_steps').select('*').in('template_id', ids).order('order_index', { ascending: true })
-        : { data: [] as any[] };
-      if (cancelled) return;
-      const stepsBy: Record<string, QuestStep[]> = {};
-      (steps || []).forEach((s: any) => {
-        (stepsBy[s.template_id] ||= []).push(s as QuestStep);
-      });
-      setTemplates(tpls.map((t: any) => ({ ...t, steps: stepsBy[t.id] || [] })) as QuestTemplate[]);
-      setLoading(false);
-    })();
-    return () => { cancelled = true; };
+    };
+    load();
+    const unsub = QuestService.subscribeCatalog(load);
+    return () => { cancelled = true; unsub(); };
   }, []);
 
-  // Load + subscribe to runs for current user. Fetch a small window (last 7
-  // days) so the streak/history logic keeps working; today's runs are picked
-  // out via `runByTemplate` below.
+  // Load + subscribe to this user's daily runs.
   useEffect(() => {
     if (!user?.id) { setRuns([]); return; }
     let cancelled = false;
     const since = new Date();
     since.setDate(since.getDate() - 7);
     const sinceKey = localDateKey(since);
-    (async () => {
-      const { data } = await sb()
-        .from('user_quest_runs')
-        .select('*')
-        .eq('user_id', user.id)
-        .gte('run_date', sinceKey);
-      if (!cancelled) setRuns((data || []) as QuestRun[]);
-    })();
-    const channel = sb()
-      .channel(`user_quest_runs:${user.id}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'user_quest_runs', filter: `user_id=eq.${user.id}` }, (payload: any) => {
-        setRuns(prev => {
-          if (payload.eventType === 'DELETE') return prev.filter(r => r.id !== payload.old.id);
-          const row = payload.new as QuestRun;
-          const i = prev.findIndex(r => r.id === row.id);
-          if (i === -1) return [...prev, row];
-          const copy = prev.slice();
-          copy[i] = row;
-          return copy;
-        });
-      })
-      .subscribe();
-    return () => { cancelled = true; sb().removeChannel(channel); };
+    const load = async () => {
+      const rows = await QuestService.listRunsSince(user.id, sinceKey);
+      if (!cancelled) setRuns(rows);
+    };
+    load();
+    const unsub = QuestService.subscribeRuns(user.id, load);
+    return () => { cancelled = true; unsub(); };
   }, [user?.id, todayKey]);
 
+  const todayQuests = useMemo(() => templates, [templates]);
 
-  // Pick today's quests (1 per category) using the local calendar date so all
-  // players see the same set for that day and the pick refreshes at midnight.
-  const todayQuests = useMemo(() => {
-    if (!recoveryLoaded) return [] as QuestTemplate[];
-    const now = new Date();
-    const dow = now.getDay();
-    const pickByCategory = (cat: QuestCategory): QuestTemplate | null => {
-      const pool = templates.filter(t => t.category === cat);
-      if (cat === 'strength') {
-        if (!programTag) return null; // wait for recovery assessment
-        const today = pool.filter(t => t.program_tag === programTag && t.day_of_week === dow);
-        return today[0] || null; // recovery day -> no strength quest
-      }
-      // non-STR: day-of-week match first, else any
-      const matched = pool.filter(t => t.day_of_week === dow);
-      const base = matched.length ? matched : pool;
-      if (!base.length) return null;
-      // deterministic by local calendar date for a stable daily pick
-      const seed = now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate() + cat.length;
-      return base[seed % base.length];
-    };
-    return (['strength','mind','agility','spirit'] as QuestCategory[])
-      .map(pickByCategory)
-      .filter((q): q is QuestTemplate => !!q);
-    // todayKey ticks at midnight so this refreshes without a reload.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [templates, programTag, recoveryLoaded, todayKey]);
-
-  // Map template -> run scoped to TODAY only. Yesterday's completed runs no
-  // longer mark today's quests as done.
   const runByTemplate = useMemo(() => {
     const map: Record<string, QuestRun | undefined> = {};
     runs.forEach(r => {
-      if (r.run_date === todayKey) map[r.template_id] = r;
+      if (r.run_date === todayKey) {
+        map[r.quest_id] = {
+          id: r.id,
+          user_id: r.user_id,
+          template_id: r.quest_id,
+          status: r.status as QuestRunStatus,
+          step_progress: (r.step_progress as Record<string, boolean>) ?? {},
+          progress_percent: r.progress_percent,
+          started_at: r.started_at,
+          completed_at: r.completed_at,
+          run_date: r.run_date,
+        };
+      }
     });
     return map;
   }, [runs, todayKey]);
 
-  // Mutations
   const startRun = useCallback(async (templateId: string) => {
     if (!user?.id) return null;
-    const runDate = localDateKey();
-    const existing = runs.find(r => r.template_id === templateId && r.run_date === runDate);
-    if (existing) return existing;
-    const { data, error } = await sb()
-      .from('user_quest_runs')
-      .insert({ user_id: user.id, template_id: templateId, status: 'active', step_progress: {}, progress_percent: 0, run_date: runDate })
-      .select()
-      .single();
-    if (error) {
-      // Unique-violation race: another tab already created today's run — fetch it.
-      if ((error as any).code === '23505') {
-        const { data: existingRow } = await sb()
-          .from('user_quest_runs')
-          .select('*')
-          .eq('user_id', user.id)
-          .eq('template_id', templateId)
-          .eq('run_date', runDate)
-          .maybeSingle();
-        return (existingRow as QuestRun) || null;
-      }
-      console.error('startRun', error);
-      return null;
-    }
-    return data as QuestRun;
-  }, [user?.id, runs]);
+    const row = await QuestService.startRun(user.id, templateId, 'main');
+    if (!row) return null;
+    const legacy: QuestRun = {
+      id: row.id,
+      user_id: row.user_id,
+      template_id: row.quest_id,
+      status: row.status as QuestRunStatus,
+      step_progress: (row.step_progress as Record<string, boolean>) ?? {},
+      progress_percent: row.progress_percent,
+      started_at: row.started_at,
+      completed_at: row.completed_at,
+      run_date: row.run_date,
+    };
+    return legacy;
+  }, [user?.id]);
 
   const toggleStep = useCallback(async (run: QuestRun, stepId: string, totalSteps: number) => {
     const next = { ...run.step_progress, [stepId]: !run.step_progress[stepId] };
-    const done = Object.values(next).filter(Boolean).length;
-    const percent = totalSteps ? Math.min(100, Math.round((done / totalSteps) * 100)) : 0;
-    await sb().from('user_quest_runs').update({ step_progress: next, progress_percent: percent }).eq('id', run.id);
+    await QuestService.updateProgress(run.id, next, totalSteps);
   }, []);
 
-  const completeRun = useCallback(async (runId: string) => {
-    await sb().from('user_quest_runs').update({ status: 'completed', progress_percent: 100, completed_at: new Date().toISOString() }).eq('id', runId);
-  }, []);
-
+  const completeRun = useCallback((runId: string) => QuestService.completeRun(runId), []);
 
   return { templates, runs, runByTemplate, todayQuests, startRun, toggleStep, completeRun, loading };
 }
