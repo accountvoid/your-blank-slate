@@ -190,7 +190,19 @@ export function useMainQuests() {
   const startRun = useCallback(async (templateId: string) => {
     if (!user?.id) return null;
     const row = await QuestService.startRun(user.id, templateId, 'main');
-    return row;
+    if (!row) return null;
+    const legacy: QuestRun = {
+      id: row.id,
+      user_id: row.user_id,
+      template_id: row.quest_id,
+      status: row.status as QuestRunStatus,
+      step_progress: (row.step_progress as Record<string, boolean>) ?? {},
+      progress_percent: row.progress_percent,
+      started_at: row.started_at,
+      completed_at: row.completed_at,
+      run_date: row.run_date,
+    };
+    return legacy;
   }, [user?.id]);
 
   const toggleStep = useCallback(async (run: QuestRun, stepId: string, totalSteps: number) => {
