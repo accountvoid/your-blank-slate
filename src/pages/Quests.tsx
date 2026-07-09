@@ -16,45 +16,89 @@ import { SponsoredMissionCard } from '@/components/ads/SponsoredMissionCard';
 import { useSideQuests } from '@/hooks/useSideQuests';
 import { useRecoveryProfile } from '@/hooks/useRecoveryProfile';
 import { RecoveryAssessmentModal } from '@/components/quests/RecoveryAssessmentModal';
+import { QuestService } from '@/services/QuestService';
+
+export type SideQuestRow = {
+  id: string;
+  title_ar: string;
+  title_en: string;
+  description_ar: string;
+  description_en: string;
+  category: StatType;
+  difficulty: string;
+  estimated_minutes: number;
+  xp_reward: number;
+  gold_reward: number;
+  steps: Array<{
+    id: string;
+    title_ar: string;
+    title_en: string;
+    detail_ar?: string;
+    detail_en?: string;
+    reps?: string[];
+    duration_minutes?: number;
+  }>;
+  warning_ar?: string;
+  warning_en?: string;
+};
+
+export type QuestRunRow = {
+  id: string;
+  quest_id: string;
+  status: string;
+  step_progress?: Record<string, boolean>;
+};
 
 type QuestTab = 'all' | StatType;
 
 const STAT_TO_AD_CATEGORY: Record<StatType, AdCategory> = {
-  strength: 'strength', mind: 'mind', spirit: 'spirit', agility: 'agility',
+  strength: 'strength',
+  mind: 'mind',
+  spirit: 'spirit',
+  agility: 'agility',
 };
 
 const catIconMap = { strength: Dumbbell, mind: Brain, spirit: Heart, agility: Zap } as const;
 
 const Quests = () => {
-  const { loading: profileLoading } = useProfile();
+  const { loading: profileLoading, profile } = useProfile();
   const { awardCategoryXp, gameState, getXpProgress } = useGameState() as any;
   const { t, i18n } = useTranslation();
   const ar = i18n.language?.startsWith('ar');
   const [activeTab, setActiveTab] = useState<QuestTab>('all');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [showRecovery, setShowRecovery] = useState(false);
+  const { needsAssessment } = useRecoveryProfile();
 
   const {
-  quests: missions,
-  runs,
-  startRun,
-  completeRun,
-  loading
-} = useSideQuests();
-const progressByMission = Object.fromEntries(
-  runs.map(run => [run.quest_id, run])
-);
-  useEffect(() => { if (needsAssessment) setShowRecovery(true); }, [needsAssessment]);
+    quests: missions,
+    runs,
+    startRun,
+    completeRun,
+    loading
+  } = useSideQuests();
+
+  const missionsList = Array.isArray(missions) ? (missions as SideQuestRow[]) : [];
+  const runsList = Array.isArray(runs) ? (runs as QuestRunRow[]) : [];
+
+  const progressByMission = Object.fromEntries(
+    runsList.map(run => [run.quest_id, run])
+  );
+
+  useEffect(() => { 
+    if (needsAssessment) setShowRecovery(true); 
+  }, [needsAssessment]);
 
   const adCategory: AdCategory | undefined =
     activeTab === 'all' ? undefined : STAT_TO_AD_CATEGORY[activeTab as StatType];
   const { ads: sponsoredAds } = useAds({ type: 'sponsored_mission', category: adCategory });
+  const sponsoredAdsList = Array.isArray(sponsoredAds) ? sponsoredAds : [];
 
   const filtered = activeTab === 'all'
-    ? missions
-    : missions.filter(m => m.category === (activeTab as SideCategory));
+    ? missionsList
+    : missionsList.filter(m => m && m.category === activeTab);
 
-  const handleInitialize = async (m: SideMission) => {
+  const handleInitialize = async (m: SideQuestRow) => {
     const r = await startRun(m.id);
     if (r) {
       setExpandedId(m.id);
@@ -62,7 +106,7 @@ const progressByMission = Object.fromEntries(
     }
   };
 
-  const handleClaim = async (m: SideMission) => {
+  const handleClaim = async (m: SideQuestRow) => {
     const row = progressByMission[m.id];
     if (!row) return;
     if (row.status === 'completed') {
@@ -77,6 +121,22 @@ const progressByMission = Object.fromEntries(
       title: t('quests.rewardsClaimed', 'Quest completed'),
       description: `+${m.xp_reward} XP · +${m.gold_reward} G`,
     });
+  };
+
+  const toggleStep = async (run: QuestRunRow, stepId: string) => {
+    const currentProgress = run.step_progress && typeof run.step_progress === 'object' ? run.step_progress : {};
+    const updatedProgress = {
+      ...currentProgress,
+      [stepId]: !currentProgress[stepId]
+    };
+
+    try {
+      if (QuestService && typeof QuestService.updateProgress === 'function') {
+        await QuestService.updateProgress(run.id, updatedProgress);
+      }
+    } catch (error) {
+      console.error('Failed to update progress:', error);
+    }
   };
 
   const tabs = [
@@ -118,7 +178,6 @@ const progressByMission = Object.fromEntries(
       </header>
 
       <main className="relative z-10 max-w-md mx-auto space-y-8">
-        {/* Total XP progress across all categories (realtime via gameState) */}
         {gameState?.stats && (
           <div className="border border-blue-500/30 bg-black/60 p-3 space-y-3 shadow-[0_0_20px_rgba(30,58,138,0.25)]">
             <div className="flex items-center justify-between">
@@ -126,15 +185,15 @@ const progressByMission = Object.fromEntries(
                 {t('quests.totalXp', 'Total Progress')}
               </span>
               <span className="text-[10px] font-mono text-slate-300">
-                {(gameState.stats.strength + gameState.stats.mind + gameState.stats.spirit + gameState.stats.agility)} XP
+                {((gameState.stats.strength ?? 0) + (gameState.stats.mind ?? 0) + (gameState.stats.spirit ?? 0) + (gameState.stats.agility ?? 0))} XP
               </span>
             </div>
             <div className="grid grid-cols-4 gap-2">
-              {(['strength','mind','agility','spirit'] as const).map((k) => {
+              {(['strength', 'mind', 'agility', 'spirit'] as const).map((k) => {
                 const Icon = catIconMap[k];
                 const xp = gameState.stats[k] ?? 0;
                 const pct = typeof getXpProgress === 'function' ? Math.min(100, Math.round(getXpProgress(xp))) : 0;
-                const colors: Record<string,string> = {
+                const colors: Record<string, string> = {
                   strength: 'from-red-500 to-orange-400',
                   mind: 'from-cyan-500 to-blue-500',
                   agility: 'from-emerald-500 to-lime-400',
@@ -179,7 +238,7 @@ const progressByMission = Object.fromEntries(
             <div className="text-center py-12 text-slate-400 text-sm flex items-center justify-center gap-2">
               <Loader2 className="w-4 h-4 animate-spin" /> {t('common.loading', 'Loading...')}
             </div>
-          ) : filtered.length === 0 && sponsoredAds.length === 0 ? (
+          ) : filtered.length === 0 && sponsoredAdsList.length === 0 ? (
             <div className="text-center py-12">
               <div className="text-4xl mb-4">✅</div>
               <p className="text-slate-400 text-sm">
@@ -192,14 +251,16 @@ const progressByMission = Object.fromEntries(
             <>
               {filtered.map(tpl => {
                 const run = progressByMission[tpl.id];
-                const Icon = catIconMap[tpl.category];
+                const Icon = catIconMap[tpl.category] || Scroll;
                 const title = ar ? tpl.title_ar : tpl.title_en;
                 const desc = ar ? tpl.description_ar : tpl.description_en;
                 const warning = ar ? tpl.warning_ar : tpl.warning_en;
                 const isCompleted = run?.status === 'completed';
                 const isActive = !!run && !isCompleted;
-                const total = tpl.steps.length;
-                const doneCount = tpl.steps.filter(s => run?.step_progress?.[s.id]).length;
+                const steps = Array.isArray(tpl.steps) ? tpl.steps : [];
+                const total = steps.length;
+                const stepProgress = run?.step_progress && typeof run.step_progress === 'object' ? run.step_progress : {};
+                const doneCount = steps.filter(s => s && s.id && stepProgress[s.id]).length;
                 const percent = total ? Math.round((doneCount / total) * 100) : 0;
                 const allDone = total > 0 && doneCount === total;
                 const expanded = expandedId === tpl.id && isActive;
@@ -259,7 +320,6 @@ const progressByMission = Object.fromEntries(
                           </div>
                         </div>
 
-                        {/* Inline expanded steps panel (the new "shape") */}
                         {expanded && (
                           <div className="border-t border-blue-500/20 pt-4 space-y-3 animate-fade-in">
                             <div className="grid grid-cols-3 gap-2 text-[10px]">
@@ -285,8 +345,9 @@ const progressByMission = Object.fromEntries(
                             )}
 
                             <ol className="space-y-1.5">
-                              {tpl.steps.map((s, idx) => {
-                                const done = !!run?.step_progress?.[s.id];
+                              {steps.map((s, idx) => {
+                                if (!s) return null;
+                                const done = !!stepProgress[s.id];
                                 const stitle = ar ? s.title_ar : s.title_en;
                                 const sdetail = ar ? s.detail_ar : s.detail_en;
                                 const reps = Array.isArray(s.reps) ? s.reps : null;
@@ -295,7 +356,7 @@ const progressByMission = Object.fromEntries(
                                     <button
                                       type="button"
                                       disabled={!run || isCompleted}
-                                      onClick={() => run && toggleStep(run as SideMissionProgress, s.id, total)}
+                                      onClick={() => run && toggleStep(run, s.id)}
                                       className={cn(
                                         'w-full text-left flex gap-2 items-start p-2 border transition',
                                         done ? 'border-emerald-500/40 bg-emerald-500/5' : 'border-slate-700/60 bg-black/30',
@@ -333,7 +394,6 @@ const progressByMission = Object.fromEntries(
                           </div>
                         )}
 
-                        {/* Action button */}
                         {isCompleted ? (
                           <div className="w-full py-2 text-center text-[10px] font-bold uppercase tracking-widest border border-emerald-500/40 bg-emerald-500/10 text-emerald-300">
                             ✓ {t('quest.completed', 'Completed')}
@@ -373,7 +433,7 @@ const progressByMission = Object.fromEntries(
                 );
               })}
 
-              {sponsoredAds.map(ad => (
+              {sponsoredAdsList.map(ad => (
                 <SponsoredMissionCard key={ad.id} ad={ad} />
               ))}
             </>
