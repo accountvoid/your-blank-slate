@@ -13,7 +13,7 @@ import { useTranslation } from 'react-i18next';
 import type { StatType } from '@/types';
 import { useAds, type AdCategory } from '@/hooks/useAds';
 import { SponsoredMissionCard } from '@/components/ads/SponsoredMissionCard';
-import { useSideMissions, type SideCategory, type SideMission, type SideMissionProgress } from '@/hooks/useSideMissions';
+import { useSideQuests } from '@/hooks/useSideQuests';
 import { useRecoveryProfile } from '@/hooks/useRecoveryProfile';
 import { RecoveryAssessmentModal } from '@/components/quests/RecoveryAssessmentModal';
 
@@ -34,9 +34,16 @@ const Quests = () => {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [showRecovery, setShowRecovery] = useState(false);
 
-  const { missions, progressByMission, startMission, toggleStep, completeMission, loading } = useSideMissions();
-  const { needsAssessment, profile } = useRecoveryProfile();
-
+  const {
+  quests: missions,
+  runs,
+  startRun,
+  completeRun,
+  loading
+} = useSideQuests();
+const progressByMission = Object.fromEntries(
+  runs.map(run => [run.quest_id, run])
+);
   useEffect(() => { if (needsAssessment) setShowRecovery(true); }, [needsAssessment]);
 
   const adCategory: AdCategory | undefined =
@@ -48,7 +55,7 @@ const Quests = () => {
     : missions.filter(m => m.category === (activeTab as SideCategory));
 
   const handleInitialize = async (m: SideMission) => {
-    const r = await startMission(m.id);
+    const r = await startRun(m.id);
     if (r) {
       setExpandedId(m.id);
       toast({ title: t('quests.questInitialized', 'Quest accepted'), description: ar ? m.title_ar : m.title_en });
@@ -62,7 +69,7 @@ const Quests = () => {
       toast({ title: t('quest.completed', 'Completed'), description: ar ? m.title_ar : m.title_en });
       return;
     }
-    await completeMission(row.id);
+    await completeRun(row.id);
     if (typeof awardCategoryXp === 'function') {
       awardCategoryXp(m.category, m.xp_reward, m.gold_reward);
     }
