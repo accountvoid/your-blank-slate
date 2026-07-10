@@ -71,10 +71,10 @@ const Quests = () => {
   const { needsAssessment } = useRecoveryProfile();
 
   const {
-    quests: missions,
-    runs,
-    startRun,
-    completeRun,
+    missions,
+    progress: runs,
+    startMission: startRun,
+    completeMission: completeRun,
     loading
   } = useSideQuests();
 
@@ -132,7 +132,9 @@ const Quests = () => {
 
     try {
       if (QuestService && typeof QuestService.updateProgress === 'function') {
-        await QuestService.updateProgress(run.id, updatedProgress);
+        const steps = Array.isArray((run as any).step_progress) ? (run as any).step_progress : [];
+        const total = Object.keys(updatedProgress).length;
+        await QuestService.updateProgress(run.id, updatedProgress, total);
       }
     } catch (error) {
       console.error('Failed to update progress:', error);
