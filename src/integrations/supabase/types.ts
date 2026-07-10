@@ -497,54 +497,6 @@ export type Database = {
         }
         Relationships: []
       }
-      portals: {
-        Row: {
-          active: boolean
-          color: string
-          created_at: string
-          danger: string
-          energy_density: string
-          id: string
-          id_portal: string
-          name: string
-          rank: string
-          required_level: number
-          required_power: number
-          rewards: Json
-          updated_at: string
-        }
-        Insert: {
-          active?: boolean
-          color?: string
-          created_at?: string
-          danger?: string
-          energy_density?: string
-          id?: string
-          id_portal: string
-          name: string
-          rank?: string
-          required_level?: number
-          required_power?: number
-          rewards?: Json
-          updated_at?: string
-        }
-        Update: {
-          active?: boolean
-          color?: string
-          created_at?: string
-          danger?: string
-          energy_density?: string
-          id?: string
-          id_portal?: string
-          name?: string
-          rank?: string
-          required_level?: number
-          required_power?: number
-          rewards?: Json
-          updated_at?: string
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
           created_at: string
