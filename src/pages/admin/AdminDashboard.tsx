@@ -1,23 +1,19 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2, Users, UserPlus, Activity, ShoppingBag, Gem, Swords, Megaphone, Coins, ScrollText, Package } from 'lucide-react';
+import { Loader2, Users, UserPlus, Activity, Swords, Coins, ScrollText, ShoppingBag, Megaphone } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface Stats {
   total_users: number;
-  active_users_7d: number;
-  recent_registrations_7d: number;
-  gates_completed: number;
-  side_missions_completed: number;
-  shop_items_total: number;
-  shop_items_active: number;
-  gate_items_total: number;
-  gate_items_active: number;
-  ads_total: number;
-  inventory_rows: number;
-  total_payments_credited: number;
-  total_gold_sold: number;
-  total_audit_events: number;
+  today_registrations: number;
+  today_logins: number;
+  total_gold: number;
+  total_gates: number;
+  total_main_quests: number;
+  total_side_quests: number;
+  total_events: number;
+  total_purchases: number;
+  revenue_usd: number;
 }
 
 interface Card {
@@ -62,18 +58,16 @@ export const AdminDashboard = () => {
 
   const cards: Card[] = stats
     ? [
-        { label: 'Total Users', value: stats.total_users, icon: Users, accent: 'text-primary' },
-        { label: 'Active (7d)', value: stats.active_users_7d, icon: Activity, accent: 'text-emerald-400' },
-        { label: 'New (7d)', value: stats.recent_registrations_7d, icon: UserPlus, accent: 'text-cyan-400' },
-        { label: 'Inventory Rows', value: stats.inventory_rows, icon: Package, accent: 'text-fuchsia-400' },
-        { label: 'Shop Items', value: `${stats.shop_items_active}/${stats.shop_items_total}`, hint: 'active / total', icon: ShoppingBag },
-        { label: 'Gate Items', value: `${stats.gate_items_active}/${stats.gate_items_total}`, hint: 'active / total', icon: Gem },
-        { label: 'Gates Completed', value: stats.gates_completed, icon: Swords, accent: 'text-orange-400' },
-        { label: 'Side Missions Done', value: stats.side_missions_completed, icon: Swords, accent: 'text-sky-400' },
-        { label: 'Ads', value: stats.ads_total, icon: Megaphone },
-        { label: 'Payments Credited', value: stats.total_payments_credited, icon: Coins, accent: 'text-yellow-400' },
-        { label: 'Gold Sold', value: stats.total_gold_sold.toLocaleString(), icon: Coins, accent: 'text-yellow-400' },
-        { label: 'Audit Events', value: stats.total_audit_events, icon: ScrollText },
+        { label: 'Total Users', value: stats.total_users ?? 0, icon: Users, accent: 'text-primary' },
+        { label: 'Today Logins', value: stats.today_logins ?? 0, icon: Activity, accent: 'text-emerald-400' },
+        { label: 'Today Signups', value: stats.today_registrations ?? 0, icon: UserPlus, accent: 'text-cyan-400' },
+        { label: 'Total Gold', value: (stats.total_gold ?? 0).toLocaleString(), icon: Coins, accent: 'text-yellow-400' },
+        { label: 'Gates', value: stats.total_gates ?? 0, icon: Swords, accent: 'text-orange-400' },
+        { label: 'Main Quests', value: stats.total_main_quests ?? 0, icon: ScrollText, accent: 'text-primary' },
+        { label: 'Side Quests', value: stats.total_side_quests ?? 0, icon: ScrollText, accent: 'text-sky-400' },
+        { label: 'Events', value: stats.total_events ?? 0, icon: Megaphone },
+        { label: 'Purchases', value: stats.total_purchases ?? 0, icon: ShoppingBag, accent: 'text-fuchsia-400' },
+        { label: 'Revenue (USD)', value: (stats.revenue_usd ?? 0).toLocaleString(), icon: Coins, accent: 'text-yellow-400' },
       ]
     : [];
 
