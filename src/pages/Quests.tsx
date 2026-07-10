@@ -78,8 +78,8 @@ const Quests = () => {
     loading
   } = useSideQuests();
 
-  const missionsList = Array.isArray(missions) ? (missions as SideQuestRow[]) : [];
-  const runsList = Array.isArray(runs) ? (runs as QuestRunRow[]) : [];
+  const missionsList = (Array.isArray(missions) ? missions : []) as unknown as SideQuestRow[];
+  const runsList = (Array.isArray(runs) ? runs : []) as unknown as QuestRunRow[];
 
   const progressByMission = Object.fromEntries(
     runsList.map(run => [run.quest_id, run])
