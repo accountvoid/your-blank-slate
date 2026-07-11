@@ -80,6 +80,7 @@ export type Database = {
           created_at: string
           id: string
           ip: string | null
+          ip_address: string | null
           record_id: string | null
           table_name: string | null
           user_agent: string | null
@@ -92,6 +93,7 @@ export type Database = {
           created_at?: string
           id?: string
           ip?: string | null
+          ip_address?: string | null
           record_id?: string | null
           table_name?: string | null
           user_agent?: string | null
@@ -104,6 +106,7 @@ export type Database = {
           created_at?: string
           id?: string
           ip?: string | null
+          ip_address?: string | null
           record_id?: string | null
           table_name?: string | null
           user_agent?: string | null
@@ -1036,6 +1039,19 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_owner: { Args: { _user_id: string }; Returns: boolean }
+      record_admin_action: {
+        Args: {
+          _action: string
+          _after: Json
+          _before: Json
+          _ip?: string
+          _record_id: string
+          _table: string
+          _user_agent?: string
+        }
+        Returns: string
+      }
       start_punishment:
         | {
             Args: { hours?: number; uid: string }
@@ -1141,7 +1157,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "super_admin" | "admin" | "moderator" | "user"
+      app_role: "super_admin" | "admin" | "moderator" | "user" | "owner"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1269,7 +1285,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["super_admin", "admin", "moderator", "user"],
+      app_role: ["super_admin", "admin", "moderator", "user", "owner"],
     },
   },
 } as const
