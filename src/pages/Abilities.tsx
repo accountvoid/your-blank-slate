@@ -6,6 +6,7 @@ import { Zap, Swords, Target, ArrowUp, Lock, Sparkles, Cpu, ShieldAlert, Hourgla
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { getBaseDamage } from '@/lib/game-formulas';
 
 // لا تغيير في المنطق (Logic)
 const SKILL_LEVEL_MULTIPLIERS = [1, 1.3, 1.6, 2.0, 2.5, 3.0] as const;
@@ -20,8 +21,6 @@ type SkillLevels = Record<SkillId, number>;
 type SkillColor = 'silver' | 'blue' | 'violet';
 
 const STORAGE_KEY = 'battle_skill_levels';
-
-import { getBaseDamage } from '@/lib/game-formulas';
 
 const loadSkillLevels = (): SkillLevels => {
   try {
