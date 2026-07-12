@@ -2,25 +2,17 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { GameState, Quest, Boss, StatType, Ability, Achievement, GrandQuest, InventoryItem, PrayerQuest, ShadowSoldier, Equipment, Gate } from '@/types/game';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import {
+  MAX_LEVEL,
+  BASE_XP_PER_LEVEL,
+  calculateLevel as calcLevelFromXp,
+  getXpRequiredForLevel as sharedGetXpRequiredForLevel,
+  getXpProgress as sharedGetXpProgress,
+} from '@/lib/game-formulas';
 
 const profilesTable = () => (supabase as any).from('profiles');
 
-const MAX_LEVEL = 100; 
-const BASE_XP_PER_LEVEL = 100;
-
 const getDayOfWeek = () => new Date().getDay();
-
-const calcLevelFromXp = (xp: number): number => {
-  let level = 1;
-  let accumulated = 0;
-  while (level < MAX_LEVEL) {
-    const required = Math.floor(100 * Math.pow(1.22, level - 1));
-    if (xp < accumulated + required) break;
-    accumulated += required;
-    level++;
-  }
-  return level;
-};
 
 const getRotatingQuests = (): Quest[] => {
   const day = getDayOfWeek();
@@ -631,36 +623,9 @@ export const useGameState = () => {
     return () => clearTimeout(timeout);
   }, [gameState, user, saveToLocalBackup]);
 
-  const getXpRequiredForLevel = (level: number): number => {
-    if (level >= MAX_LEVEL) return 999999999;
-    return Math.floor(100 * Math.pow(1.22, level - 1));
-  };
-
-  const calculateLevel = useCallback((xp: number): number => {
-    let level = 1;
-    let accumulatedXp = 0;
-    while (level < MAX_LEVEL) {
-      const required = getXpRequiredForLevel(level);
-      if (xp < accumulatedXp + required) break;
-      accumulatedXp += required;
-      level++;
-    }
-    return level;
-  }, []);
-
-  const getXpProgress = (xp: number): number => {
-    let level = 1;
-    let accumulatedXp = 0;
-    while (level < MAX_LEVEL) {
-      const required = getXpRequiredForLevel(level);
-      if (xp < accumulatedXp + required) {
-        return ((xp - accumulatedXp) / required) * 100;
-      }
-      accumulatedXp += required;
-      level++;
-    }
-    return 100;
-  }
+  const getXpRequiredForLevel = sharedGetXpRequiredForLevel;
+  const calculateLevel = useCallback((xp: number): number => calcLevelFromXp(xp), []);
+  const getXpProgress = sharedGetXpProgress;
 
   const getTotalLevel = useCallback((levels: typeof gameState.levels): number => {
     const average = (levels.strength + levels.mind + levels.spirit + levels.agility) / 4;
