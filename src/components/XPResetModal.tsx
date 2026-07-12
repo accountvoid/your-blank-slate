@@ -68,19 +68,6 @@ export const XPResetModal = ({ gameState, onClose, onConfirm }: XPResetModalProp
     }
   };
 
-  const calculateLevel = (xp: number): number => {
-    const baseXP = 100;
-    const growthRate = 1.5;
-    let level = 1;
-    let requiredXP = baseXP;
-    let totalRequired = baseXP;
-    while (xp >= totalRequired && level < 100) {
-      level++;
-      requiredXP = Math.floor(baseXP * Math.pow(growthRate, level - 1));
-      totalRequired += requiredXP;
-    }
-    return level;
-  };
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95 backdrop-blur-md">
@@ -142,7 +129,17 @@ export const XPResetModal = ({ gameState, onClose, onConfirm }: XPResetModalProp
           {(Object.keys(statConfig) as StatType[]).map(stat => {
             const config = statConfig[stat];
             const Icon = config.icon;
-            const newLevel = calculateLevel(allocation[stat]);
+            const newLevel = (() => {
+              let level = 1;
+              let accumulated = 0;
+              while (level < 100) {
+                const required = Math.floor(100 * Math.pow(1.22, level - 1));
+                if (allocation[stat] < accumulated + required) break;
+                accumulated += required;
+                level++;
+              }
+              return level;
+            })();
             const oldLevel = gameState.levels[stat];
             const levelChange = newLevel - oldLevel;
 
