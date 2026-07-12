@@ -3,6 +3,15 @@ import { Swords, Zap, Heart, Battery, ArrowLeft, Shield, Wind, Eye, Flame, Star,
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameState } from '@/hooks/useGameState';
+import {
+  getBaseDamage,
+  getAgilityDodge,
+  getAgilitySpeedBonus,
+  getIntCounterChance,
+  getSpiritHitBonus,
+  getSpiritDmgBonus,
+  getSpiritReveal,
+} from '@/lib/game-formulas';
 
 interface DamagePopup {
   id: number;
@@ -51,19 +60,6 @@ const LOOT_TABLE: Record<string, LootItem[]> = {
 };
 
 const RARITY_COLORS: Record<string, string> = { common: '#9ca3af', rare: '#3b82f6', epic: '#a855f7', legendary: '#f59e0b' };
-
-const getBaseDamage = (strengthLevel: number): number => {
-  if (strengthLevel <= 1) return 1;
-  if (strengthLevel <= 10) return Math.max(1, Math.floor(Math.pow(1000, (strengthLevel - 1) / 9)));
-  return Math.floor(1000 + Math.pow(strengthLevel - 10, 0.7) * 100);
-};
-
-const getAgilityDodge = (agiLevel: number): number => Math.min(0.5, 0.02 * agiLevel);
-const getAgilitySpeedBonus = (agiLevel: number): number => Math.min(0.5, 0.01 * agiLevel);
-const getIntCounterChance = (intLevel: number): number => Math.min(0.4, 0.015 * intLevel);
-const getSpiritHitBonus = (spiLevel: number): number => Math.min(0.3, 0.01 * spiLevel);
-const getSpiritDmgBonus = (spiLevel: number): number => 1 + Math.min(0.5, 0.01 * spiLevel);
-const getSpiritReveal = (spiLevel: number): boolean => spiLevel >= 5;
 
 const SKILL_LEVEL_MULTIPLIERS = [1, 1.3, 1.6, 2.0, 2.5, 3.0];
 const DARK_VOID_CHARGE_REQUIRED = 15;
