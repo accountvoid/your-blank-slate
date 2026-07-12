@@ -21,6 +21,8 @@ type SkillColor = 'silver' | 'blue' | 'violet';
 
 const STORAGE_KEY = 'battle_skill_levels';
 
+import { getBaseDamage } from '@/lib/game-formulas';
+
 const loadSkillLevels = (): SkillLevels => {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
