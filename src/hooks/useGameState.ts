@@ -623,36 +623,9 @@ export const useGameState = () => {
     return () => clearTimeout(timeout);
   }, [gameState, user, saveToLocalBackup]);
 
-  const getXpRequiredForLevel = (level: number): number => {
-    if (level >= MAX_LEVEL) return 999999999;
-    return Math.floor(100 * Math.pow(1.22, level - 1));
-  };
-
-  const calculateLevel = useCallback((xp: number): number => {
-    let level = 1;
-    let accumulatedXp = 0;
-    while (level < MAX_LEVEL) {
-      const required = getXpRequiredForLevel(level);
-      if (xp < accumulatedXp + required) break;
-      accumulatedXp += required;
-      level++;
-    }
-    return level;
-  }, []);
-
-  const getXpProgress = (xp: number): number => {
-    let level = 1;
-    let accumulatedXp = 0;
-    while (level < MAX_LEVEL) {
-      const required = getXpRequiredForLevel(level);
-      if (xp < accumulatedXp + required) {
-        return ((xp - accumulatedXp) / required) * 100;
-      }
-      accumulatedXp += required;
-      level++;
-    }
-    return 100;
-  }
+  const getXpRequiredForLevel = sharedGetXpRequiredForLevel;
+  const calculateLevel = useCallback((xp: number): number => calcLevelFromXp(xp), []);
+  const getXpProgress = sharedGetXpProgress;
 
   const getTotalLevel = useCallback((levels: typeof gameState.levels): number => {
     const average = (levels.strength + levels.mind + levels.spirit + levels.agility) / 4;
