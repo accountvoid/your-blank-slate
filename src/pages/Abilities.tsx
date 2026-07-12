@@ -21,12 +21,6 @@ type SkillColor = 'silver' | 'blue' | 'violet';
 
 const STORAGE_KEY = 'battle_skill_levels';
 
-const getBaseDamage = (strengthLevel: number): number => {
-  if (strengthLevel <= 1) return 1;
-  if (strengthLevel <= 10) return Math.max(1, Math.floor(Math.pow(1000, (strengthLevel - 1) / 9)));
-  return Math.floor(1000 + Math.pow(strengthLevel - 10, 0.7) * 100);
-};
-
 const loadSkillLevels = (): SkillLevels => {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
