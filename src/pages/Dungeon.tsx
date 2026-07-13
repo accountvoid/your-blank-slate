@@ -13,17 +13,9 @@ import { StaminaModal } from '@/features/dungeon/DungeonEncounter';
 import { generateDungeon, countRoomTypes, STAMINA_TASKS } from '@/features/dungeon/dungeonGenerator';
 import { DungeonRoom, Position, SystemMessage, StaminaTask } from '@/features/dungeon/DungeonTypes';
 import { GateLootModal, useGateLootGenerator, type LootItem } from '@/components/GateLootModal';
+import { RANK_THEMES } from '@/lib/game-constants';
 let username: string = "ALXMUS";
 const GRID_SIZE = 8;
-
-const RANK_THEMES: Record<string, { primary: string; secondary: string; shadow: string }> = {
-  E: { primary: '#6b7280', secondary: '#4b5563', shadow: 'rgba(107,114,128,0.2)' },
-  D: { primary: '#22c55e', secondary: '#16a34a', shadow: 'rgba(34,197,94,0.2)' },
-  C: { primary: '#3b82f6', secondary: '#2563eb', shadow: 'rgba(59,130,246,0.2)' },
-  B: { primary: '#a855f7', secondary: '#9333ea', shadow: 'rgba(168,85,247,0.2)' },
-  A: { primary: '#f59e0b', secondary: '#d97706', shadow: 'rgba(245,158,11,0.2)' },
-  S: { primary: '#ef4444', secondary: '#dc2626', shadow: 'rgba(239,68,68,0.2)' },
-};
 
 type DungeonPhase = 'entrance' | 'entering' | 'grotto' | 'event' | 'cleared';
 type EventType = 'treasure' | 'monster' | 'boss' | null;
