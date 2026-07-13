@@ -671,7 +671,7 @@ const HunterBattle = () => {
                     <div className="flex items-center gap-3">
                       <span className="text-xl">{item.icon}</span>
                       <div>
-                        <span className="text-xs font-bold block" style={{ color: RARITY_COLORS[item.rarity] }}>{item.name}</span>
+                        <span className="text-xs font-bold block" style={{ color: RARITY_HEX_COLORS[item.rarity] }}>{item.name}</span>
                         <span className="text-[9px] uppercase text-zinc-500 tracking-wider">{item.rarity}</span>
                       </div>
                     </div>
