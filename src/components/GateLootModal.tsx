@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { GATE_GOLD_BY_RANK } from '@/lib/marketItems';
 import { useGateItems } from '@/hooks/useGateItems';
+import { RARITY_BORDER_CLASSES } from '@/lib/game-constants';
 
 export interface LootItem {
   id: string;
@@ -22,13 +23,7 @@ interface GateLootModalProps {
   onCollect: () => void;
 }
 
-const RARITY_BORDER: Record<LootItem['rarity'], string> = {
-  common: 'border-slate-600',
-  uncommon: 'border-green-500/50',
-  rare: 'border-blue-500/50',
-  epic: 'border-purple-500/50',
-  legendary: 'border-yellow-500/50',
-};
+const RARITY_BORDER = RARITY_BORDER_CLASSES;
 
 export const GateLootModal = ({ show, rank, loot, onClose, onCollect }: GateLootModalProps) => {
   const { t } = useTranslation();
