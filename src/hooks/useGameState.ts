@@ -139,66 +139,6 @@ const getInitialAchievements = (): Achievement[] => [
   { id: 'ach9', name: 'المستوى 100', description: 'وصلت للمستوى 100', requirement: 100, progress: 0, unlocked: false, icon: '🏅', rarity: 'legendary' },
 ];
 
-const getScheduledGates = (playerLevel: number): Gate[] => {
-  const allGates: Gate[] = [
-    { id: 'gate_e', idGate: 'GATE-0001', name: 'بوابة E', rank: 'E', requiredPower: 5, energyDensity: '1,200', danger: 'MINIMAL THREAT', color: 'gray', discovered: true, completed: false, rewards: { xp: 100, gold: 50, shadowPoints: 2 } },
-    { id: 'gate_d', idGate: 'GATE-0002', name: 'بوابة D', rank: 'D', requiredPower: 10, energyDensity: '5,400', danger: 'LOW THREAT', color: 'green', discovered: false, completed: false, rewards: { xp: 250, gold: 100, shadowPoints: 5 } },
-    { id: 'gate_c', idGate: 'GATE-0003', name: 'بوابة C', rank: 'C', requiredPower: 20, energyDensity: '12,000', danger: 'MODERATE DANGER', color: 'blue', discovered: false, completed: false, rewards: { xp: 500, gold: 200, shadowPoints: 10 } },
-    { id: 'gate_b', idGate: 'GATE-0004', name: 'بوابة B', rank: 'B', requiredPower: 35, energyDensity: '28,000', danger: 'HIGH DANGER', color: 'purple', discovered: false, completed: false, rewards: { xp: 1000, gold: 400, shadowPoints: 20 } },
-    { id: 'gate_a', idGate: 'GATE-0005', name: 'بوابة A', rank: 'A', requiredPower: 60, energyDensity: '65,000', danger: 'EXTREME PERIL', color: 'orange', discovered: false, completed: false, rewards: { xp: 2500, gold: 0, shadowPoints: 50 } },
-    { id: 'gate_s', idGate: 'GATE-0006', name: 'بوابة S', rank: 'S', requiredPower: 100, energyDensity: 'UNMEASURABLE', danger: 'CATACLYSMIC', color: 'red', discovered: false, completed: false, rewards: { xp: 10000, gold: 0, shadowPoints: 200 } },
-  ];
-
-  const today = new Date();
-  const dayOfWeek = today.getDay();
-  const gateDays = [0, 2, 4, 6];
-  
-  if (!gateDays.includes(dayOfWeek)) return [];
-  
-  const dateSeed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
-  const seededRandom = (seed: number): number => {
-    const x = Math.sin(seed) * 10000;
-    return x - Math.floor(x);
-  };
-  
-  let availableRanks: string[] = [];
-  if (playerLevel >= 35) availableRanks = ['C', 'B'];
-  else if (playerLevel >= 20) availableRanks = ['D', 'C'];
-  else if (playerLevel >= 10) availableRanks = ['E', 'D'];
-  else availableRanks = ['E'];
-  
-  const rankIndex = Math.floor(seededRandom(dateSeed + 42) * availableRanks.length);
-  const selectedRank = availableRanks[rankIndex];
-  const gateTemplate = allGates.find(g => g.rank === selectedRank) || allGates[0];
-  
-  const closingDate = new Date(today);
-  closingDate.setHours(23, 59, 59, 999);
-  const closingTime = closingDate.toISOString();
-  
-  const isHigherLevel = playerLevel >= gateTemplate.requiredPower;
-  const rankIdx = ['E','D','C','B','A','S'].indexOf(gateTemplate.rank);
-  const permanentId = `GATE-${String(rankIdx * 100000 + (dateSeed % 100000)).padStart(4, '0')}`;
-
-  return [{
-    ...gateTemplate,
-    idGate: permanentId,
-    id: `${gateTemplate.id}_${dateSeed}`,
-    discovered: true,
-    gateNumber: 1,
-    closingTime,
-    name: isHigherLevel ? gateTemplate.name : `بوابة ${gateTemplate.rank}`,
-    energyDensity: isHigherLevel ? getRandomEnergyDensity(gateTemplate.rank) : '???',
-    danger: isHigherLevel ? gateTemplate.danger : '???',
-    isFullyRevealed: isHigherLevel,
-  }];
-};
-
-const getRandomEnergyDensity = (rank: string): string => {
-  const ranges: Record<string, [number, number]> = { 'E': [800, 1500], 'D': [4000, 7000], 'C': [10000, 15000], 'B': [25000, 35000], 'A': [60000, 80000], 'S': [100000, 999999] };
-  const [min, max] = ranges[rank] || [1000, 2000];
-  return (Math.floor(Math.random() * (max - min + 1)) + min).toLocaleString();
-};
-
 const getInitialInventory = (): InventoryItem[] => [];
 
 const getInitialPrayerQuests = (): PrayerQuest[] => [
@@ -232,7 +172,9 @@ const getDefaultState = (): GameState => ({
   prayerQuests: getInitialPrayerQuests(),
   shadowSoldiers: [],
   equipment: [],
-  gates: getScheduledGates(1),
+  // Gates catalog is Supabase-driven (see useGatesCatalog).
+  // `state.gates` only tracks per-user completion entries (appended by claimGateLoot).
+  gates: [],
   dailyStats: [],
   totalQuestsCompleted: 0,
   streakDays: 0,
@@ -405,7 +347,7 @@ export const useGameState = () => {
             mergedState.prayerQuests = mergedState.prayerQuests.map((p: PrayerQuest) => ({ ...p, completed: false }));
           }
 
-          if (!mergedState.gates || mergedState.gates.length === 0 || isNewDay) mergedState.gates = getScheduledGates(mergedState.totalLevel || 1);
+          if (!mergedState.gates) mergedState.gates = [];
           if (!mergedState.abilities || mergedState.abilities.length === 0) mergedState.abilities = getInitialAbilities();
           if (!mergedState.achievements || mergedState.achievements.length === 0) mergedState.achievements = getInitialAchievements();
 
