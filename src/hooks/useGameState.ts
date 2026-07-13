@@ -433,25 +433,6 @@ export const useGameState = () => {
   }, [user?.id, saveToLocalBackup]);
 
   useEffect(() => {
-    const checkAndUpdateGates = () => {
-      const lastGateUpdate = localStorage.getItem('lastGateUpdateDate');
-      const today = new Date().toISOString().split('T')[0];
-      if (lastGateUpdate !== today) {
-        setGameState(prev => {
-          const updated = { ...prev, gates: getScheduledGates(prev.totalLevel || 1) };
-          saveToLocalBackup(updated, user?.id);
-          return updated;
-        });
-        localStorage.setItem('lastGateUpdateDate', today);
-        window.dispatchEvent(new CustomEvent('newGateAppeared'));
-      }
-    };
-    checkAndUpdateGates();
-    const interval = setInterval(checkAndUpdateGates, 60000);
-    return () => clearInterval(interval);
-  }, [user?.id, saveToLocalBackup]);
-
-  useEffect(() => {
     if (!gameState.punishment?.active || !gameState.punishment?.endTime) return;
     const checkPunishmentDamage = () => {
       const endTime = new Date(gameState.punishment.endTime).getTime();
