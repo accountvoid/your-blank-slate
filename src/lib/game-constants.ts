@@ -14,7 +14,7 @@ export type Rank = 'E' | 'D' | 'C' | 'B' | 'A' | 'S';
 export type Rarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
 
 /** Solid hex color per rank — used by Battle bosses, Dungeon theme, Monster encounters. */
-export const RANK_HEX_COLORS: Record<Rank, string> = {
+export const RANK_HEX_COLORS: Record<string, string> = {
   E: '#6b7280',
   D: '#22c55e',
   C: '#3b82f6',
@@ -24,7 +24,7 @@ export const RANK_HEX_COLORS: Record<Rank, string> = {
 };
 
 /** Dungeon theme (primary/secondary/shadow) per rank. */
-export const RANK_THEMES: Record<Rank, { primary: string; secondary: string; shadow: string }> = {
+export const RANK_THEMES: Record<string, { primary: string; secondary: string; shadow: string }> = {
   E: { primary: '#6b7280', secondary: '#4b5563', shadow: 'rgba(107,114,128,0.2)' },
   D: { primary: '#22c55e', secondary: '#16a34a', shadow: 'rgba(34,197,94,0.2)' },
   C: { primary: '#3b82f6', secondary: '#2563eb', shadow: 'rgba(59,130,246,0.2)' },
@@ -34,7 +34,7 @@ export const RANK_THEMES: Record<Rank, { primary: string; secondary: string; sha
 };
 
 /** Gates.tsx: Tailwind gradient classes per rank (NOTE: C uses cyan, not blue). */
-export const RANK_GATE_GRADIENT: Record<Rank, string> = {
+export const RANK_GATE_GRADIENT: Record<string, string> = {
   S: 'from-red-500 to-red-700',
   A: 'from-purple-500 to-purple-700',
   B: 'from-blue-500 to-blue-700',
@@ -45,7 +45,7 @@ export const RANK_GATE_GRADIENT: Record<Rank, string> = {
 export const RANK_GATE_GRADIENT_DEFAULT = 'from-blue-500 to-blue-700';
 
 /** Gates.tsx: Tailwind border classes per rank. */
-export const RANK_GATE_BORDER: Record<Rank, string> = {
+export const RANK_GATE_BORDER: Record<string, string> = {
   S: 'border-red-500/50',
   A: 'border-purple-500/50',
   B: 'border-blue-500/50',
@@ -56,7 +56,7 @@ export const RANK_GATE_BORDER: Record<Rank, string> = {
 export const RANK_GATE_BORDER_DEFAULT = 'border-blue-500/50';
 
 /** Gates.tsx: box-shadow glow per rank. */
-export const RANK_GATE_GLOW: Record<Rank, string> = {
+export const RANK_GATE_GLOW: Record<string, string> = {
   S: '0 0 80px rgba(239, 68, 68, 0.7)',
   A: '0 0 80px rgba(168, 85, 247, 0.6)',
   B: '0 0 60px rgba(59, 130, 246, 0.5)',
@@ -67,7 +67,7 @@ export const RANK_GATE_GLOW: Record<Rank, string> = {
 export const RANK_GATE_GLOW_DEFAULT = '0 0 50px rgba(59, 130, 246, 0.5)';
 
 /** Battle.tsx rarity → hex color (no `uncommon` tier). */
-export const RARITY_HEX_COLORS: Record<Exclude<Rarity, 'uncommon'>, string> = {
+export const RARITY_HEX_COLORS: Record<string, string> = {
   common: '#9ca3af',
   rare: '#3b82f6',
   epic: '#a855f7',
