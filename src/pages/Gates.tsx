@@ -63,10 +63,10 @@ const Gates = () => {
   const totalLevel = gameState.totalLevel || 1;
   const playerPower = totalLevel;
 
-  // Source of truth = Supabase gates_catalog. Falls back to legacy gameState.gates
-  // only if catalog hook errored (e.g., migration not yet applied).
-  const { gates: catalogGates, loading: gatesLoading, error: gatesError } = useGatesCatalog(totalLevel);
-  const gates = gatesError ? (gameState.gates || []) : catalogGates;
+  // Source of truth = Supabase gates_catalog. No fallback to hardcoded data —
+  // if the catalog errors we surface it explicitly (see error UI below).
+  const { gates: catalogGates, loading: gatesLoading, error: gatesError, reload: reloadGates } = useGatesCatalog(totalLevel);
+  const gates = catalogGates;
 
   const hasManaGauge = gameState.inventory?.some(item => item.id === 'mana_meter' && item.quantity > 0);
 
@@ -136,6 +136,22 @@ const Gates = () => {
 
   if (profileLoading || gatesLoading) {
     return <LoadingScreen fullScreen message="GATES" />;
+  }
+
+  if (gatesError) {
+    return (
+      <div className="min-h-screen bg-[#020203] text-white flex flex-col items-center justify-center px-6 text-center">
+        <AlertTriangle className="w-14 h-14 text-red-400 mb-4" />
+        <h2 className="text-lg font-black tracking-widest uppercase text-red-300 mb-2">Gates unavailable</h2>
+        <p className="text-xs text-slate-400 max-w-sm mb-6 font-mono break-words">{gatesError}</p>
+        <button
+          onClick={() => reloadGates()}
+          className="px-6 py-2 bg-blue-600/20 border border-blue-400 rounded-lg text-blue-200 text-xs font-bold tracking-widest uppercase active:scale-95"
+        >
+          Retry
+        </button>
+      </div>
+    );
   }
 
   return (
