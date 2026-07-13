@@ -978,7 +978,11 @@ export const useGameState = () => {
       });
 
       const newLevels = { strength: Math.min(calculateLevel(newStats.strength), MAX_LEVEL), mind: Math.min(calculateLevel(newStats.mind), MAX_LEVEL), spirit: Math.min(calculateLevel(newStats.spirit), MAX_LEVEL), agility: Math.min(calculateLevel(newStats.agility), MAX_LEVEL) };
-      return { ...prev, gold: newGold, shadowPoints: newShadowPoints, stats: newStats, levels: newLevels, totalLevel: getTotalLevel(newLevels), inventory: newInventory, gates: prev.gates.map(g => g.id === gateId ? { ...g, completed: true } : g) };
+      const gatesArr = prev.gates || [];
+      const nextGates = gatesArr.some(g => g.id === gateId)
+        ? gatesArr.map(g => g.id === gateId ? { ...g, completed: true } : g)
+        : [...gatesArr, { id: gateId, idGate: gateId, name: '', rank: 'E', requiredPower: 0, energyDensity: '', danger: '', color: 'gray', discovered: true, completed: true, rewards: { xp: 0, gold: 0, shadowPoints: 0 } } as Gate];
+      return { ...prev, gold: newGold, shadowPoints: newShadowPoints, stats: newStats, levels: newLevels, totalLevel: getTotalLevel(newLevels), inventory: newInventory, gates: nextGates };
     });
   }, [calculateLevel, getTotalLevel]);
 
