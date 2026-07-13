@@ -12,6 +12,7 @@ import {
   getSpiritDmgBonus,
   getSpiritReveal,
 } from '@/lib/game-formulas';
+import { RANK_HEX_COLORS, RARITY_HEX_COLORS } from '@/lib/game-constants';
 
 interface DamagePopup {
   id: number;
