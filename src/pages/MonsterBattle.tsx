@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Sword, Shield, ArrowLeft, Zap, Skull, Coins, Sparkles } from 'lucide-react';
 import { useGameState } from '@/hooks/useGameState';
 import { cn } from '@/lib/utils';
+import { RANK_HEX_COLORS } from '@/lib/game-constants';
 
 /**
  * Monster Battle - lightweight encounter screen for regular mobs.
@@ -24,12 +25,12 @@ interface MonsterConfig {
 }
 
 const MONSTERS_BY_RANK: Record<string, MonsterConfig> = {
-  E: { name: 'Goblin', emoji: '👺', hpMult: 3, power: 8,  speed: 2500, goldReward: 20,  xpReward: 5,  color: '#6b7280' },
-  D: { name: 'Wolf',   emoji: '🐺', hpMult: 6, power: 16, speed: 2200, goldReward: 50,  xpReward: 12, color: '#22c55e' },
-  C: { name: 'Orc',    emoji: '👹', hpMult: 12, power: 30, speed: 2000, goldReward: 120, xpReward: 25, color: '#3b82f6' },
-  B: { name: 'Wraith', emoji: '👻', hpMult: 22, power: 55, speed: 1800, goldReward: 280, xpReward: 50, color: '#a855f7' },
-  A: { name: 'Demon',  emoji: '😈', hpMult: 40, power: 95, speed: 1700, goldReward: 600, xpReward: 100, color: '#f59e0b' },
-  S: { name: 'Reaper', emoji: '💀', hpMult: 70, power: 160, speed: 1600, goldReward: 1500, xpReward: 250, color: '#ef4444' },
+  E: { name: 'Goblin', emoji: '👺', hpMult: 3, power: 8,  speed: 2500, goldReward: 20,  xpReward: 5,  color: RANK_HEX_COLORS.E },
+  D: { name: 'Wolf',   emoji: '🐺', hpMult: 6, power: 16, speed: 2200, goldReward: 50,  xpReward: 12, color: RANK_HEX_COLORS.D },
+  C: { name: 'Orc',    emoji: '👹', hpMult: 12, power: 30, speed: 2000, goldReward: 120, xpReward: 25, color: RANK_HEX_COLORS.C },
+  B: { name: 'Wraith', emoji: '👻', hpMult: 22, power: 55, speed: 1800, goldReward: 280, xpReward: 50, color: RANK_HEX_COLORS.B },
+  A: { name: 'Demon',  emoji: '😈', hpMult: 40, power: 95, speed: 1700, goldReward: 600, xpReward: 100, color: RANK_HEX_COLORS.A },
+  S: { name: 'Reaper', emoji: '💀', hpMult: 70, power: 160, speed: 1600, goldReward: 1500, xpReward: 250, color: RANK_HEX_COLORS.S },
 };
 
 const getBaseDamage = (str: number) => {
