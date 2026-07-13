@@ -11,6 +11,14 @@ import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 import { Gate } from '@/types/game';
 import { AdBanner } from '@/components/ads/AdBanner';
+import {
+  RANK_GATE_GRADIENT,
+  RANK_GATE_GRADIENT_DEFAULT,
+  RANK_GATE_BORDER,
+  RANK_GATE_BORDER_DEFAULT,
+  RANK_GATE_GLOW,
+  RANK_GATE_GLOW_DEFAULT,
+} from '@/lib/game-constants';
 
 const useGateTimer = (closingTime?: string) => {
   const [remaining, setRemaining] = useState(0);
@@ -109,41 +117,9 @@ const Gates = () => {
     setCurrentLoot([]);
   };
 
-  const getGateColor = (rank: string) => {
-    switch (rank) {
-      case 'S': return 'from-red-500 to-red-700';
-      case 'A': return 'from-purple-500 to-purple-700';
-      case 'B': return 'from-blue-500 to-blue-700';
-      case 'C': return 'from-cyan-500 to-cyan-700';
-      case 'D': return 'from-green-500 to-green-700';
-      case 'E': return 'from-gray-500 to-gray-700';
-      default: return 'from-blue-500 to-blue-700';
-    }
-  };
-
-  const getGateBorderColor = (rank: string) => {
-    switch (rank) {
-      case 'S': return 'border-red-500/50';
-      case 'A': return 'border-purple-500/50';
-      case 'B': return 'border-blue-500/50';
-      case 'C': return 'border-cyan-500/50';
-      case 'D': return 'border-green-500/50';
-      case 'E': return 'border-gray-500/50';
-      default: return 'border-blue-500/50';
-    }
-  };
-
-  const getGateGlow = (rank: string) => {
-    switch (rank) {
-      case 'S': return '0 0 80px rgba(239, 68, 68, 0.7)';
-      case 'A': return '0 0 80px rgba(168, 85, 247, 0.6)';
-      case 'B': return '0 0 60px rgba(59, 130, 246, 0.5)';
-      case 'C': return '0 0 50px rgba(6, 182, 212, 0.4)';
-      case 'D': return '0 0 50px rgba(34, 197, 94, 0.4)';
-      case 'E': return '0 0 40px rgba(156, 163, 175, 0.3)';
-      default: return '0 0 50px rgba(59, 130, 246, 0.5)';
-    }
-  };
+  const getGateColor = (rank: string) => RANK_GATE_GRADIENT[rank] ?? RANK_GATE_GRADIENT_DEFAULT;
+  const getGateBorderColor = (rank: string) => RANK_GATE_BORDER[rank] ?? RANK_GATE_BORDER_DEFAULT;
+  const getGateGlow = (rank: string) => RANK_GATE_GLOW[rank] ?? RANK_GATE_GLOW_DEFAULT;
 
   const isGateLocked = (gate: Gate) => gate.rank === 'S' || gate.rank === 'A';
   const canSeeGateDetails = (gate: Gate) => !isGateLocked(gate);
