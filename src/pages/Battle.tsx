@@ -42,12 +42,12 @@ interface BossConfig {
 }
 
 const BOSSES_BY_RANK: Record<string, BossConfig> = {
-  E: { name: 'عنكبوت الظل', rank: 'E', image: '/BoosSnowSpider.png', color: '#6b7280', hpMultiplier: 10, attackPower: 15, attackSpeed: 3000, dodgeChance: 0.08 },
-  D: { name: 'ذئب الصحراء', rank: 'D', image: '/BoosSnowSpider.png', color: '#22c55e', hpMultiplier: 20, attackPower: 30, attackSpeed: 3000, dodgeChance: 0.12 },
-  C: { name: 'فارس الظلام', rank: 'C', image: '/BoosSnowSpider.png', color: '#3b82f6', hpMultiplier: 35, attackPower: 55, attackSpeed: 3000, dodgeChance: 0.18 },
-  B: { name: 'تنين الجليد', rank: 'B', image: '/BoosSnowSpider.png', color: '#a855f7', hpMultiplier: 60, attackPower: 90, attackSpeed: 3000, dodgeChance: 0.22 },
-  A: { name: 'ملك الوحوش', rank: 'A', image: '/BoosSnowSpider.png', color: '#f59e0b', hpMultiplier: 100, attackPower: 150, attackSpeed: 3000, dodgeChance: 0.28 },
-  S: { name: 'إمبراطور الظلام', rank: 'S', image: '/BoosSnowSpider.png', color: '#ef4444', hpMultiplier: 200, attackPower: 250, attackSpeed: 3000, dodgeChance: 0.35 },
+  E: { name: 'عنكبوت الظل', rank: 'E', image: '/BoosSnowSpider.png', color: RANK_HEX_COLORS.E, hpMultiplier: 10, attackPower: 15, attackSpeed: 3000, dodgeChance: 0.08 },
+  D: { name: 'ذئب الصحراء', rank: 'D', image: '/BoosSnowSpider.png', color: RANK_HEX_COLORS.D, hpMultiplier: 20, attackPower: 30, attackSpeed: 3000, dodgeChance: 0.12 },
+  C: { name: 'فارس الظلام', rank: 'C', image: '/BoosSnowSpider.png', color: RANK_HEX_COLORS.C, hpMultiplier: 35, attackPower: 55, attackSpeed: 3000, dodgeChance: 0.18 },
+  B: { name: 'تنين الجليد', rank: 'B', image: '/BoosSnowSpider.png', color: RANK_HEX_COLORS.B, hpMultiplier: 60, attackPower: 90, attackSpeed: 3000, dodgeChance: 0.22 },
+  A: { name: 'ملك الوحوش', rank: 'A', image: '/BoosSnowSpider.png', color: RANK_HEX_COLORS.A, hpMultiplier: 100, attackPower: 150, attackSpeed: 3000, dodgeChance: 0.28 },
+  S: { name: 'إمبراطور الظلام', rank: 'S', image: '/BoosSnowSpider.png', color: RANK_HEX_COLORS.S, hpMultiplier: 200, attackPower: 250, attackSpeed: 3000, dodgeChance: 0.35 },
 };
 
 const LOOT_TABLE: Record<string, LootItem[]> = {
@@ -58,8 +58,6 @@ const LOOT_TABLE: Record<string, LootItem[]> = {
   A: [{ name: 'ذهب', icon: '🪙', rarity: 'legendary', amount: 2000 }, { name: 'درع التنين', icon: '🐉', rarity: 'legendary' }, { name: 'عباءة الخفاء', icon: '🧥', rarity: 'epic' }],
   S: [{ name: 'ذهب', icon: '🪙', rarity: 'legendary', amount: 5000 }, { name: 'سيف القيامة', icon: '⚔️', rarity: 'legendary' }, { name: 'تاج الإمبراطور', icon: '👑', rarity: 'legendary' }],
 };
-
-const RARITY_COLORS: Record<string, string> = { common: '#9ca3af', rare: '#3b82f6', epic: '#a855f7', legendary: '#f59e0b' };
 
 const SKILL_LEVEL_MULTIPLIERS = [1, 1.3, 1.6, 2.0, 2.5, 3.0];
 const DARK_VOID_CHARGE_REQUIRED = 15;
